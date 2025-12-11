@@ -402,7 +402,7 @@ return {
           easing = "out",
           duration = 115,
         }),
-        priority = 2,
+        priority = 1,
         delay = 35,
       },
       options = {
