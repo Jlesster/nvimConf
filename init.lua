@@ -12,6 +12,9 @@ local function load_source(source)
   end
 end
 
+-- Load dynamic terminal colors
+require('dynamic-colors').setup()
+
 local function load_sources(source_files)
   vim.loader.enable()
   for _, source in ipairs(source_files) do
