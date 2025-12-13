@@ -66,7 +66,6 @@ function M.apply_colors()
     end
   end
 
-  print("Terminal colors applied!")
 end
 
 function M.setup()

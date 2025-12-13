@@ -354,6 +354,23 @@ return {
       local notify = require("notify")
       notify.setup(opts)
       vim.notify = notify
+          -- Filter out LSP notifications
+    vim.notify = function(msg, level, notify_opts)
+      -- Filter out LSP messages
+      if type(msg) == "string" then
+        -- Common LSP notification patterns to ignore
+        if msg:match("LSP") or
+           msg:match("language server") or
+           msg:match("Starting client") or
+           msg:match("Restarting LSP") or
+           msg:match("Client.*stopped") or
+           msg:match("workspace/diagnostic") then
+          return
+        end
+      end
+
+      notify(msg, level, notify_opts)
+    end
     end,
   },
 

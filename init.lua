@@ -41,6 +41,19 @@ local function load_colorscheme(colorscheme)
     end
 end
 
+-- In your init.lua or a separate file like lua/lsp-autorestart.lua
+local lsp_autorestart = require('lsp-autorestart')
+
+lsp_autorestart.setup({
+  max_restarts = 3,        -- Optional: customize max restarts
+  restart_window = 60000,  -- Optional: time window in ms
+  cooldown_period = 5000,  -- Optional: cooldown before restart
+  blacklist = {            -- Optional: clients to never restart
+    "null-ls",
+    "copilot",
+  }
+})
+
 -- Call the functions defined above.
 load_sources({
   "base.1-options",
