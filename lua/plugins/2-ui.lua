@@ -72,6 +72,12 @@ return {
           LineNrBelow = { fg = "#daa9ff" },
           IblIndent = { fg = colors.lavender },
           IblScope = { fg = colors.mauve },
+          WinSeparator = { fg = colors.surface0, bg = "NONE" },
+          VertSplit = { fg = colors.surface0, bg = "NONE" },
+          NeoTreeTabActive = { fg = colors.text, bg = "NONE" },
+          NeoTreeTabInactive = { fg = colors.overlay0, bg = "NONE" },
+          NeoTreeTabSeparatorActive = { fg = colors.surface0, bg = "NONE" },
+          NeoTreeTabSeparatorInactive = { fg = colors.surface0, bg = "NONE" },
         }
       end,
 
@@ -402,7 +408,7 @@ return {
           easing = "out",
           duration = 115,
         }),
-        priority = 1,
+        priority = 3,
         delay = 35,
       },
       options = {
