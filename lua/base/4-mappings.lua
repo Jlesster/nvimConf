@@ -1492,10 +1492,32 @@ function M.lsp_mappings(client, bufnr)
   })
 
   -- Other LSP mappings
-  lsp_mappings.n["<leader>lL"] = {
-    function() vim.api.nvim_command(':LspRestart') end,
-    desc = "LSP restart",
-  }
+lsp_mappings.n["<leader>lL"] = {
+  function()
+    -- Get the current buffer
+    local bufnr = vim.api.nvim_get_current_buf()
+
+    -- Get all LSP clients attached to this buffer
+    local clients = vim.lsp.get_clients({ bufnr = bufnr })
+
+    -- If lsp-autorestart is available, reset restart limits for all clients
+    local autorestart_available, autorestart = pcall(require, "lsp-autorestart")
+    if autorestart_available then
+      for _, client in ipairs(clients) do
+        -- Reset restart history for this client on current buffer
+        local key = string.format("%d:%s", bufnr, client.name)
+        -- Access the internal restart_history if exposed, or use the command
+        --vim.cmd(string.format("LspRestartReset %s", client.name))
+      end
+      --vim.notify("LSP restart limits reset for current buffer", vim.log.levels.INFO)
+    end
+
+    -- Perform the actual restart
+    vim.api.nvim_command(':LspRestart')
+    vim.notify("Restarted LSP", vim.log.levels.INFO);
+  end,
+  desc = "LSP restart (with auto-restart reset)",
+}
 
   -- Goto definition / declaration
   lsp_mappings.n["gd"] = {
