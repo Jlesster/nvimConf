@@ -218,7 +218,7 @@ local function start_lsp_client(bufnr, client_name)
     -- Attach to the specific buffer
     vim.api.nvim_buf_call(bufnr, function()
       local server_config = require("lspconfig")[client_name]
-        if not config then return end
+        if not server_config then return end
 
         vim.lsp.start(server_config.make_config(), {
           bufnr = bufnr,
