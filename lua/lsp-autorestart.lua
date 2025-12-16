@@ -214,20 +214,26 @@ local function start_lsp_client(bufnr, client_name)
 
   -- Standard LSP client start
   local ok, lspconfig = pcall(require, "lspconfig")
-  if ok and lspconfig[client_name] then
-    -- Attach to the specific buffer
-    vim.api.nvim_buf_call(bufnr, function()
-      local server_config = require("lspconfig")[client_name]
-        if not server_config then return end
+  if not ok then return end
 
-        vim.lsp.start(server_config.make_config(), {
-          bufnr = bufnr,
-          reuse_client = function(client)
-            return client.name == client_name
-          end,
-        })
-    end)
-  end
+  local configs = require("lspconfig.configs")
+  if not configs[client_name] then return end
+
+  -- Attach to the specific buffer
+  vim.api.nvim_buf_call(bufnr, function()
+    local config_def = configs[client_name]
+    if not config_def then return end
+
+    -- Get the configuration for this server
+    local server_config = config_def.make_config and config_def.make_config() or config_def
+
+    vim.lsp.start(server_config, {
+      bufnr = bufnr,
+      reuse_client = function(client)
+        return client.name == client_name
+      end,
+    })
+  end)
 end
 
 -- Main restart function (now server-level)
