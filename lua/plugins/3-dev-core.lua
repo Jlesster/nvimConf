@@ -222,14 +222,9 @@ return {
     },
     config = function(_, opts)
       require("java").setup(opts)               -- Setup.
-      vim.api.nvim_create_autocmd("FileType", { -- Enable for java files.
-        desc = "Load this plugin for java files.",
-        callback = function()
-          local lspconf = utils.get_plugin_opts("nvim-lspconfig")
-          local is_java = vim.bo.filetype == "java"
-          if lspconf and is_java then require("lspconfig").jdtls.setup({}) end
-        end,
-      })
+      if vim.bo.filetype == "java" then
+        require("lspconfig").jdtls.setup({})
+      end
     end
   },
 
