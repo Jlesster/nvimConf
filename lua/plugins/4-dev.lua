@@ -151,14 +151,14 @@ return {
     event = "User BaseFile",
     opts = {
       filter_kind = { -- Symbols that will appear on the tree
-        -- "Class",
+        "Class",
         "Constructor",
         "Enum",
         "Function",
         "Interface",
         -- "Module",
         "Method",
-        -- "Struct",
+        "Struct",
       },
       open_automatic = false, -- Open if the buffer is compatible
       nerd_font = (vim.g.fallback_icons_enabled and false) or true,
@@ -166,7 +166,7 @@ return {
       link_folds_to_tree = false,
       link_tree_to_folds = false,
       attach_mode = "global",
-      backends = { "lsp", "treesitter", "markdown", "man" },
+      backends = { "treesitter", "lsp", "markdown", "man" },
       disable_max_lines = vim.g.big_file.lines,
       disable_max_size = vim.g.big_file.size,
       layout = {
