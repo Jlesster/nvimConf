@@ -56,6 +56,7 @@ return {
         ".hg",
         ".bzr",
         ".svn",
+        "pom.xml",
         "Makefile",
         "package.json",
         ".solution",

@@ -261,6 +261,121 @@ end, { desc = "Run e2e tests for the current nodejs project" })
 -- Extra commands
 ----------------------------------------------
 
+-- -- Debug version that actually shows output
+-- autocmd({ "BufEnter" }, {
+--   desc = "Auto change to project root on buffer enter (DEBUG)",
+--   callback = function(args)
+--
+--     -- Defer slightly to avoid race conditions with buffer creation
+--     vim.defer_fn(function()
+--
+--       -- Always prefer the buffer that triggered the autocmd
+--       local bufnr = args.buf or vim.api.nvim_get_current_buf()
+--
+--       -- SAFETY: buffer may no longer exist by the time this runs
+--       if not bufnr or not vim.api.nvim_buf_is_valid(bufnr) then
+--         return
+--       end
+--
+--       -- Read buffer-local options safely
+--       local buftype = vim.bo[bufnr].buftype
+--       local filetype = vim.bo[bufnr].filetype
+--
+--       -- Buffers that should NEVER affect cwd
+--       local ignore_buftypes = {
+--         nofile = true,
+--         terminal = true,
+--         prompt = true,
+--         quickfix = true,
+--       }
+--
+--       -- Filetypes that should NEVER affect cwd
+--       local ignore_filetypes = {
+--         alpha = true,
+--         ["neo-tree"] = true,
+--         Trouble = true,
+--         lazy = true,
+--         aerial = true,
+--         [""] = true,
+--       }
+--       -- Skip buffers we do not care about
+--       if ignore_buftypes[buftype] or ignore_filetypes[filetype] then
+--         return
+--       end
+--       -- Absolute path to the file backing this buffer
+--       local filepath = vim.api.nvim_buf_get_name(bufnr)
+--       -- Must be a real, readable file
+--       if filepath == "" or vim.fn.filereadable(filepath) ~= 1 then
+--         return
+--       end
+--       -- Save cwd so we can see whether it actually changes
+--       local old_cwd = vim.fn.getcwd()
+--       local project_ok, project = pcall(require, "project_nvim.project")
+--       if project_ok then
+--         -- Ask project.nvim for the root that owns THIS FILE
+--         local root = project.get_project_root(filepath)
+--         -- Only change directory if we got a valid result
+--         if root and vim.fn.isdirectory(root) == 1 then
+--           -- Avoid useless :cd calls
+--           if old_cwd ~= root then
+--             vim.cmd.cd(root)
+--           end
+--
+--           return
+--         end
+--       end
+--
+--       ------------------------------------------------------------------
+--       -- Fallback: if project.nvim fails, cd to file's directory
+--       ------------------------------------------------------------------
+--
+--       local fallback_dir = vim.fn.fnamemodify(filepath, ":p:h")
+--
+--       if vim.fn.isdirectory(fallback_dir) == 1 then
+--         vim.cmd.cd(fallback_dir)
+--       end
+--
+--     end, 50) -- defer time (ms)
+--   end,
+-- })
+
+-- Debug version that actually shows output
+autocmd({ "BufEnter" }, {
+  desc = "Auto change to project root on buffer enter (DEBUG)",
+  callback = function(args)
+    vim.defer_fn(function()
+      local bufnr = args.buf or vim.api.nvim_get_current_buf()
+      if not bufnr or not vim.api.nvim_buf_is_valid(bufnr) then
+        return
+      end
+      local buftype = vim.api.nvim_get_option_value("buftype", { buf = bufnr })
+      local filetype = vim.api.nvim_get_option_value("filetype", { buf = bufnr })
+
+      local ignore_buftypes = { "nofile", "terminal", "prompt", "quickfix" }
+      local ignore_filetypes = { "alpha", "neo-tree", "Trouble", "lazy", "aerial", "" }
+
+      if not vim.tbl_contains(ignore_buftypes, buftype)
+         and not vim.tbl_contains(ignore_filetypes, filetype) then
+        local filepath = vim.api.nvim_buf_get_name(bufnr)
+
+        if filepath ~= "" and vim.fn.filereadable(filepath) == 1 then
+
+          -- Try ProjectRoot
+          local success, err = pcall(vim.cmd, "ProjectRoot")
+
+          if not success then
+            -- Fallback to buffer directory
+            local dir = vim.fn.fnamemodify(filepath, ":p:h")
+            if vim.fn.isdirectory(dir) == 1 then
+              vim.cmd.cd(dir)
+            end
+          end
+        end
+      end
+    end, 50)
+  end,
+})
+
 -- Change working directory
 cmd("Cwd", function()
   vim.cmd(":cd %:p:h")

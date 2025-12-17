@@ -65,6 +65,7 @@ return {
       custom_highlights = function(colors)
         return {
           Comment = { fg = "#ea92da" },
+          Constant = { fg = "#94e2d5" },
           EndOfBuffer = { fg = "#cba6f9" },
           NonText = { fg = "#cba6f9" },
           CursorLine = { bg = "#2b1f38" },
@@ -78,6 +79,35 @@ return {
           NeoTreeTabInactive = { fg = colors.overlay0, bg = "NONE" },
           NeoTreeTabSeparatorActive = { fg = colors.surface0, bg = "NONE" },
           NeoTreeTabSeparatorInactive = { fg = colors.surface0, bg = "NONE" },
+
+          ["@constant"] = { fg = colors.teal }, -- or "#94e2d5" for more teal
+          ["@constant.builtin"] = { fg = colors.teal },
+          ["@constant.macro"] = { fg = colors.teal },
+
+          -- ["@lsp.type.property.java"] = { fg = colors.teal },
+          -- ["@lsp.typemod.property.readonly.java"] = { fg = colors.teal },
+          -- Cyans/Blues (cool tones that complement purple)
+          -- ["@lsp.typemod.property.readonly.java"] = { fg = "#89dceb" }, -- sky (bright cyan)
+          -- ["@lsp.typemod.property.readonly.java"] = { fg = "#74c7ec" }, -- sapphire (aqua)
+          -- ["@lsp.typemod.property.readonly.java"] = { fg = "#89b4fa" }, -- blue (periwinkle)
+          -- ["@lsp.typemod.property.readonly.java"] = { fg = "#7dc4e4" }, -- lighter cyan
+          ["@lsp.typemod.property.readonly.java"] = { fg = "#94e9c9" }, -- teal (your current Constant color)
+          --
+          -- -- Pinks/Magentas (matches wallpaper)
+          -- ["@lsp.typemod.property.readonly.java"] = { fg = "#f5c2e7" }, -- pink
+          -- ["@lsp.typemod.property.readonly.java"] = { fg = "#ea92da" }, -- (your comment color)
+          -- ["@lsp.typemod.property.readonly.java"] = { fg = "#f5bde6" }, -- softer pink
+          -- ["@lsp.typemod.property.readonly.java"] = { fg = "#ff9bdb" }, -- bright magenta
+          --
+          -- -- Purples/Lavenders
+          -- ["@lsp.typemod.property.readonly.java"] = { fg = "#b4befe" }, -- lavender
+          -- ["@lsp.typemod.property.readonly.java"] = { fg = "#cba6f9" }, -- mauve (your EndOfBuffer color)
+          -- ["@lsp.typemod.property.readonly.java"] = { fg = "#daa9ff" }, -- (your line number color)
+          --
+          -- -- Warm accents
+          -- ["@lsp.typemod.property.readonly.java"] = { fg = "#fab387" }, -- peach
+          -- ["@lsp.typemod.property.readonly.java"] = { fg = "#f9e2af" }, -- yellow
+          -- ["@lsp.typemod.property.readonly.java"] = { fg = "#a6e3a1" }, -- green
         }
       end,
 
