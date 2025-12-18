@@ -397,3 +397,41 @@ end, { desc = "Write all changed buffers" })
 cmd("CloseNotifications", function()
   require("notify").dismiss({ pending = true, silent = true })
 end, { desc = "Dismiss all notifications" })
+
+vim.api.nvim_create_autocmd("LspAttach", {
+  callback = function(args)
+    local client = vim.lsp.get_client_by_id(args.data.client_id)
+    if client and client.server_capabilities.semanticTokensProvider then
+      vim.lsp.semantic_tokens.start(args.buf, client.id)
+    end
+  end,
+})
+
+vim.api.nvim_create_autocmd("LspAttach", {
+  callback = function(args)
+    local client = vim.lsp.get_client_by_id(args.data.client_id)
+    if client
+      and client.name == "jdtls"
+      and client.server_capabilities.semanticTokensProvider
+    then
+      vim.lsp.semantic_tokens.start(args.buf, client.id)
+    end
+  end,
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "java",
+  callback = function()
+    vim.b.syntax = "off"
+  end,
+})
+
+vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
+  pattern = "*.java",
+  callback = function()
+    vim.defer_fn(function()
+      vim.cmd("LspStart jdtls")
+    end, 0)
+  end,
+})
+

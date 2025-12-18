@@ -57,7 +57,12 @@ return {
 
       highlight = {
         enable = true,
-        disable = function(_, bufnr) return utils.is_big_file(bufnr) end,
+        disable = function(lang, bufnr)
+          if utils.is_big_file(bufnr) then
+            return true
+          end
+          return false
+        end,
       },
       matchup = {
         enable = true,

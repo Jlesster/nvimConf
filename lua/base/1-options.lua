@@ -87,3 +87,4 @@ vim.g.lsp_round_borders_enabled = true -- Enable round borders for lsp hover and
 vim.g.lsp_signature_enabled = true -- Enable automatically showing lsp help as you write function parameters.
 vim.g.notifications_enabled = true -- Enable notifications.
 vim.g.url_hl_enabled = true -- Highlight URLs with an underline effect.
+vim.lsp.semantic_tokens.enable = true -- Semantic tokens force push
