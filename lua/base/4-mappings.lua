@@ -105,7 +105,7 @@ maps.i["<C-BS>"] = { "<C-W>", desc = "Enable CTRL+backsace to delete." }
 maps.n["0"] =
 { "^", desc = "Go to the fist character of the line (aliases 0 to ^)" }
 maps.n["<leader>Mm"] = {":Maven<cr>", desc = "Maven Management"}
-maps.n["<leader>Mc"] = {":TermExec cmd='mvn archetype:generate -DarchetypeArtifactId=maven-archetype-quickstart -DarchetypeVersion=1.5 -DinteractiveMode=true'<CR>", desc = "Generate Maven Project"}
+maps.n["<leader>Mc"] = {":TermExec cmd='mvn archetype:generate -DarchetypeArtifactId=bubuwu -DarchetypeVersion=1.5 -DinteractiveMode=true'<CR>", desc = "Generate Maven Project"}
 maps.n["<leader>q"] = { "<cmd>confirm q<cr>", desc = "Quit" }
 maps.n["<leader>q"] = {
   function()
