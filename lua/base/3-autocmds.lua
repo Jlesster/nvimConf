@@ -340,36 +340,84 @@ end, { desc = "Run e2e tests for the current nodejs project" })
 -- })
 
 -- Debug version that actually shows output
+-- Auto change to project root on buffer enter - IMPROVED VERSION
+-- Auto change to project root on buffer enter - DIRECT DETECTION
 autocmd({ "BufEnter" }, {
-  desc = "Auto change to project root on buffer enter (DEBUG)",
+  desc = "Auto change to project root on buffer enter with direct detection",
   callback = function(args)
     vim.defer_fn(function()
       local bufnr = args.buf or vim.api.nvim_get_current_buf()
       if not bufnr or not vim.api.nvim_buf_is_valid(bufnr) then
         return
       end
+
       local buftype = vim.api.nvim_get_option_value("buftype", { buf = bufnr })
       local filetype = vim.api.nvim_get_option_value("filetype", { buf = bufnr })
 
       local ignore_buftypes = { "nofile", "terminal", "prompt", "quickfix" }
       local ignore_filetypes = { "alpha", "neo-tree", "Trouble", "lazy", "aerial", "" }
 
-      if not vim.tbl_contains(ignore_buftypes, buftype)
-         and not vim.tbl_contains(ignore_filetypes, filetype) then
-        local filepath = vim.api.nvim_buf_get_name(bufnr)
+      if vim.tbl_contains(ignore_buftypes, buftype) or vim.tbl_contains(ignore_filetypes, filetype) then
+        return
+      end
 
-        if filepath ~= "" and vim.fn.filereadable(filepath) == 1 then
+      local filepath = vim.api.nvim_buf_get_name(bufnr)
+      if filepath == "" or vim.fn.filereadable(filepath) ~= 1 then
+        return
+      end
 
-          -- Try ProjectRoot
-          local success, err = pcall(vim.cmd, "ProjectRoot")
+      -- Direct project root detection
+      local function find_project_root(path)
+        local patterns = {
+          "pom.xml",
+          "build.gradle",
+          "build.gradle.kts",
+          ".git",
+          "Makefile",
+          "package.json",
+          ".solution",
+          "gradlew",
+        }
 
-          if not success then
-            -- Fallback to buffer directory
-            local dir = vim.fn.fnamemodify(filepath, ":p:h")
-            if vim.fn.isdirectory(dir) == 1 then
-              vim.cmd.cd(dir)
+        local current_dir = path
+
+        -- Walk up the directory tree
+        while current_dir ~= "/" do
+          for _, pattern in ipairs(patterns) do
+            local marker = current_dir .. "/" .. pattern
+            if vim.fn.filereadable(marker) == 1 or vim.fn.isdirectory(marker) == 1 then
+              return current_dir
             end
           end
+
+          -- Go up one directory
+          local parent = vim.fn.fnamemodify(current_dir, ":h")
+          if parent == current_dir then
+            break
+          end
+          current_dir = parent
+        end
+
+        return nil
+      end
+
+      -- Get the directory of the current file
+      local file_dir = vim.fn.fnamemodify(filepath, ":p:h")
+
+      -- Find project root starting from file's directory
+      local project_root = find_project_root(file_dir)
+
+      if project_root then
+        local current_cwd = vim.fn.getcwd()
+
+        if current_cwd ~= project_root then
+          vim.cmd.cd(vim.fn.fnameescape(project_root))
+          local project_name = vim.fn.fnamemodify(project_root, ":t")
+        end
+      else
+        -- No project root found, just cd to file's directory
+        if vim.fn.getcwd() ~= file_dir then
+          vim.cmd.cd(vim.fn.fnameescape(file_dir))
         end
       end
     end, 50)
