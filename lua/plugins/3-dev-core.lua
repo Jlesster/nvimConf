@@ -214,6 +214,9 @@ return {
       spring_boot_tools = {
         enable = false;
       },
+      jdtls = {
+        bundles = {},
+      },
       -- NOTE: One of these files must be in your project root directory.
       --       Otherwise the debugger will end in the wrong directory and fail.
       root_markers = {
@@ -231,7 +234,11 @@ return {
     config = function(_, opts)
       require("java").setup(opts)               -- Setup.
       if vim.bo.filetype == "java" then
-        require("lspconfig").jdtls.setup({})
+        require("lspconfig").jdtls.setup({
+          init_options = {
+            bundles = {},
+          },
+        })
       end
     end
   },
