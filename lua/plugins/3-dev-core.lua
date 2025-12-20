@@ -211,6 +211,9 @@ return {
       notifications = {
         dap = false,
       },
+      spring_boot_tools = {
+        enable = false;
+      },
       -- NOTE: One of these files must be in your project root directory.
       --       Otherwise the debugger will end in the wrong directory and fail.
       root_markers = {
@@ -395,7 +398,7 @@ return {
     opts = {
       aggressive_mode = false,
       excluded_lsp_clients = {
-        "null-ls", "jdtls", "marksman", "lua_ls"
+        "null-ls", "jdtls", "marksman", "lua_ls", "spring-boot"
       },
       grace_period = (60 * 15),
       wakeup_delay = 3000,
