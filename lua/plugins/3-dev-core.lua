@@ -208,6 +208,10 @@ return {
       "mason-org/mason.nvim",
     },
     opts = {
+      verification = {
+        invalid_order = false,
+        duplicate_setup_calls = false,
+      },
       notifications = {
         dap = false,
       },
@@ -251,7 +255,7 @@ return {
       },
     },
     config = function(_, opts)
-      require("java").setup(opts)               -- Setup.
+      require("java").setup(opts)         -- Setup.
       if vim.bo.filetype == "java" then
         require("lspconfig").jdtls.setup({
           handlers = {

@@ -487,3 +487,18 @@ vim.api.nvim_create_autocmd("FileType", {
     end, 2000) -- Wait 2 seconds for JDTLS to fully start
   end,
 })
+vim.api.nvim_create_autocmd("WinEnter", {
+  callback = function()
+    local win = vim.api.nvim_get_current_win()
+    local config = vim.api.nvim_win_get_config(win)
+
+    -- If it's a floating window
+    if config.relative ~= "" then
+      vim.wo[win].winblend = 0  -- No transparency blend
+      -- Force the window to use transparent background
+      vim.api.nvim_win_call(win, function()
+        vim.cmd([[setlocal winhighlight=Normal:NormalFloat,FloatBorder:FloatBorder]])
+      end)
+    end
+  end,
+})
