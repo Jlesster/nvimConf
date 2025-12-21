@@ -42,7 +42,7 @@ vim.opt.tabstop = 2 -- Number of space in a tab.
 
 vim.opt.termguicolors = true -- Enable 24-bit RGB color in the TUI.
 vim.opt.undofile = true -- Enable persistent undo between session and reboots.
-vim.opt.updatetime = 300 -- Length of time to wait before triggering the plugin.
+vim.opt.updatetime = 50 -- Length of time to wait before triggering the plugin.
 vim.opt.virtualedit = "block" -- Allow going past end of line in visual block mode.
 vim.opt.writebackup = false -- Disable making a backup before overwriting a file.
 vim.opt.shada = "!,'1000,<50,s10,h" -- Remember the last 1000 opened files

@@ -467,13 +467,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
   end,
 })
 
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = "java",
-  callback = function()
-    vim.b.syntax = "off"
-  end,
-})
-
 vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
   pattern = "*.java",
   callback = function()
@@ -482,4 +475,15 @@ vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
     end, 0)
   end,
 })
-
+-- Force JDTLS to download sources for external libraries
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "java",
+  callback = function()
+    vim.defer_fn(function()
+      -- Execute LSP command to download sources
+      vim.lsp.buf.execute_command({
+        command = "java.project.updateSourceAttachment",
+      })
+    end, 2000) -- Wait 2 seconds for JDTLS to fully start
+  end,
+})

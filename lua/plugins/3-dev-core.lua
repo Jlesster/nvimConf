@@ -215,7 +215,26 @@ return {
         enable = false;
       },
       jdtls = {
-        bundles = {},
+        settings = {
+          java = {
+            configuration = {
+              updateBuildConfiguration = "automatic",
+            },
+            maven = {
+              downloadSources = true,
+              downloadJavadoc = true,
+            },
+            sources = {
+              organisedImports = {
+                starThreshold = 9999;
+                staticStarThreshold = 9999;
+              },
+            },
+            contentProvider = {
+              preferred = "fernflower",
+            },
+          },
+        },
       },
       -- NOTE: One of these files must be in your project root directory.
       --       Otherwise the debugger will end in the wrong directory and fail.
@@ -235,8 +254,8 @@ return {
       require("java").setup(opts)               -- Setup.
       if vim.bo.filetype == "java" then
         require("lspconfig").jdtls.setup({
-          init_options = {
-            bundles = {},
+          handlers = {
+
           },
         })
       end

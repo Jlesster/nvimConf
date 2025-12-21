@@ -39,7 +39,7 @@ return {
       transparent_background = true,
       float = {
         transparent = true,
-        solid = true,
+        solid = false,
       },
       term_colors = true,
       lsp_styles = {
@@ -866,7 +866,7 @@ return {
 
     opts_extend = { "disable.ft", "disable.bt" },
     opts = {
-      preset = "classic", -- "classic", "modern", or "helix"
+      preset = "modern", -- "classic", "modern", or "helix"
       icons = {
         group = (vim.g.fallback_icons_enabled and "+") or "",
         rules = false,
