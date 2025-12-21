@@ -53,6 +53,16 @@ function M.apply_colors()
   vim.g.terminal_color_14 = colors.term14
   vim.g.terminal_color_15 = colors.term15
 
+  local border_color = colors.term12 or colors.term4  -- Use your purple-blue
+  if border_color then
+    vim.api.nvim_set_hl(0, "FloatBorder", { bg = "NONE", fg = border_color })
+    vim.api.nvim_set_hl(0, "TelescopeBorder", { bg = "NONE", fg = border_color })
+    vim.api.nvim_set_hl(0, "TelescopePromptBorder", { bg = "NONE", fg = border_color })
+    vim.api.nvim_set_hl(0, "TelescopeResultsBorder", { bg = "NONE", fg = border_color })
+    vim.api.nvim_set_hl(0, "TelescopePreviewBorder", { bg = "NONE", fg = border_color })
+    vim.api.nvim_set_hl(0, "WhichKeyBorder", { bg = "NONE", fg = border_color })
+  end
+
   -- Refresh any open terminal buffers
   for _, buf in ipairs(vim.api.nvim_list_bufs()) do
     if vim.api.nvim_buf_is_valid(buf) then

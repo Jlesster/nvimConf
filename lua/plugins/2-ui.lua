@@ -67,7 +67,7 @@ return {
           Comment = { fg = "#ea92da" },
           Constant = { fg = "#94e2d5" },
           RenderMarkdownCode= { bg = "NONE" },
-          ColorCOlumn = { bg = "NONE" },
+          ColorColumn = { bg = "NONE" },
           EndOfBuffer = { fg = "#cba6f9" },
           NonText = { fg = "#cba6f9" },
           CursorLine = { bg = "#2b1f38" },

@@ -502,3 +502,13 @@ vim.api.nvim_create_autocmd("WinEnter", {
     end
   end,
 })
+-- Apply dynamic colors to terminals (including ToggleTerm)
+vim.api.nvim_create_autocmd("TermOpen", {
+  desc = "Apply dynamic terminal colors",
+  callback = function()
+    -- Small delay to ensure terminal is ready
+    vim.defer_fn(function()
+      require('dynamic-colors').apply_colors()
+    end, 50)
+  end,
+})
