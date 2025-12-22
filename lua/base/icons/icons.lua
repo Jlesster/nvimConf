@@ -25,33 +25,33 @@
 return {
   -- Which-key
   Debugger = "",
-  Run = "󰑮",
+  Run = "",
   Find = "",
-  Session = "󱂬",
-  Sort = "󰒺",
-  Buffer = "󰓩",
-  Terminal = "",
-  UI = "",
-  Test = "󰙨",
-  Packages = "󰏖",
-  Docs = "",
-  Git = "󰊢",
-  LSP = "",
+  Session = "󰶮",
+  Sort = "󱎊",
+  Buffer = "",
+  Terminal = "",
+  UI = "",
+  Test = "󰤑",
+  Packages = "",
+  Docs = "",
+  Git = "",
+  LSP = "󱇯",
 
   -- Heirline-components - tabline
   BufferClose = "󰅖",
   FileModified = "",
   FileReadOnly = "",
-  ArrowLeft = "",
-  ArrowRight = "",
-  TabClose = "󰅙",
+  ArrowLeft = "",
+  ArrowRight = "",
+  TabClose = "󰅚",
 
   -- Heirline-components - winbar
   CompilerPlay = "",
   CompilerStop = "",
   CompilerRedo = "",
-  NeoTree = "",
-  Aerial = "" ,
+  NeoTree = "",
+  Aerial = "" ,
   ZenMode = "󰰶",
   BufWrite = "",
   BufWriteAll = "",
@@ -64,7 +64,7 @@ return {
   FoldSeparator = " ",
 
   -- Heirline-components - statusline
-  ActiveLSP = "",
+  ActiveLSP = "󱇯",
   ActiveTS = "",
   Environment = "",
   DiagnosticError = "",
@@ -83,24 +83,24 @@ return {
   PathSeparator = "",
 
   -- Neotree
-  FolderClosed = "",
-  FolderEmpty = "",
-  FolderOpen = "",
+  FolderClosed = "",
+  FolderEmpty = "",
+  FolderOpen = "󰉍",
   Diagnostic = "󰒡",
   DefaultFile = "󰈙",
 
   -- Git
   GitBranch = "",
-  GitAdd = "",
-  GitChange = "",
-  GitDelete = "",
+  GitAdd = "",
+  GitChange = "",
+  GitDelete = "",
   GitConflict = "",
   GitIgnored = "◌",
   GitRenamed = "➜",
   GitSign = "▎",
-  GitStaged = "✓",
-  GitUnstaged = "✗",
-  GitUntracked = "★",
+  GitStaged = "",
+  GitUnstaged = "",
+  GitUntracked = "",
 
   -- DAP
   DapBreakpoint = "",
@@ -113,14 +113,14 @@ return {
   PromptPrefix = "❯",
 
   -- Nvim-lightbulb
-  Lightbulb = "💡",
+  Lightbulb = "",
 
   -- Alpha
-  GreeterNew = "📄",
-  GreeterRecent = "🌺",
-  GreeterYazi = "🦆",
-  GreeterSessions = "🔎",
-  GreeterProjects = "💼",
+  GreeterNew = "󰈙",
+  GreeterRecent = "󰮳",
+  GreeterYazi = "󰪶",
+  GreeterSessions = "󰮗",
+  GreeterProjects = "",
   GreeterPlug = "",
 
   -- Mason

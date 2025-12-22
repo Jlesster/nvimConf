@@ -70,6 +70,12 @@ return {
           ColorColumn = { bg = "NONE" },
           EndOfBuffer = { fg = "#cba6f9" },
           NonText = { fg = "#cba6f9" },
+          AlphaIconNew = { fg = colors.blue },        -- 📄 New file
+          AlphaIconRecent = { fg = colors.pink },     -- 🌺 Recent files
+          AlphaIconYazi = { fg = colors.peach },      -- 🦆 Yazi
+          AlphaIconSessions = { fg = colors.green },  -- 🔎 Sessions
+          AlphaIconProjects = { fg = colors.mauve },  -- 💼 Projects
+          AlphaIconQuit = { fg = colors.red },        -- Quit
           CursorLine = { bg = "#2b1f38" },
           LineNrAbove = { fg = "#daa9ff" },
           LineNrBelow = { fg = "#daa9ff" },
@@ -265,31 +271,25 @@ return {
       if not is_yazi_installed then yazi_button = nil end
 
       -- Buttons
+      local function button_with_hl(sc, icon, text, command, icon_hl)
+      local btn = dashboard.button(sc, icon .. " " .. text, command)
+        btn.opts.hl = {
+          { icon_hl, 0, #icon },
+          { "AlphaButtons", #icon, -1 }
+        }
+        btn.opts.hl_shortcut = "AlphaShortcut"
+        return btn
+      end
+
       dashboard.section.buttons.val = {
-        dashboard.button(
-          "n",
-          get_icon("GreeterNew") .. " New",
-          "<cmd>ene<CR>"
-        ),
-        dashboard.button(
-          "e",
-          get_icon("GreeterRecent") .. " Recent  ",
-          "<cmd>Telescope oldfiles<CR>"
-        ),
-        yazi_button,
-        dashboard.button(
-          "s",
-          get_icon("GreeterSessions") .. " Sessions",
-          "<cmd>SessionManager! load_session<CR>"
-        ),
-        dashboard.button(
-          "p",
-          get_icon("GreeterProjects") .. " Projects",
-          "<cmd>Telescope projects<CR>"
-        ),
+        button_with_hl("n", get_icon("GreeterNew"), "New", "<cmd>ene<CR>", "AlphaIconNew"),
+        button_with_hl("e", get_icon("GreeterRecent"), "Recent  ", "<cmd>Telescope oldfiles<CR>", "AlphaIconRecent"),
+        is_yazi_installed and button_with_hl("r", get_icon("GreeterYazi"), "Yazi", "<cmd>Yazi<CR>", "AlphaIconYazi") or nil,
+        button_with_hl("s", get_icon("GreeterSessions"), "Sessions", "<cmd>SessionManager! load_session<CR>", "AlphaIconSessions"),
+        button_with_hl("p", get_icon("GreeterProjects"), "Projects", "<cmd>Telescope projects<CR>", "AlphaIconProjects"),
         dashboard.button("", ""),
-        dashboard.button("q", "   Quit", "<cmd>exit<CR>"),
-      }
+        button_with_hl("q", " ", "Quit", "<cmd>exit<CR>", "AlphaIconQuit"),
+}
 
       -- Vertical margins
       dashboard.config.layout[1].val =
