@@ -1,19 +1,22 @@
+
 local M = {}
 
-function M.load_colors()
-  local state_dir = os.getenv("XDG_STATE_HOME") or (os.getenv("HOME") .. "/.local/state")
-  local color_file = state_dir .. "/quickshell/user/generated/material_colors.scss"
+local state_dir = os.getenv("XDG_STATE_HOME") or (os.getenv("HOME") .. "/.local/state")
+local color_file = state_dir .. "/quickshell/user/generated/material_colors.scss"
+local colorscheme = "material_purple_mocha"
 
+-- ------------------------------------------------------------------
+-- Load colors from SCSS
+-- ------------------------------------------------------------------
+function M.load_colors()
   local file = io.open(color_file, "r")
   if not file then
-    print("Could not open color file: " .. color_file)
     return nil
   end
 
   local colors = {}
   for line in file:lines() do
-    -- Parse SCSS variables: $term0: #282828;
-    local name, value = line:match("%$([%w_]+):%s*([#%w]+)")
+    local name, value = line:match("%$([%w_]+):%s*(#[%w]+)")
     if name and value then
       colors[name] = value
     end
@@ -23,80 +26,184 @@ function M.load_colors()
   return colors
 end
 
+-- ------------------------------------------------------------------
+-- Apply terminal + UI colors
+-- ------------------------------------------------------------------
 function M.apply_colors()
   local colors = M.load_colors()
-  if not colors then
+  if not colors or not colors.term0 then
     return
   end
 
-  -- Only apply if we have terminal colors
-  if not colors.term0 then
-    print("No terminal colors found in color file")
-    return
+  -- terminal colors
+  for i = 0, 15 do
+    vim.g["terminal_color_" .. i] = colors["term" .. i]
   end
-
-  -- Set terminal colors
-  vim.g.terminal_color_0 = colors.term0
-  vim.g.terminal_color_1 = colors.term1
-  vim.g.terminal_color_2 = colors.term2
-  vim.g.terminal_color_3 = colors.term3
-  vim.g.terminal_color_4 = colors.term4
-  vim.g.terminal_color_5 = colors.term5
-  vim.g.terminal_color_6 = colors.term6
-  vim.g.terminal_color_7 = colors.term7
-  vim.g.terminal_color_8 = colors.term8
-  vim.g.terminal_color_9 = colors.term9
-  vim.g.terminal_color_10 = colors.term10
-  vim.g.terminal_color_11 = colors.term11
-  vim.g.terminal_color_12 = colors.term12
-  vim.g.terminal_color_13 = colors.term13
-  vim.g.terminal_color_14 = colors.term14
-  vim.g.terminal_color_15 = colors.term15
-
-  local border_color = colors.term12 or colors.term4  -- Use your purple-blue
-  if border_color then
-    vim.api.nvim_set_hl(0, "FloatBorder", { bg = "NONE", fg = border_color })
-    vim.api.nvim_set_hl(0, "TelescopeBorder", { bg = "NONE", fg = border_color })
-    vim.api.nvim_set_hl(0, "TelescopePromptBorder", { bg = "NONE", fg = border_color })
-    vim.api.nvim_set_hl(0, "TelescopeResultsBorder", { bg = "NONE", fg = border_color })
-    vim.api.nvim_set_hl(0, "TelescopePreviewBorder", { bg = "NONE", fg = border_color })
-    vim.api.nvim_set_hl(0, "WhichKeyBorder", { bg = "NONE", fg = border_color })
-  end
-
-  -- Refresh any open terminal buffers
-  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-    if vim.api.nvim_buf_is_valid(buf) then
-      local buftype = vim.api.nvim_buf_get_option(buf, 'buftype')
-      if buftype == 'terminal' then
-        -- Trigger a redraw for terminal buffers
-        vim.api.nvim_buf_call(buf, function()
-          vim.cmd('redraw!')
-        end)
-      end
-    end
-  end
-
 end
 
+-- ------------------------------------------------------------------
+-- FULL reload (this fixes transparency + LSP issues)
+-- ------------------------------------------------------------------
+function M.reload()
+  vim.schedule(function()
+    vim.cmd("hi clear")
+    vim.cmd("syntax reset")
+    vim.cmd("colorscheme " .. colorscheme)
+
+    -- Reassert transparency (CRITICAL)
+    local transparent_groups = {
+  -- Core editor / windows
+  "Normal",
+  "NormalFloat",
+  "FloatBorder",
+  "SignColumn",
+  "EndOfBuffer",
+  "VertSplit",
+  "WinSeparator",
+  "WinBar",
+  "WinBarNC",
+  "Title",
+
+  -- Cursor / columns (IMPORTANT)
+  "CursorLine",
+  "CursorColumn",
+  "ColorColumn",
+
+  -- Status / tabline
+  "StatusLine",
+  "StatusLineNC",
+  "TabLine",
+  "TabLineFill",
+  "TabLineSel",
+
+  -- Popup / completion
+  "Pmenu",
+  "PmenuSbar",
+  "PmenuThumb",
+  "PmenuBorder",
+
+  -- Completion item kinds (nvim-cmp)
+  "CmpItemKindVariable",
+  "CmpItemKindFunction",
+  "CmpItemKindMethod",
+  "CmpItemKindConstructor",
+  "CmpItemKindClass",
+  "CmpItemKindInterface",
+  "CmpItemKindStruct",
+  "CmpItemKindEnum",
+  "CmpItemKindEnumMember",
+  "CmpItemKindModule",
+  "CmpItemKindProperty",
+  "CmpItemKindField",
+  "CmpItemKindTypeParameter",
+  "CmpItemKindConstant",
+  "CmpItemKindKeyword",
+  "CmpItemKindSnippet",
+  "CmpItemKindText",
+  "CmpItemKindFile",
+  "CmpItemKindFolder",
+  "CmpItemKindColor",
+  "CmpItemKindReference",
+  "CmpItemKindOperator",
+  "CmpItemKindUnit",
+  "CmpItemKindValue",
+
+  -- Completion text
+  "CmpItemAbbr",
+  "CmpItemAbbrDeprecated",
+  "CmpItemAbbrMatch",
+  "CmpItemAbbrMatchFuzzy",
+  "CmpItemMenu",
+
+  -- Which-key
+  "WhichKey",
+  "WhichKeyFloat",
+  "WhichKeyTile",
+
+  -- Neo-tree
+  "NeoTreeTabActive",
+  "NeoTreeTabInactive",
+  "NeoTreeTabSeparatorActive",
+  "NeoTreeTabSeparatorInactive",
+
+  -- Render / markdown
+  "RenderMarkdownCode",
+
+  -- Bufferline / Barbar
+  "BufferLineFill",
+  "BufferLineBackground",
+  "BufferLineBuffer",
+  "BufferLineBufferVisible",
+  "BufferLineBufferSelected",
+  "BufferLineTab",
+  "BufferLineTabSelected",
+  "BufferLineSeparator",
+  "BufferLineSeparatorVisible",
+  "BufferLineSeparatorSelected",
+
+  "BufferCurrent",
+  "BufferCurrentIndex",
+  "BufferCurrentMod",
+  "BufferCurrentSign",
+  "BufferCurrentTarget",
+
+  "BufferVisible",
+  "BufferVisibleIndex",
+  "BufferVisibleMod",
+  "BufferVisibleSign",
+  "BufferVisibleTarget",
+
+  "BufferInactive",
+  "BufferInactiveIndex",
+  "BufferInactiveMod",
+  "BufferInactiveSign",
+  "BufferInactiveTarget",
+
+  "BufferTabpages",
+  "BufferTabpageFill",
+
+  -- Devicons
+  "BufferLineDevIconLua",
+  "BufferLineDevIconDefault",
+
+  -- Overseer
+  "OverseerTask",
+  "OverseerTaskBorder",
+  "OverseerRunning",
+  "OverseerSuccess",
+  "OverseerCanceled",
+  "OverseerFailure",
+    }
+
+  for _, group in ipairs(transparent_groups) do
+      local ok, hl = pcall(vim.api.nvim_get_hl, 0, { name = group })
+      if ok then
+        hl.bg = "NONE"
+        vim.api.nvim_set_hl(0, group, hl)
+      end
+    end
+  end)
+end
+
+-- ------------------------------------------------------------------
+-- Setup file watcher
+-- ------------------------------------------------------------------
 function M.setup()
-  -- Apply colors immediately
+  -- Initial load
   M.apply_colors()
+  M.reload()
 
-  -- Watch for color file changes
-  local state_dir = os.getenv("XDG_STATE_HOME") or (os.getenv("HOME") .. "/.local/state")
-  local color_file = state_dir .. "/quickshell/user/generated/material_colors.scss"
-
-  -- Reload on focus gained or when entering nvim
-  vim.api.nvim_create_autocmd({"FocusGained", "VimEnter"}, {
-    callback = function()
+  -- Watch for file changes
+  vim.loop.fs_event_start(
+    vim.loop.new_fs_event(),
+    color_file,
+    {},
+    function()
       M.apply_colors()
-    end,
-  })
-
-  -- Create a command to manually reload colors
-  vim.api.nvim_create_user_command('ReloadColors', function()
-    M.apply_colors()
-  end, {})
+      M.reload()
+    end
+  )
 end
 
 return M
+

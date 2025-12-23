@@ -441,3 +441,6 @@ main() {
 }
 
 main "$@"
+
+kwriteconfig5 --file kdeglobals --group Icons --key Theme Papirus
+qdbus org.kde.KWin /KWin reconfigure
