@@ -10,39 +10,39 @@ vim.g.colors_name = "material_purple_mocha"
 local colors = {
   -- Base colors
   base = "#1E1E2E",
-  mantle = "#191825",
-  crust = "#12111B",
+  mantle = "#1C1724",
+  crust = "#14101A",
 
   -- Surface colors
-  surface0 = "#323244",
-  surface1 = "#46475A",
-  surface2 = "#595B70",
+  surface0 = "#363043",
+  surface1 = "#4B4559",
+  surface2 = "#5E596F",
 
   -- Overlay colors
-  overlay0 = "#6E7086",
-  overlay1 = "#81839C",
-  overlay2 = "#9598B2",
+  overlay0 = "#736E85",
+  overlay1 = "#86829C",
+  overlay2 = "#9B97B2",
 
   -- Text colors
-  text = "#CED6F4",
-  subtext1 = "#BBC2DE",
-  subtext0 = "#A7ADC8",
+  text = "#D1D5F4",
+  subtext1 = "#BEC1DE",
+  subtext0 = "#AAACC8",
 
   -- Accent colors (VIBRANT)
-  rosewater = "#F2E0E4",
-  flamingo = "#EBCEDC",
-  pink = "#D8B5E1",
-  mauve = "#C5A1F2",
-  red = "#DB91D8",
-  maroon = "#DAA4CE",
-  peach = "#FEAEAD",
-  yellow = "#EECEB8",
-  green = "#71D2BB",
-  teal = "#89D1E5",
-  sky = "#A2D5FF",
-  sapphire = "#90B7F7",
-  blue = "#B5B5FF",
-  lavender = "#C5B9FC",
+  rosewater = "#F4E0E1",
+  flamingo = "#EECDD7",
+  pink = "#D6B6E3",
+  mauve = "#ABA8F9",
+  red = "#E68EC8",
+  maroon = "#E2A2C3",
+  peach = "#FFAF9E",
+  yellow = "#EECFAF",
+  green = "#7BD2AB",
+  teal = "#86D3DC",
+  sky = "#94D8FB",
+  sapphire = "#82BBF2",
+  blue = "#AFB6FF",
+  lavender = "#CAB8FB",
 }
 
 local function hi(group, opts)
@@ -65,6 +65,9 @@ hi("Normal", { fg = colors.text, bg = colors.base })
 hi("NormalFloat", { fg = colors.text, bg = colors.mantle })
 hi("FloatBorder", { fg = colors.base, bg = colors.mantle })
 hi("FloatTitle", { fg = colors.mauve, bg = colors.base, style = "bold,italic" })
+hi("Folded", { fg = colors.mauve, bg = colors.base, style = "bold" })
+hi("FoldColumn", { fg = colors.red, bg = colors.base })
+hi("FoldIndicator", { fg = colors.mauve, bg = colors.surface0 })
 
 hi("Cursor", { fg = colors.base, bg = colors.text })
 hi("CursorLine", { bg = colors.base })
@@ -163,7 +166,7 @@ hi("@function.macro", { fg = colors.mauve })
 hi("@function.method", { fg = colors.blue, style = "bold" })
 
 hi("@constructor", { fg = colors.sapphire })
-hi("@operator", { fg = colors.teal })
+hi("@operator", { fg = "#0aebff" })
 
 hi("@keyword", { fg = colors.mauve, style = "bold" })
 hi("@keyword.function", { fg = colors.mauve, style = "bold" })
@@ -203,11 +206,12 @@ hi("@lsp.typemod.variable.readonly", { fg = colors.teal })
 hi("@lsp.typemod.variable.declaration", { fg = colors.flamingo, style = "italic" })
 hi("@lsp.typemod.variable.static", { fg = colors.flamingo })
 hi("@lsp.typemod.variable.global", { fg = colors.flamingo })
+hi("@lsp.typemod.variable.global.lua", { fg = colors.red })
 
 -- Properties and Fields
 hi("@lsp.type.property", { fg = colors.text })
 hi("@lsp.typemod.property.static", { fg = colors.teal, style = "italic" })
-hi("@lsp.typemod.property.static.java", { fg = colors.red, style = "italic,bold" })
+hi("@lsp.typemod.property.static.java", { fg = colors.teal, style = "italic" })
 
 -- Functions and Methods
 hi("@lsp.type.function", { fg = colors.blue, style = "bold" })
@@ -226,7 +230,7 @@ hi("@lsp.type.typeParameter", { fg = colors.flamingo, style = "italic" })
 
 -- Namespaces and Modules
 hi("@lsp.type.namespace", { fg = colors.sapphire, style = "italic" })
-hi("@lsp.type.namespace.java", { fg = colors.sapphire, style = "italic" })
+hi("@lsp.type.namespace.java", { fg = colors.teal, style = "italic" })
 hi("@lsp.mod.importDeclaration", { fg = colors.yellow, style = "italic" })
 hi("@lsp.mod.importDeclaration.java", { fg = colors.yellow, style = "italic" })
 hi("@lsp.typemod.namespace.importDeclaration.java", { fg = colors.yellow, style = "italic" })
@@ -288,12 +292,11 @@ hi("NvimTreeNormal", { fg = colors.text, bg = colors.base })
 hi("NvimTreeFolderIcon", { fg = colors.mauve })
 hi("NvimTreeFolderName", { fg = colors.sapphire })
 hi("NvimTreeOpenedFolderName", { fg = colors.blue, bold = true })
-hi("NeoTreeIndentMarker", { fg = colors.overlay0 })
+hi("NvimTreeIndentMarker", { fg = colors.overlay0 })
 hi("NvimTreeGitDirty", { fg = colors.yellow })
 hi("NvimTreeGitNew", { fg = colors.green })
 hi("NvimTreeGitDeleted", { fg = colors.red })
 
-hi("NeoTreeGitStaged", { fg = colors.red })
 hi("NeoTreeFileIcon", { fg = colors.mauve })
 hi("NeoTreeDirectoryIcon", { fg = colors.mauve })
 hi("NeoTreeDirectoryName", { fg = colors.lavender })
@@ -436,6 +439,8 @@ local transparent_groups = {
   "WinBar",
   "WinBarNC",
   "Title",
+  "Folded",
+  "FoldColumn",
 
   -- Cursor / columns (IMPORTANT)
   "CursorLine",

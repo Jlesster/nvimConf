@@ -1,4 +1,3 @@
-
 local M = {}
 
 local state_dir = os.getenv("XDG_STATE_HOME") or (os.getenv("HOME") .. "/.local/state")
@@ -35,7 +34,7 @@ function M.apply_colors()
     return
   end
 
-  -- terminal colors
+  -- terminal colors - apply immediately, not in schedule
   for i = 0, 15 do
     vim.g["terminal_color_" .. i] = colors["term" .. i]
   end
@@ -45,6 +44,9 @@ end
 -- FULL reload (this fixes transparency + LSP issues)
 -- ------------------------------------------------------------------
 function M.reload()
+  -- Apply terminal colors BEFORE the scheduled reload
+  M.apply_colors()
+
   vim.schedule(function()
     vim.cmd("hi clear")
     vim.cmd("syntax reset")
@@ -52,130 +54,130 @@ function M.reload()
 
     -- Reassert transparency (CRITICAL)
     local transparent_groups = {
-  -- Core editor / windows
-  "Normal",
-  "NormalFloat",
-  "FloatBorder",
-  "SignColumn",
-  "EndOfBuffer",
-  "VertSplit",
-  "WinSeparator",
-  "WinBar",
-  "WinBarNC",
-  "Title",
+      -- Core editor / windows
+      "Normal",
+      "NormalFloat",
+      "FloatBorder",
+      "SignColumn",
+      "EndOfBuffer",
+      "VertSplit",
+      "WinSeparator",
+      "WinBar",
+      "WinBarNC",
+      "Title",
 
-  -- Cursor / columns (IMPORTANT)
-  "CursorLine",
-  "CursorColumn",
-  "ColorColumn",
+      -- Cursor / columns (IMPORTANT)
+      "CursorLine",
+      "CursorColumn",
+      "ColorColumn",
 
-  -- Status / tabline
-  "StatusLine",
-  "StatusLineNC",
-  "TabLine",
-  "TabLineFill",
-  "TabLineSel",
+      -- Status / tabline
+      "StatusLine",
+      "StatusLineNC",
+      "TabLine",
+      "TabLineFill",
+      "TabLineSel",
 
-  -- Popup / completion
-  "Pmenu",
-  "PmenuSbar",
-  "PmenuThumb",
-  "PmenuBorder",
+      -- Popup / completion
+      "Pmenu",
+      "PmenuSbar",
+      "PmenuThumb",
+      "PmenuBorder",
 
-  -- Completion item kinds (nvim-cmp)
-  "CmpItemKindVariable",
-  "CmpItemKindFunction",
-  "CmpItemKindMethod",
-  "CmpItemKindConstructor",
-  "CmpItemKindClass",
-  "CmpItemKindInterface",
-  "CmpItemKindStruct",
-  "CmpItemKindEnum",
-  "CmpItemKindEnumMember",
-  "CmpItemKindModule",
-  "CmpItemKindProperty",
-  "CmpItemKindField",
-  "CmpItemKindTypeParameter",
-  "CmpItemKindConstant",
-  "CmpItemKindKeyword",
-  "CmpItemKindSnippet",
-  "CmpItemKindText",
-  "CmpItemKindFile",
-  "CmpItemKindFolder",
-  "CmpItemKindColor",
-  "CmpItemKindReference",
-  "CmpItemKindOperator",
-  "CmpItemKindUnit",
-  "CmpItemKindValue",
+      -- Completion item kinds (nvim-cmp)
+      "CmpItemKindVariable",
+      "CmpItemKindFunction",
+      "CmpItemKindMethod",
+      "CmpItemKindConstructor",
+      "CmpItemKindClass",
+      "CmpItemKindInterface",
+      "CmpItemKindStruct",
+      "CmpItemKindEnum",
+      "CmpItemKindEnumMember",
+      "CmpItemKindModule",
+      "CmpItemKindProperty",
+      "CmpItemKindField",
+      "CmpItemKindTypeParameter",
+      "CmpItemKindConstant",
+      "CmpItemKindKeyword",
+      "CmpItemKindSnippet",
+      "CmpItemKindText",
+      "CmpItemKindFile",
+      "CmpItemKindFolder",
+      "CmpItemKindColor",
+      "CmpItemKindReference",
+      "CmpItemKindOperator",
+      "CmpItemKindUnit",
+      "CmpItemKindValue",
 
-  -- Completion text
-  "CmpItemAbbr",
-  "CmpItemAbbrDeprecated",
-  "CmpItemAbbrMatch",
-  "CmpItemAbbrMatchFuzzy",
-  "CmpItemMenu",
+      -- Completion text
+      "CmpItemAbbr",
+      "CmpItemAbbrDeprecated",
+      "CmpItemAbbrMatch",
+      "CmpItemAbbrMatchFuzzy",
+      "CmpItemMenu",
 
-  -- Which-key
-  "WhichKey",
-  "WhichKeyFloat",
-  "WhichKeyTile",
+      -- Which-key
+      "WhichKey",
+      "WhichKeyFloat",
+      "WhichKeyTile",
 
-  -- Neo-tree
-  "NeoTreeTabActive",
-  "NeoTreeTabInactive",
-  "NeoTreeTabSeparatorActive",
-  "NeoTreeTabSeparatorInactive",
+      -- Neo-tree
+      "NeoTreeTabActive",
+      "NeoTreeTabInactive",
+      "NeoTreeTabSeparatorActive",
+      "NeoTreeTabSeparatorInactive",
 
-  -- Render / markdown
-  "RenderMarkdownCode",
+      -- Render / markdown
+      "RenderMarkdownCode",
 
-  -- Bufferline / Barbar
-  "BufferLineFill",
-  "BufferLineBackground",
-  "BufferLineBuffer",
-  "BufferLineBufferVisible",
-  "BufferLineBufferSelected",
-  "BufferLineTab",
-  "BufferLineTabSelected",
-  "BufferLineSeparator",
-  "BufferLineSeparatorVisible",
-  "BufferLineSeparatorSelected",
+      -- Bufferline / Barbar
+      "BufferLineFill",
+      "BufferLineBackground",
+      "BufferLineBuffer",
+      "BufferLineBufferVisible",
+      "BufferLineBufferSelected",
+      "BufferLineTab",
+      "BufferLineTabSelected",
+      "BufferLineSeparator",
+      "BufferLineSeparatorVisible",
+      "BufferLineSeparatorSelected",
 
-  "BufferCurrent",
-  "BufferCurrentIndex",
-  "BufferCurrentMod",
-  "BufferCurrentSign",
-  "BufferCurrentTarget",
+      "BufferCurrent",
+      "BufferCurrentIndex",
+      "BufferCurrentMod",
+      "BufferCurrentSign",
+      "BufferCurrentTarget",
 
-  "BufferVisible",
-  "BufferVisibleIndex",
-  "BufferVisibleMod",
-  "BufferVisibleSign",
-  "BufferVisibleTarget",
+      "BufferVisible",
+      "BufferVisibleIndex",
+      "BufferVisibleMod",
+      "BufferVisibleSign",
+      "BufferVisibleTarget",
 
-  "BufferInactive",
-  "BufferInactiveIndex",
-  "BufferInactiveMod",
-  "BufferInactiveSign",
-  "BufferInactiveTarget",
+      "BufferInactive",
+      "BufferInactiveIndex",
+      "BufferInactiveMod",
+      "BufferInactiveSign",
+      "BufferInactiveTarget",
 
-  "BufferTabpages",
-  "BufferTabpageFill",
+      "BufferTabpages",
+      "BufferTabpageFill",
 
-  -- Devicons
-  "BufferLineDevIconLua",
-  "BufferLineDevIconDefault",
+      -- Devicons
+      "BufferLineDevIconLua",
+      "BufferLineDevIconDefault",
 
-  -- Overseer
-  "OverseerTask",
-  "OverseerTaskBorder",
-  "OverseerRunning",
-  "OverseerSuccess",
-  "OverseerCanceled",
-  "OverseerFailure",
+      -- Overseer
+      "OverseerTask",
+      "OverseerTaskBorder",
+      "OverseerRunning",
+      "OverseerSuccess",
+      "OverseerCanceled",
+      "OverseerFailure",
     }
 
-  for _, group in ipairs(transparent_groups) do
+    for _, group in ipairs(transparent_groups) do
       local ok, hl = pcall(vim.api.nvim_get_hl, 0, { name = group })
       if ok then
         hl.bg = "NONE"
@@ -189,8 +191,10 @@ end
 -- Setup file watcher
 -- ------------------------------------------------------------------
 function M.setup()
-  -- Initial load
+  -- Initial load - apply colors immediately
   M.apply_colors()
+
+  -- Then do the full reload (which will apply colors again before scheduling)
   M.reload()
 
   -- Watch for file changes
@@ -199,11 +203,9 @@ function M.setup()
     color_file,
     {},
     function()
-      M.apply_colors()
       M.reload()
     end
   )
 end
 
 return M
-

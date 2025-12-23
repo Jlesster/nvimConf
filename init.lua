@@ -13,7 +13,6 @@ local function load_source(source)
 end
 
 -- Load dynamic terminal colors
-require('dynamic-colors').setup()
 
 local function load_sources(source_files)
   vim.loader.enable()
@@ -40,6 +39,8 @@ local function load_colorscheme(colorscheme)
       end
     end
 end
+
+
 
 -- In your init.lua or a separate file like lua/lsp-autorestart.lua
 local lsp_autorestart = require('lsp-autorestart')
@@ -71,3 +72,4 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 load_colorscheme(vim.g.default_colorscheme)
 load_sources_async({ "base.4-mappings" })
+require('dynamic-colors').setup()

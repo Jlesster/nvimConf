@@ -4,7 +4,7 @@
 -- ----------------------------------------
 
 -- Theme
-vim.g.default_colorscheme = "catppuccin"
+vim.g.default_colorscheme = "material_purple_mocha"
 
 -- Options --------------------------------------------------------------------
 vim.opt.breakindent = true -- Wrap indent to match  line start.
@@ -39,8 +39,14 @@ vim.opt.smartindent = true -- Smarter autoindentation.
 vim.opt.splitbelow = true -- Splitting a new window below the current one.
 vim.opt.splitright = true -- Splitting a new window at the right of the current one.
 vim.opt.tabstop = 2 -- Number of space in a tab.
-
 vim.opt.termguicolors = true -- Enable 24-bit RGB color in the TUI.
+
+if vim.g.neovide then
+  vim.o.guifont = "IosevkaJlessBrains Font:h13"
+  vim.o.neovide_scale_factor = 1.0
+  vim.o.neovide_refresh_rate = 60
+end
+
 vim.opt.undofile = true -- Enable persistent undo between session and reboots.
 vim.opt.updatetime = 50 -- Length of time to wait before triggering the plugin.
 vim.opt.virtualedit = "block" -- Allow going past end of line in visual block mode.
