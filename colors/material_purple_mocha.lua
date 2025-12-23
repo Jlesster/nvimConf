@@ -288,13 +288,20 @@ hi("NvimTreeNormal", { fg = colors.text, bg = colors.base })
 hi("NvimTreeFolderIcon", { fg = colors.mauve })
 hi("NvimTreeFolderName", { fg = colors.sapphire })
 hi("NvimTreeOpenedFolderName", { fg = colors.blue, bold = true })
-hi("NvimTreeIndentMarker", { fg = colors.overlay0 })
+hi("NeoTreeIndentMarker", { fg = colors.overlay0 })
 hi("NvimTreeGitDirty", { fg = colors.yellow })
 hi("NvimTreeGitNew", { fg = colors.green })
 hi("NvimTreeGitDeleted", { fg = colors.red })
 
+hi("NeoTreeGitStaged", { fg = colors.red })
+hi("NeoTreeFileIcon", { fg = colors.mauve })
+hi("NeoTreeDirectoryIcon", { fg = colors.mauve })
+hi("NeoTreeDirectoryName", { fg = colors.lavender })
+hi("NeoTreeExpander", { fg = colors.lavender })
+hi("NeoTreeFileNameOpened", { fg = colors.red })
 hi("NeoTreeTabActive", { fg = colors.mauve, bg = colors.base })
 hi("NeoTreeTabInactive", { fg = colors.overlay0, bg = colors.base })
+hi("NeoTreeCursorLine", { fg = colors.red })
 hi("NeoTreeTabSeparatorActive", { fg = colors.surface0, bg = "NONE" })
 hi("NeoTreeTabSeparatorInactive", { fg = colors.surface0, bg = "NONE" })
 
@@ -489,6 +496,7 @@ local transparent_groups = {
   -- Neo-tree
   "NeoTreeTabActive",
   "NeoTreeTabInactive",
+  "NvimTreeNormal",
   "NeoTreeTabSeparatorActive",
   "NeoTreeTabSeparatorInactive",
 
@@ -539,6 +547,14 @@ local transparent_groups = {
   "OverseerSuccess",
   "OverseerCanceled",
   "OverseerFailure",
+
+  "TelescopePromptBorder",
+  "TelescopeResultsBorder",
+  "TelescopePreviewBorder",
+  "DiagnosticVirtualTextError",
+  "DiagnosticVirtualTextWarn",
+  "DiagnosticVirtualTextInfo",
+  "DiagnosticVirtualTextHint",
     }
 
 for _, group in ipairs(transparent_groups) do
