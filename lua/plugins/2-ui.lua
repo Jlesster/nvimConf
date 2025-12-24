@@ -163,6 +163,7 @@ return {
   {
     "goolord/alpha-nvim",
     cmd = "Alpha",
+    lazy = true,
     -- setup header and buttonts
     opts = function()
       local dashboard = require("alpha.themes.dashboard")
@@ -349,6 +350,7 @@ return {
 
       return {
         timeout = 2500,
+        background_colour = "#000000",
         fps = fps,
         max_height = function() return math.floor(vim.o.lines * 0.75) end,
         max_width = function() return math.floor(vim.o.columns * 0.75) end,
@@ -827,6 +829,9 @@ return {
         "noice",
         "prompt",
         "TelescopePrompt",
+        "TelescopeResults",
+        "TelescopePreview",
+        "NeoTree",
         "alpha",
       },
     },

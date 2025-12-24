@@ -70,6 +70,5 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.opt_local.expandtab = true
   end,
 })
-load_colorscheme(vim.g.default_colorscheme)
-load_sources_async({ "base.4-mappings" })
 require('dynamic-colors').setup()
+load_sources_async({ "base.4-mappings" })

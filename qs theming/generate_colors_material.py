@@ -187,21 +187,31 @@ if args.termscheme is not None:
 
     # Define purple color palette with variations in tone and slight chroma
     purple_palette = {
-        'term0':  Hct.from_hct(base_hue, min(primary_hct.chroma * 0.6, 25), 6),   # Very dark black-purple bg to match nvim
-        'term1':  Hct.from_hct(base_hue - 15, min(primary_hct.chroma * 1.5, 75), 62), # Red-purple (errors)
-        'term2':  Hct.from_hct(base_hue + 30, min(primary_hct.chroma * 1.4, 70), 68), # Blue-purple (success)
-        'term3':  Hct.from_hct(base_hue + 5, min(primary_hct.chroma * 2.0, 95), 92), # Light purple (Keys/Values) - WHITE-ISH PURPLE, VERY SATURATED
-        'term4':  Hct.from_hct(base_hue + 5, min(primary_hct.chroma * 1.7, 85), 82),  # Medium purple (info) - BRIGHTER
-        'term5':  Hct.from_hct(base_hue - 5, min(primary_hct.chroma * 1.8, 88), 80), # Pink-purple - VERY SATURATED
-        'term6':  Hct.from_hct(base_hue + 10, min(primary_hct.chroma * 1.7, 85), 82), # Cyan-purple - BRIGHTER
-        'term7':  Hct.from_hct(base_hue, min(primary_hct.chroma * 0.25, 20), 88),      # Light gray-purple (normal text) - VERY BRIGHT
+        'term0':  Hct.from_hct(base_hue, min(primary_hct.chroma * 0.6, 25), 6),   # Very dark black-purple bg
+
+        # RED (term1) - Subtle reddish-purple for errors/deletions
+        'term1':  Hct.from_hct(base_hue - 12, min(primary_hct.chroma * 0.8, 45), 58), # DESATURATED red-purple
+
+        # GREEN (term2) - Subtle cyan-purple for success/additions
+        'term2':  Hct.from_hct(base_hue + 25, min(primary_hct.chroma * 0.9, 48), 62), # DESATURATED blue-purple/teal
+
+        'term3':  Hct.from_hct(base_hue + 5, min(primary_hct.chroma * 2.0, 95), 92), # Light purple (Keys/Values) - WHITE-ISH PURPLE
+        'term4':  Hct.from_hct(base_hue + 5, min(primary_hct.chroma * 1.7, 85), 82),  # Medium purple (info)
+        'term5':  Hct.from_hct(base_hue - 5, min(primary_hct.chroma * 1.8, 88), 80), # Pink-purple
+        'term6':  Hct.from_hct(base_hue + 10, min(primary_hct.chroma * 1.7, 85), 82), # Cyan-purple
+        'term7':  Hct.from_hct(base_hue, min(primary_hct.chroma * 0.25, 20), 88),      # Light gray-purple (normal text)
         'term8':  Hct.from_hct(base_hue, min(primary_hct.chroma * 1.0, 42), 35),      # Medium dark purple
-        'term9':  Hct.from_hct(base_hue - 15, min(primary_hct.chroma * 1.8, 88), 85), # Bright red-purple - VERY BRIGHT
-        'term10': Hct.from_hct(base_hue + 30, min(primary_hct.chroma * 1.7, 85), 88), # Bright blue-purple - VERY BRIGHT
-        'term11': Hct.from_hct(base_hue + 5, min(primary_hct.chroma * 2.0, 95), 92), # Bright light purple (Keys/Values) - WHITE-ISH PURPLE, VERY SATURATED
-        'term12': Hct.from_hct(base_hue + 5, min(primary_hct.chroma * 1.8, 88), 88),  # Bright medium purple - VERY BRIGHT
-        'term13': Hct.from_hct(base_hue - 5, min(primary_hct.chroma * 1.8, 88), 87), # Bright pink-purple - VERY BRIGHT
-        'term14': Hct.from_hct(base_hue + 10, min(primary_hct.chroma * 1.7, 85), 86), # Bright cyan-purple - VERY BRIGHT
+
+        # BRIGHT RED (term9) - Subtle bright reddish-purple
+        'term9':  Hct.from_hct(base_hue - 12, min(primary_hct.chroma * 1.0, 55), 68), # DESATURATED bright red-purple
+
+        # BRIGHT GREEN (term10) - Subtle bright cyan-purple
+        'term10': Hct.from_hct(base_hue + 25, min(primary_hct.chroma * 1.1, 58), 70), # DESATURATED bright blue-purple
+
+        'term11': Hct.from_hct(base_hue + 5, min(primary_hct.chroma * 2.0, 95), 92), # Bright light purple
+        'term12': Hct.from_hct(base_hue + 5, min(primary_hct.chroma * 1.8, 88), 88),  # Bright medium purple
+        'term13': Hct.from_hct(base_hue - 5, min(primary_hct.chroma * 1.8, 88), 87), # Bright pink-purple
+        'term14': Hct.from_hct(base_hue + 10, min(primary_hct.chroma * 1.7, 85), 86), # Bright cyan-purple
         'term15': Hct.from_hct(base_hue, min(primary_hct.chroma * 0.12, 10), 96),      # Nearly pure white with tiny purple hint
     }
 
@@ -212,6 +222,7 @@ if args.termscheme is not None:
             # Fallback - force everything to purple hue
             term_colors[color] = argb_to_hex(Hct.from_hct(base_hue, 40, 70).to_int())
 
+
 # LazyGit-specific colors - ALL PURPLE SHADES
 lazygit_colors = {}
 if args.termscheme is not None:
@@ -219,7 +230,7 @@ if args.termscheme is not None:
     primary_hct = Hct.from_int(hex_to_argb(material_colors['primary_paletteKeyColor']))
     base_hue = primary_hct.hue
 
-    # Selection background - much darker, more saturated purple
+    # Selection background - darker, more saturated purple
     lazygit_colors['selectedLineBg'] = argb_to_hex(
         Hct.from_hct(base_hue, min(primary_hct.chroma * 1.6, 65), 15 if darkmode else 88).to_int()
     )
@@ -257,14 +268,96 @@ if args.termscheme is not None:
         Hct.from_hct(base_hue - 10, 12, 90 if darkmode else 20).to_int()
     )
 
-    # Unstaged changes - red-purple (only slightly shifted)
+    # DIFF COLORS - Subtle purple-tinted versions
+    # Deletions (red) - desaturated red-purple, subtle
     lazygit_colors['unstagedChanges'] = argb_to_hex(
-        Hct.from_hct(base_hue - 20, min(primary_hct.chroma * 1.3, 70), 60 if darkmode else 45).to_int()
+        Hct.from_hct(
+            base_hue - 12,  # Slight shift towards red
+            min(primary_hct.chroma * 0.8, 45),  # Low saturation
+            58 if darkmode else 52
+        ).to_int()
     )
+
+    # Additions (green) - desaturated blue-purple/teal, subtle
+    lazygit_colors['stagedChanges'] = argb_to_hex(
+        Hct.from_hct(
+            base_hue + 25,  # Slight shift towards cyan
+            min(primary_hct.chroma * 0.9, 48),  # Low saturation
+            62 if darkmode else 48
+        ).to_int()
+    )
+
+    # Modified/changed sections - use term3 (light purple)
+    lazygit_colors['diffModified'] = term_colors['term3']
+
+    # Context lines - use term7 (normal text)
+    lazygit_colors['diffContext'] = term_colors['term7']
+
+    # Search / diff emphasis - soft purple
+    lazygit_colors['searchMatching'] = argb_to_hex(
+        Hct.from_hct(
+            base_hue + 8,
+            min(primary_hct.chroma * 1.2, 65),
+            72 if darkmode else 55
+        ).to_int()
+    )
+
+    # Default text color - use term7
+    lazygit_colors['defaultText'] = term_colors['term7']
+
+    # Conflict colors - all subtle purples
+    lazygit_colors['conflictOurs'] = argb_to_hex(
+        Hct.from_hct(base_hue + 20, min(primary_hct.chroma * 0.85, 50), 60 if darkmode else 50).to_int()
+    )
+    lazygit_colors['conflictTheirs'] = argb_to_hex(
+        Hct.from_hct(base_hue - 15, min(primary_hct.chroma * 0.85, 50), 56 if darkmode else 48).to_int()
+    )
+    lazygit_colors['conflictBase'] = term_colors['term3']
+
+# Generate Git diff colors configuration
+if args.termscheme is not None and lazygit_colors:
+    import subprocess
+
+    # Use the same colors we generated for LazyGit diffs
+    git_diff_colors = {
+        'old': lazygit_colors['unstagedChanges'],
+        'new': lazygit_colors['stagedChanges'],
+        'meta': term_colors['term4'],  # Purple info color
+        'frag': term_colors['term4'],  # Purple info color
+        'commit': term_colors['term5'], # Pink-purple
+    }
+
+    # Set git config colors
+    try:
+        for key, color in git_diff_colors.items():
+            subprocess.run(
+                ['git', 'config', '--global', f'color.diff.{key}', color],
+                check=True
+            )
+
+        # Also set diff-highlight colors (for better diffs)
+        subprocess.run(['git', 'config', '--global', 'color.diff-highlight.oldNormal', git_diff_colors['old']], check=True)
+        subprocess.run(['git', 'config', '--global', 'color.diff-highlight.newNormal', git_diff_colors['new']], check=True)
+
+        # Status colors
+        subprocess.run(['git', 'config', '--global', 'color.status.added', git_diff_colors['new']], check=True)
+        subprocess.run(['git', 'config', '--global', 'color.status.deleted', git_diff_colors['old']], check=True)
+        subprocess.run(['git', 'config', '--global', 'color.status.changed', git_diff_colors['meta']], check=True)
+
+        if args.debug:
+            print("\nGit diff colors configured:")
+            print(f"  Deletions (red): {git_diff_colors['old']}")
+            print(f"  Additions (green): {git_diff_colors['new']}")
+            print(f"  Metadata: {git_diff_colors['meta']}")
+    except subprocess.CalledProcessError as e:
+        if args.debug:
+            print(f"Warning: Could not set git config colors: {e}")
+    except FileNotFoundError:
+        if args.debug:
+            print("Warning: git command not found, skipping git color configuration")
 
 # Neovim colors - Catppuccin Mocha harmonized with Material You
 neovim_colors = {}
-
 if args.termscheme is not None:
     # Load real Catppuccin Mocha palette
     cat = load_catppuccin_palette(os.path.expanduser("~/.config/quickshell/ii/scripts/colors/Colors.json"))
@@ -273,13 +366,13 @@ if args.termscheme is not None:
 
     # VERY gentle harmonization
     BG_HARMONY = 0.08
-    UI_HARMONY = 0.15
-    SYNTAX_HARMONY = 0.55 #lower is more harmony
+    UI_HARMONY = 5.15
+    SYNTAX_HARMONY = 00.55 #lower is more harmony
     TEXT_HARMONY = 0.06
 
     BG_THRESH = 10.0
     UI_THRESH = 18.0
-    SYNTAX_THRESH = 32.0 #less is more contr
+    SYNTAX_THRESH = 90.05 #less is more contr
     TEXT_THRESH = 8.0
 
     # Background / surfaces (keep Mocha depth)
@@ -403,493 +496,591 @@ end
 -- ============================================================================
 -- BASE UI ELEMENTS
 -- ============================================================================
-hi("Normal", {{ fg = colors.text, bg = colors.base }})
-hi("NormalFloat", {{ fg = colors.text, bg = colors.mantle }})
-hi("FloatBorder", {{ fg = colors.base, bg = colors.mantle }})
-hi("FloatTitle", {{ fg = colors.mauve, bg = colors.base, style = "bold,italic" }})
+local fucntion setup_highlights()
+    hi("Normal", {{ fg = colors.text, bg = "NONE" }})
+    hi("NormalFloat", {{ fg = colors.text, bg = colors.mantle }})
+    hi("FloatBorder", {{ fg = "NONE", bg = colors.mantle }})
+    hi("FloatTitle", {{ fg = colors.mauve, bg = "NONE", style = "bold,italic" }})
+    hi("Folded", {{ fg = "NONE", bg = "NONE" }})
+    hi("FoldColumn", {{ fg = colors.red }})
+    hi("UfoFoldedBg", {{ fg = colors.lavender }})
+    hi("UfoFoldedFg", {{ fg = colors.lavender }})
 
-hi("Cursor", {{ fg = colors.base, bg = colors.text }})
-hi("CursorLine", {{ bg = colors.base }})
-hi("CursorColumn", {{ bg = colors.base }})
-hi("ColorColumn", {{ bg = "NONE" }})
-hi("CursorLineNr", {{ fg = colors.lavender, style = "bold" }})
-hi("LineNr", {{ fg = colors.overlay0 }})
-hi("LineNrAbove", {{ fg = colors.mauve }})
-hi("LineNrBelow", {{ fg = colors.mauve }})
-hi("SignColumn", {{ bg = colors.base }})
-hi("EndOfBuffer", {{ fg = colors.lavender }})
-hi("NonText", {{ fg = colors.lavender }})
+    hi("Cursor", {{ fg = "NONE", bg = colors.text }})
+    hi("CursorLine", {{ bg = "NONE" }})
+    hi("CursorColumn", {{ bg = "NONE" }})
+    hi("ColorColumn", {{ bg = "NONE" }})
+    hi("CursorLineNr", {{ fg = colors.lavender, style = "bold" }})
+    hi("LineNr", {{ fg = colors.overlay0 }})
+    hi("LineNrAbove", {{ fg = colors.mauve }})
+    hi("LineNrBelow", {{ fg = colors.mauve }})
+    hi("SignColumn", {{ bg = "NONE" }})
+    hi("EndOfBuffer", {{ fg = colors.lavender }})
+    hi("NonText", {{ fg = colors.lavender }})
 
-hi("StatusLine", {{ fg = colors.text, bg = colors.base }})
-hi("StatusLineNC", {{ fg = colors.overlay0, bg = colors.base }})
-hi("VertSplit", {{ fg = colors.surface0, bg = "NONE" }})
-hi("WinSeparator", {{ fg = colors.surface0, bg = "NONE" }})
+    hi("StatusLine", {{ fg = colors.text, bg = "NONE" }})
+    hi("StatusLineNC", {{ fg = colors.overlay0, bg = "NONE" }})
+    hi("VertSplit", {{ fg = colors.surface0, bg = "NONE" }})
+    hi("WinSeparator", {{ fg = colors.surface0, bg = "NONE" }})
 
-hi("Search", {{ fg = colors.base, bg = colors.mauve}})
-hi("IncSearch", {{ fg = colors.base, bg = colors.peach }})
-hi("CurSearch", {{ fg = colors.base, bg = colors.peach }})
-hi("Visual", {{ bg = colors.surface1 }})
-hi("VisualNOS", {{ bg = colors.surface1 }})
+    hi("Search", {{ fg = colors.red, bg = colors.rosewater }})
+    hi("IncSearch", {{ fg = "NONE", bg = colors.red }})
+    hi("CurSearch", {{ fg = "NONE", bg = colors.red }})
+    hi("Visual", {{ bg = colors.surface1 }})
+    hi("VisualNOS", {{ bg = colors.surface1 }})
 
-hi("Pmenu", {{ fg = colors.text, bg = colors.base }})
-hi("PmenuSel", {{ fg = colors.base, bg = colors.surface1, style = "bold" }})
-hi("PmenuSbar", {{ bg = colors.base}})
-hi("PmenuThumb", {{ bg = colors.base }})
-hi("PmenuBorder", {{ fg = colors.lavender, bg = colors.base }})
+    hi("Pmenu", {{ fg = colors.text, bg = "NONE" }})
+    hi("PmenuSel", {{ fg = "NONE", bg = colors.surface1, style = "bold" }})
+    hi("PmenuSbar", {{ bg = "NONE"}})
+    hi("PmenuThumb", {{ bg = "NONE" }})
+    hi("PmenuBorder", {{ fg = colors.lavender, bg = "NONE" }})
 
--- Completion menu kind highlights (nvim-cmp)
-hi("CmpItemKindVariable", {{ fg = colors.text, bg = "NONE" }})
-hi("CmpItemKindFunction", {{ fg = colors.blue, bg = "NONE" }})
-hi("CmpItemKindMethod", {{ fg = colors.blue, bg = "NONE" }})
-hi("CmpItemKindConstructor", {{ fg = colors.sapphire, bg = "NONE" }})
-hi("CmpItemKindClass", {{ fg = colors.yellow, bg = "NONE" }})
-hi("CmpItemKindInterface", {{ fg = colors.yellow, bg = "NONE" }})
-hi("CmpItemKindStruct", {{ fg = colors.yellow, bg = "NONE" }})
-hi("CmpItemKindEnum", {{ fg = colors.peach, bg = "NONE" }})
-hi("CmpItemKindEnumMember", {{ fg = colors.teal, bg = "NONE" }})
-hi("CmpItemKindModule", {{ fg = colors.sapphire, bg = "NONE" }})
-hi("CmpItemKindProperty", {{ fg = colors.teal, bg = "NONE" }})
-hi("CmpItemKindField", {{ fg = colors.teal, bg = "NONE" }})
-hi("CmpItemKindTypeParameter", {{ fg = colors.flamingo, bg = "NONE" }})
-hi("CmpItemKindConstant", {{ fg = colors.teal, bg = "NONE" }})
-hi("CmpItemKindKeyword", {{ fg = colors.mauve, bg = "NONE" }})
-hi("CmpItemKindSnippet", {{ fg = colors.pink, bg = "NONE" }})
-hi("CmpItemKindText", {{ fg = colors.green, bg = "NONE" }})
-hi("CmpItemKindFile", {{ fg = colors.blue, bg = "NONE" }})
-hi("CmpItemKindFolder", {{ fg = colors.blue, bg = "NONE" }})
-hi("CmpItemKindColor", {{ fg = colors.peach, bg = "NONE" }})
-hi("CmpItemKindReference", {{ fg = colors.peach, bg = "NONE" }})
-hi("CmpItemKindOperator", {{ fg = colors.sky, bg = "NONE" }})
-hi("CmpItemKindUnit", {{ fg = colors.peach, bg = "NONE" }})
-hi("CmpItemKindValue", {{ fg = colors.peach, bg = "NONE" }})
+    -- Completion menu kind highlights (nvim-cmp)
+    hi("CmpItemKindVariable", {{ fg = colors.text, bg = "NONE" }})
+    hi("CmpItemKindFunction", {{ fg = colors.blue, bg = "NONE" }})
+    hi("CmpItemKindMethod", {{ fg = colors.blue, bg = "NONE" }})
+    hi("CmpItemKindConstructor", {{ fg = colors.sapphire, bg = "NONE" }})
+    hi("CmpItemKindClass", {{ fg = colors.yellow, bg = "NONE" }})
+    hi("CmpItemKindInterface", {{ fg = colors.yellow, bg = "NONE" }})
+    hi("CmpItemKindStruct", {{ fg = colors.yellow, bg = "NONE" }})
+    hi("CmpItemKindEnum", {{ fg = colors.peach, bg = "NONE" }})
+    hi("CmpItemKindEnumMember", {{ fg = colors.teal, bg = "NONE" }})
+    hi("CmpItemKindModule", {{ fg = colors.sapphire, bg = "NONE" }})
+    hi("CmpItemKindProperty", {{ fg = colors.teal, bg = "NONE" }})
+    hi("CmpItemKindField", {{ fg = colors.teal, bg = "NONE" }})
+    hi("CmpItemKindTypeParameter", {{ fg = colors.flamingo, bg = "NONE" }})
+    hi("CmpItemKindConstant", {{ fg = colors.teal, bg = "NONE" }})
+    hi("CmpItemKindKeyword", {{ fg = colors.mauve, bg = "NONE" }})
+    hi("CmpItemKindSnippet", {{ fg = colors.pink, bg = "NONE" }})
+    hi("CmpItemKindText", {{ fg = colors.green, bg = "NONE" }})
+    hi("CmpItemKindFile", {{ fg = colors.blue, bg = "NONE" }})
+    hi("CmpItemKindFolder", {{ fg = colors.blue, bg = "NONE" }})
+    hi("CmpItemKindColor", {{ fg = colors.peach, bg = "NONE" }})
+    hi("CmpItemKindReference", {{ fg = colors.peach, bg = "NONE" }})
+    hi("CmpItemKindOperator", {{ fg = colors.sky, bg = "NONE" }})
+    hi("CmpItemKindUnit", {{ fg = colors.peach, bg = "NONE" }})
+    hi("CmpItemKindValue", {{ fg = colors.peach, bg = "NONE" }})
 
--- Completion item highlights
-hi("CmpItemAbbr", {{ fg = colors.text, bg = "NONE" }})
-hi("CmpItemAbbrDeprecated", {{ fg = colors.overlay0, bg = "NONE", style = "strikethrough" }})
-hi("CmpItemAbbrMatch", {{ fg = colors.blue, bg = "NONE", style = "bold" }})
-hi("CmpItemAbbrMatchFuzzy", {{ fg = colors.blue, bg = "NONE" }})
-hi("CmpItemMenu", {{ fg = colors.subtext0, bg = "NONE", style = "italic" }})
+    -- Completion item highlights
+    hi("CmpItemAbbr", {{ fg = colors.text, bg = "NONE" }})
+    hi("CmpItemAbbrDeprecated", {{ fg = colors.overlay0, bg = "NONE", style = "strikethrough" }})
+    hi("CmpItemAbbrMatch", {{ fg = colors.blue, bg = "NONE", style = "bold" }})
+    hi("CmpItemAbbrMatchFuzzy", {{ fg = colors.blue, bg = "NONE" }})
+    hi("CmpItemMenu", {{ fg = colors.subtext0, bg = "NONE", style = "italic" }})
 
-hi("TabLine", {{ fg = colors.subtext0, bg = colors.mantle }})
-hi("TabLineFill", {{ bg = colors.base }})
-hi("TabLineSel", {{ fg = colors.mauve, bg = colors.base }})
+    hi("TabLine", {{ fg = colors.subtext0, bg = colors.mantle }})
+    hi("TabLineFill", {{ bg = "NONE" }})
+    hi("TabLineSel", {{ fg = colors.mauve, bg = "NONE" }})
 
--- ============================================================================
--- TREESITTER BASE SYNTAX (Fallbacks when LSP not available)
--- ============================================================================
-hi("@variable", {{ fg = colors.text }})
-hi("@variable.builtin", {{ fg = colors.red, style = "italic" }})
-hi("@variable.parameter", {{ fg = colors.maroon, style = "italic" }})
-hi("@variable.member", {{ fg = colors.teal }})
+    -- ============================================================================
+    -- TREESITTER BASE SYNTAX (Fallbacks when LSP not available)
+    -- ============================================================================
+    hi("@variable", {{ fg = colors.text }})
+    hi("@variable.builtin", {{ fg = colors.red, style = "italic" }})
+    hi("@variable.parameter", {{ fg = colors.maroon, style = "italic" }})
+    hi("@variable.member", {{ fg = colors.teal }})
 
-hi("@constant", {{ fg = colors.teal }})
-hi("@constant.builtin", {{ fg = colors.red, style = "italic" }})
-hi("@constant.macro", {{ fg = colors.sapphire }})
+    hi("@constant", {{ fg = colors.teal }})
+    hi("@constant.builtin", {{ fg = colors.red, style = "italic" }})
+    hi("@constant.macro", {{ fg = colors.sapphire }})
 
-hi("@module", {{ fg = colors.sapphire, style = "italic" }})
-hi("@label", {{ fg = colors.sapphire }})
+    hi("@module", {{ fg = colors.sapphire, style = "italic" }})
+    hi("@label", {{ fg = colors.sapphire }})
 
-hi("@string", {{ fg = colors.green }})
-hi("@string.escape", {{ fg = colors.pink }})
-hi("@string.regexp", {{ fg = colors.pink }})
-hi("@character", {{ fg = colors.teal }})
-hi("@character.special", {{ fg = colors.pink }})
+    hi("@string", {{ fg = colors.green }})
+    hi("@string.escape", {{ fg = colors.pink }})
+    hi("@string.regexp", {{ fg = colors.pink }})
+    hi("@character", {{ fg = colors.teal }})
+    hi("@character.special", {{ fg = colors.pink }})
 
-hi("@number", {{ fg = colors.peach }})
-hi("@number.float", {{ fg = colors.peach }})
-hi("@boolean", {{ fg = colors.peach }})
+    hi("@number", {{ fg = colors.peach }})
+    hi("@number.float", {{ fg = colors.peach }})
+    hi("@boolean", {{ fg = colors.peach }})
 
-hi("@function", {{ fg = colors.blue, style = "bold" }})
-hi("@function.builtin", {{ fg = colors.blue, style = "italic" }})
-hi("@function.macro", {{ fg = colors.mauve }})
-hi("@function.method", {{ fg = colors.blue, style = "bold" }})
+    hi("@function", {{ fg = colors.blue, style = "bold" }})
+    hi("@function.builtin", {{ fg = colors.blue, style = "italic" }})
+    hi("@function.macro", {{ fg = colors.mauve }})
+    hi("@function.method", {{ fg = colors.blue, style = "bold" }})
 
-hi("@constructor", {{ fg = colors.sapphire }})
-hi("@operator", {{ fg = colors.teal }})
+    hi("@constructor", {{ fg = colors.sapphire }})
+    hi("@operator", {{ fg = "#00ffff" }})
 
-hi("@keyword", {{ fg = colors.mauve, style = "bold" }})
-hi("@keyword.function", {{ fg = colors.mauve, style = "bold" }})
-hi("@keyword.operator", {{ fg = colors.mauve }})
-hi("@keyword.return", {{ fg = colors.pink, style = "bold" }})
+    hi("@keyword", {{ fg = colors.mauve, style = "bold" }})
+    hi("@keyword.conditional", {{ fg = colors.mauve, style = "bold,italic" }})
+    hi("@keyword.function", {{ fg = colors.mauve, style = "bold" }})
+    hi("@keyword.operator", {{ fg = colors.mauve }})
+    hi("@keyword.return", {{ fg = colors.pink, style = "bold" }})
 
-hi("@type", {{ fg = colors.yellow }})
-hi("@type.builtin", {{ fg = colors.yellow, style = "italic" }})
-hi("@type.qualifier", {{ fg = colors.mauve, style = "italic" }})
+    hi("@type", {{ fg = colors.yellow }})
+    hi("@type.builtin", {{ fg = colors.yellow, style = "italic" }})
+    hi("@type.qualifier", {{ fg = colors.mauve, style = "italic" }})
 
-hi("@property", {{ fg = colors.teal }})
-hi("@attribute", {{ fg = colors.yellow, style = "italic" }})
-hi("@namespace", {{ fg = colors.sapphire, style = "italic" }})
+    hi("@property", {{ fg = colors.teal }})
+    hi("@attribute", {{ fg = colors.yellow, style = "italic" }})
+    hi("@namespace", {{ fg = colors.sapphire, style = "italic" }})
 
-hi("@punctuation.delimiter", {{ fg = colors.overlay2 }})
-hi("@punctuation.bracket", {{ fg = colors.overlay2 }})
-hi("@punctuation.special", {{ fg = colors.sky }})
+    hi("@punctuation.delimiter", {{ fg = colors.overlay2 }})
+    hi("@punctuation.bracket", {{ fg = colors.overlay2 }})
+    hi("@punctuation.special", {{ fg = colors.sky }})
 
-hi("@comment", {{ fg = colors.pink, italic = true }})
-hi("@comment.todo", {{ fg = colors.yellow, bg = colors.surface0, style = "bold" }})
-hi("@comment.note", {{ fg = colors.blue, bg = colors.surface0, style = "bold" }})
-hi("@comment.warning", {{ fg = colors.peach, bg = colors.surface0, style = "bold" }})
-hi("@comment.error", {{ fg = colors.red, bg = colors.surface0, style = "bold" }})
+    hi("@comment", {{ fg = colors.pink, italic = true }})
+    hi("@comment.todo", {{ fg = colors.yellow, bg = colors.surface0, style = "bold" }})
+    hi("@comment.note", {{ fg = colors.blue, bg = colors.surface0, style = "bold" }})
+    hi("@comment.warning", {{ fg = colors.peach, bg = colors.surface0, style = "bold" }})
+    hi("@comment.error", {{ fg = colors.red, bg = colors.surface0, style = "bold" }})
 
-hi("@tag", {{ fg = colors.mauve }})
-hi("@tag.attribute", {{ fg = colors.teal, style = "italic" }})
-hi("@tag.delimiter", {{ fg = colors.overlay2 }})
+    hi("@tag", {{ fg = colors.mauve }})
+    hi("@tag.attribute", {{ fg = colors.teal, style = "italic" }})
+    hi("@tag.delimiter", {{ fg = colors.overlay2 }})
 
--- ============================================================================
--- LSP SEMANTIC TOKENS (Primary highlighting - overrides Treesitter)
--- ============================================================================
+    -- ============================================================================
+    -- LSP SEMANTIC TOKENS (Primary highlighting - overrides Treesitter)
+    -- ============================================================================
 
--- Variables and Parameters
-hi("@lsp.type.variable", {{ fg = colors.text }})
-hi("@lsp.type.parameter", {{ fg = colors.maroon, style = "italic" }})
-hi("@lsp.typemod.variable.readonly", {{ fg = colors.teal }})
-hi("@lsp.typemod.variable.declaration", {{ fg = colors.flamingo, style = "italic" }})
-hi("@lsp.typemod.variable.static", {{ fg = colors.flamingo }})
-hi("@lsp.typemod.variable.global", {{ fg = colors.flamingo }})
+    -- Variables and Parameters
+    hi("@lsp.type.variable", {{ fg = colors.text }})
+    hi("@lsp.type.parameter", {{ fg = colors.red, style = "italic" }})
+    hi("@lsp.typemod.variable.readonly", {{ fg = colors.teal }})
+    hi("@lsp.typemod.variable.declaration", {{ fg = colors.flamingo, style = "italic" }})
+    hi("@lsp.typemod.variable.static", {{ fg = colors.flamingo }})
+    hi("@lsp.typemod.variable.global", {{ fg = colors.flamingo }})
 
--- Properties and Fields
-hi("@lsp.type.property", {{ fg = colors.text }})
-hi("@lsp.typemod.property.static", {{ fg = colors.teal, style = "italic" }})
-hi("@lsp.typemod.property.static.java", {{ fg = colors.red, style = "italic,bold" }})
+    -- Properties and Fields
+    hi("@lsp.type.property", {{ fg = colors.text }})
+    hi("@lsp.typemod.property.static", {{ fg = colors.teal, style = "italic" }})
+    hi("@lsp.typemod.property.static.java", {{ fg = colors.green, style = "italic,bold" }})
 
--- Functions and Methods
-hi("@lsp.type.function", {{ fg = colors.blue, style = "bold" }})
-hi("@lsp.type.method", {{ fg = colors.sapphire, style = "bold" }})
-hi("@lsp.typemod.function.static", {{ fg = colors.sky, style = "bold" }})
-hi("@lsp.typemod.method.static", {{ fg = colors.sapphire, style = "bold" }})
+    -- Functions and Methods
+    hi("@lsp.type.function", {{ fg = colors.blue, style = "bold" }})
+    hi("@lsp.type.method.java", {{ fg = colors.sapphire, style = "bold" }})
+    hi("@lsp.type.method", {{ fg = colors.sapphire, style = "bold" }})
+    hi("@lsp.typemod.function.static", {{ fg = colors.sky, style = "bold" }})
+    hi("@lsp.typemod.method.static", {{ fg = colors.sapphire, style = "bold" }})
 
--- Types and Classes
-hi("@lsp.type.class", {{ fg = colors.yellow, style = "bold" }})
-hi("@lsp.type.interface", {{ fg = colors.yellow, style = "italic" }})
-hi("@lsp.type.struct", {{ fg = colors.yellow }})
-hi("@lsp.type.enum", {{ fg = colors.peach }})
-hi("@lsp.type.enumMember", {{ fg = colors.teal }})
-hi("@lsp.type.type", {{ fg = colors.yellow }})
-hi("@lsp.type.typeParameter", {{ fg = colors.flamingo, style = "italic" }})
+    -- Types and Classes
+    hi("@lsp.type.class", {{ fg = colors.yellow, style = "bold" }})
+    hi("@lsp.type.interface", {{ fg = colors.yellow, style = "italic" }})
+    hi("@lsp.type.struct", {{ fg = colors.yellow }})
+    hi("@lsp.type.enum", {{ fg = colors.peach }})
+    hi("@lsp.type.enumMember", {{ fg = colors.teal }})
+    hi("@lsp.type.type", {{ fg = colors.yellow }})
+    hi("@lsp.type.typeParameter", {{ fg = colors.flamingo, style = "italic" }})
 
--- Namespaces and Modules
-hi("@lsp.type.namespace", {{ fg = colors.sapphire, style = "italic" }})
-hi("@lsp.type.namespace.java", {{ fg = colors.sapphire, style = "italic" }})
-hi("@lsp.mod.importDeclaration", {{ fg = colors.yellow, style = "italic" }})
-hi("@lsp.mod.importDeclaration.java", {{ fg = colors.yellow, style = "italic" }})
-hi("@lsp.typemod.namespace.importDeclaration.java", {{ fg = colors.yellow, style = "italic" }})
+    -- Namespaces and Modules
+    hi("@lsp.type.namespace", {{ fg = colors.sapphire, style = "italic" }})
+    hi("@lsp.type.namespace.java", {{ fg = colors.sapphire, style = "italic" }})
+    hi("@lsp.mod.importDeclaration", {{ fg = colors.yellow, style = "italic" }})
+    hi("@lsp.mod.importDeclaration.java", {{ fg = colors.yellow, style = "italic" }})
+    hi("@lsp.typemod.namespace.importDeclaration.java", {{ fg = colors.yellow, style = "italic" }})
 
--- Macros and Preprocessor
-hi("@lsp.type.macro", {{ fg = colors.sapphire }})
-hi("@lsp.typemod.macro.globalScope", {{ fg = colors.sapphire }})
-hi("@lsp.typemod.macro.globalScope.cpp", {{ fg = colors.sapphire }})
+    -- Macros and Preprocessor
+    hi("@lsp.type.macro", {{ fg = colors.sapphire }})
+    hi("@lsp.typemod.macro.globalScope", {{ fg = colors.sapphire }})
+    hi("@lsp.typemod.macro.globalScope.cpp", {{ fg = colors.sapphire }})
 
--- Decorators and Annotations
-hi("@lsp.type.decorator", {{ fg = colors.yellow, style = "italic" }})
-hi("@lsp.type.annotation", {{ fg = colors.yellow, style = "italic" }})
+    -- Decorators and Annotations
+    hi("@lsp.type.decorator", {{ fg = colors.yellow, style = "italic" }})
+    hi("@lsp.type.annotation", {{ fg = colors.yellow, style = "italic" }})
 
--- Keywords (when LSP provides them)
-hi("@lsp.type.keyword", {{ fg = colors.mauve, style = "bold" }})
-hi("@lsp.typemod.keyword.controlFlow", {{ fg = colors.pink, style = "bold" }})
+    -- Keywords (when LSP provides them)
+    hi("@lsp.type.keyword", {{ fg = colors.mauve, style = "bold" }})
+    hi("@lsp.typemod.keyword.controlFlow", {{ fg = colors.pink, style = "bold" }})
 
--- ============================================================================
--- DIAGNOSTIC
--- ============================================================================
-hi("DiagnosticError", {{ fg = colors.red }})
-hi("DiagnosticWarn", {{ fg = colors.yellow }})
-hi("DiagnosticInfo", {{ fg = colors.blue }})
-hi("DiagnosticHint", {{ fg = colors.teal }})
-hi("DiagnosticOk", {{ fg = colors.green }})
+    -- ============================================================================
+    -- DIAGNOSTIC
+    -- ============================================================================
+    hi("DiagnosticError", {{ fg = colors.red }})
+    hi("DiagnosticWarn", {{ fg = colors.yellow }})
+    hi("DiagnosticInfo", {{ fg = colors.blue }})
+    hi("DiagnosticHint", {{ fg = colors.teal }})
+    hi("DiagnosticOk", {{ fg = colors.green }})
 
-hi("DiagnosticVirtualTextError", {{ fg = colors.red, bg = colors.base }})
-hi("DiagnosticVirtualTextWarn", {{ fg = colors.yellow, bg = colors.base }})
-hi("DiagnosticVirtualTextInfo", {{ fg = colors.blue, bg = colors.base }})
-hi("DiagnosticVirtualTextHint", {{ fg = colors.teal, bg = colors.base }})
+    hi("DiagnosticVirtualTextError", {{ fg = colors.red, bg = "NONE" }})
+    hi("DiagnosticVirtualTextWarn", {{ fg = colors.yellow, bg = "NONE" }})
+    hi("DiagnosticVirtualTextInfo", {{ fg = colors.blue, bg = "NONE" }})
+    hi("DiagnosticVirtualTextHint", {{ fg = colors.teal, bg = "NONE" }})
 
-hi("DiagnosticUnderlineError", {{ sp = colors.red, style = "undercurl" }})
-hi("DiagnosticUnderlineWarn", {{ sp = colors.yellow, style = "undercurl" }})
-hi("DiagnosticUnderlineInfo", {{ sp = colors.blue, style = "undercurl" }})
-hi("DiagnosticUnderlineHint", {{ sp = colors.teal, style = "undercurl" }})
+    hi("DiagnosticUnderlineError", {{ sp = colors.red, style = "undercurl" }})
+    hi("DiagnosticUnderlineWarn", {{ sp = colors.yellow, style = "undercurl" }})
+    hi("DiagnosticUnderlineInfo", {{ sp = colors.blue, style = "undercurl" }})
+    hi("DiagnosticUnderlineHint", {{ sp = colors.teal, style = "undercurl" }})
 
--- ============================================================================
--- LSP REFERENCES
--- ============================================================================
-hi("LspReferenceText", {{ bg = colors.surface1 }})
-hi("LspReferenceRead", {{ bg = colors.surface1 }})
-hi("LspReferenceWrite", {{ bg = colors.surface1, style = "bold" }})
+    -- ============================================================================
+    -- LSP REFERENCES
+    -- ============================================================================
+    hi("LspReferenceText", {{ bg = colors.surface1 }})
+    hi("LspReferenceRead", {{ bg = colors.surface1 }})
+    hi("LspReferenceWrite", {{ bg = colors.surface1, style = "bold" }})
 
--- ============================================================================
--- PLUGIN: TELESCOPE
--- ============================================================================
-hi("TelescopeBorder", {{ fg = colors.lavender, bg = colors.mantle }})
-hi("TelescopePromptBorder", {{ fg = colors.mauve, bg = colors.base}})
-hi("TelescopeResultsBorder", {{ fg = colors.lavender, bg = colors.base }})
-hi("TelescopePreviewBorder", {{ fg = colors.lavender, bg = colors.base }})
-hi("TelescopeSelection", {{ fg = colors.surface0, bg = colors.mauve, style = "bold" }})
-hi("TelescopeSelectionCaret", {{ fg = colors.mauve, bg = colors.surface0 }})
-hi("TelescopeMatching", {{ fg = colors.blue }})
+    -- ============================================================================
+    -- PLUGIN: TELESCOPE
+    -- ============================================================================
+    hi("TelescopeBorder", {{ fg = colors.lavender, bg = colors.mantle }})
+    hi("TelescopePromptBorder", {{ fg = colors.mauve, bg = "NONE"}})
+    hi("TelescopeResultsBorder", {{ fg = colors.lavender, bg = "NONE" }})
+    hi("TelescopePreviewBorder", {{ fg = colors.lavender, bg = "NONE" }})
+    hi("TelescopeSelection", {{ fg = colors.surface0, bg = colors.mauve, style = "bold" }})
+    hi("TelescopeSelectionCaret", {{ fg = colors.mauve, bg = colors.surface0 }})
+    hi("TelescopeMatching", {{ fg = colors.blue }})
 
--- ============================================================================
--- PLUGIN: NVIM-TREE / NEO-TREE
--- ============================================================================
-hi("NvimTreeNormal", {{ fg = colors.text, bg = colors.base }})
-hi("NvimTreeFolderIcon", {{ fg = colors.mauve }})
-hi("NvimTreeFolderName", {{ fg = colors.sapphire }})
-hi("NvimTreeOpenedFolderName", {{ fg = colors.blue, bold = true }})
-hi("NvimTreeIndentMarker", {{ fg = colors.overlay0 }})
-hi("NvimTreeGitDirty", {{ fg = colors.yellow }})
-hi("NvimTreeGitNew", {{ fg = colors.green }})
-hi("NvimTreeGitDeleted", {{ fg = colors.red }})
+    -- ============================================================================
+    -- PLUGIN: NVIM-TREE / NEO-TREE
+    -- ============================================================================
+    hi("NvimTreeNormal", {{ fg = colors.text, bg = "NONE" }})
+    hi("NvimTreeFolderIcon", {{ fg = colors.mauve }})
+    hi("NvimTreeFolderName", {{ fg = colors.sapphire }})
+    hi("NvimTreeOpenedFolderName", {{ fg = colors.blue, bold = true }})
+    hi("NvimTreeIndentMarker", {{ fg = colors.overlay0 }})
+    hi("NvimTreeGitDirty", {{ fg = colors.yellow }})
+    hi("NvimTreeGitNew", {{ fg = colors.green }})
+    hi("NvimTreeGitDeleted", {{ fg = colors.red }})
 
-hi("NeoTreeTabActive", {{ fg = colors.mauve, bg = colors.base }})
-hi("NeoTreeTabInactive", {{ fg = colors.overlay0, bg = colors.base }})
-hi("NeoTreeTabSeparatorActive", {{ fg = colors.surface0, bg = "NONE" }})
-hi("NeoTreeTabSeparatorInactive", {{ fg = colors.surface0, bg = "NONE" }})
+    hi("NeoTreeTabActive", {{ fg = colors.mauve, bg = "NONE" }})
+    hi("NeoTreeGitUntracked", {{ fg = colors.red }})
+    hi("NeoTreeTabInactive", {{ fg = colors.overlay0, bg = "NONE" }})
+    hi("NeoTreeTabSeparatorActive", {{ fg = colors.surface0, bg = "NONE" }})
+    hi("NeoTreeTabSeparatorInactive", {{ fg = colors.surface0, bg = "NONE" }})
+    hi("NeoTreeDirectoryIcon", {{ fg = colors.mauve }})
+    hi("NeoTreeDirectoryName", {{ fg = colors.sky }})
+    hi("NeoTreeCursorLine", {{ fg = colors.red }})
 
--- ============================================================================
--- PLUGIN: INDENT-BLANKLINE
--- ============================================================================
-hi("IblIndent", {{ fg = colors.lavender }})
-hi("IblScope", {{ fg = colors.mauve }})
+    -- ============================================================================
+    -- PLUGIN: INDENT-BLANKLINE
+    -- ============================================================================
+    hi("IblIndent", {{ fg = colors.lavender }})
+    hi("IblScope", {{ fg = colors.mauve }})
+    hi("MiniIndentscopeSymbol", {{ fg = colors.mauve }} )
 
--- ============================================================================
--- PLUGIN: WHICH-KEY
--- ============================================================================
-hi("WhichKey", {{ fg = colors.mauve, bg = "NONE" }})
-hi("WhichKeyGroup", {{ fg = colors.blue }})
-hi("WhichKeyDesc", {{ fg = colors.text }})
-hi("WhichKeySeparator", {{ fg = colors.mauve }})
-hi("WhichKeyFloat", {{ bg = colors.base }})
-hi("WhichKeyTile", {{ bg = colors.base }})
+    -- ============================================================================
+    -- PLUGIN: WHICH-KEY
+    -- ============================================================================
+    hi("WhichKey", {{ fg = colors.mauve, bg = "NONE" }})
+    hi("WhichKeyGroup", {{ fg = colors.blue }})
+    hi("WhichKeyBorder", {{ fg = colors.red, bg = "NONE" }})
+    hi("WhichKeyDesc", {{ fg = colors.text }})
+    hi("WhichKeySeparator", {{ fg = colors.mauve }})
+    hi("WhichKeyFloat", {{ bg = "NONE" }})
+    hi("WhichKeyTitle", {{ bg = "NONE" }})
 
--- ============================================================================
--- PLUGIN: NOTIFY
--- ============================================================================
-hi("NotifyBackground", {{ bg = colors.base }})
-hi("NotifyERRORBorder", {{ fg = colors.red }})
-hi("NotifyWARNBorder", {{ fg = colors.yellow }})
-hi("NotifyINFOBorder", {{ fg = colors.blue }})
-hi("NotifyDEBUGBorder", {{ fg = colors.overlay0 }})
-hi("NotifyTRACEBorder", {{ fg = colors.teal }})
-hi("NotifyERRORIcon", {{ fg = colors.red }})
-hi("NotifyWARNIcon", {{ fg = colors.yellow }})
-hi("NotifyINFOIcon", {{ fg = colors.blue }})
-hi("NotifyDEBUGIcon", {{ fg = colors.overlay0 }})
-hi("NotifyTRACEIcon", {{ fg = colors.teal }})
-hi("NotifyERRORTitle", {{ fg = colors.red }})
-hi("NotifyWARNTitle", {{ fg = colors.yellow }})
-hi("NotifyINFOTitle", {{ fg = colors.blue }})
-hi("NotifyDEBUGTitle", {{ fg = colors.overlay0 }})
-hi("NotifyTRACETitle", {{ fg = colors.teal }})
+    -- ============================================================================
+    -- PLUGIN: NOTIFY
+    -- ============================================================================
+    hi("NotifyBackground", {{ bg = "#000000" }})
+    hi("NotifyERRORBorder", {{ fg = colors.red }})
+    hi("NotifyWARNBorder", {{ fg = colors.yellow }})
+    hi("NotifyINFOBorder", {{ fg = colors.blue }})
+    hi("NotifyDEBUGBorder", {{ fg = colors.overlay0 }})
+    hi("NotifyTRACEBorder", {{ fg = colors.teal }})
+    hi("NotifyERRORIcon", {{ fg = colors.red }})
+    hi("NotifyWARNIcon", {{ fg = colors.yellow }})
+    hi("NotifyINFOIcon", {{ fg = colors.blue }})
+    hi("NotifyDEBUGIcon", {{ fg = colors.overlay0 }})
+    hi("NotifyTRACEIcon", {{ fg = colors.teal }})
+    hi("NotifyERRORTitle", {{ fg = colors.red }})
+    hi("NotifyWARNTitle", {{ fg = colors.yellow }})
+    hi("NotifyINFOTitle", {{ fg = colors.blue }})
+    hi("NotifyDEBUGTitle", {{ fg = colors.overlay0 }})
+    hi("NotifyTRACETitle", {{ fg = colors.teal }})
 
--- ============================================================================
--- PLUGIN: RAINBOW DELIMITERS
--- ============================================================================
-hi("RainbowDelimiterRed", {{ fg = colors.red }})
-hi("RainbowDelimiterOrange", {{ fg = colors.peach }})
-hi("RainbowDelimiterYellow", {{ fg = colors.yellow }})
-hi("RainbowDelimiterGreen", {{ fg = colors.green }})
-hi("RainbowDelimiterCyan", {{ fg = colors.teal }})
-hi("RainbowDelimiterBlue", {{ fg = colors.sky }})
-hi("RainbowDelimiterViolet", {{ fg = colors.mauve }})
+    -- ============================================================================
+    -- PLUGIN: RAINBOW DELIMITERS
+    -- ============================================================================
+    hi("RainbowDelimiterRed", {{ fg = colors.red }})
+    hi("RainbowDelimiterOrange", {{ fg = colors.peach }})
+    hi("RainbowDelimiterYellow", {{ fg = colors.yellow }})
+    hi("RainbowDelimiterGreen", {{ fg = colors.green }})
+    hi("RainbowDelimiterCyan", {{ fg = colors.teal }})
+    hi("RainbowDelimiterBlue", {{ fg = colors.sky }})
+    hi("RainbowDelimiterViolet", {{ fg = colors.mauve }})
 
--- ============================================================================
--- PLUGIN: RENDER-MARKDOWN
--- ============================================================================
-hi("RenderMarkdownCode", {{ bg = "NONE" }})
+    -- ============================================================================
+    -- PLUGIN: RENDER-MARKDOWN
+    -- ============================================================================
+    hi("RenderMarkdownCode", {{ bg = "NONE" }})
 
--- ============================================================================
--- PLUGIN: BUFFERLINE / BARBAR
--- ============================================================================
-hi("BufferLineFill", {{ bg = "NONE" }})
-hi("BufferLineBackground", {{ fg = colors.overlay0, bg = "NONE" }})
-hi("BufferLineBuffer", {{ fg = colors.overlay0, bg = "NONE" }})
-hi("BufferLineBufferVisible", {{ fg = colors.text, bg = "NONE" }})
-hi("BufferLineBufferSelected", {{ fg = colors.mauve, bg = "NONE", style = "bold" }})
-hi("BufferLineTab", {{ fg = colors.overlay0, bg = "NONE" }})
-hi("BufferLineTabSelected", {{ fg = colors.mauve, bg = "NONE", style = "bold" }})
-hi("BufferLineSeparator", {{ fg = colors.surface0, bg = "NONE" }})
-hi("BufferLineSeparatorVisible", {{ fg = colors.surface0, bg = "NONE" }})
-hi("BufferLineSeparatorSelected", {{ fg = colors.surface0, bg = "NONE" }})
+    -- ============================================================================
+    -- PLUGIN: BUFFERLINE / BARBAR
+    -- ============================================================================
+    hi("BufferLineFill", {{ bg = "NONE" }})
+    hi("BufferLineBackground", {{ fg = colors.overlay0, bg = "NONE" }})
+    hi("BufferLineBuffer", {{ fg = colors.overlay0, bg = "NONE" }})
+    hi("BufferLineBufferVisible", {{ fg = colors.text, bg = "NONE" }})
+    hi("BufferLineBufferSelected", {{ fg = colors.mauve, bg = "NONE", style = "bold" }})
+    hi("BufferLineTab", {{ fg = colors.overlay0, bg = "NONE" }})
+    hi("BufferLineTabSelected", {{ fg = colors.mauve, bg = "NONE", style = "bold" }})
+    hi("BufferLineSeparator", {{ fg = colors.surface0, bg = "NONE" }})
+    hi("BufferLineSeparatorVisible", {{ fg = colors.surface0, bg = "NONE" }})
+    hi("BufferLineSeparatorSelected", {{ fg = colors.surface0, bg = "NONE" }})
 
--- Barbar plugin
-hi("BufferCurrent", {{ fg = colors.text, bg = "NONE", style = "bold" }})
-hi("BufferCurrentIndex", {{ fg = colors.mauve, bg = "NONE" }})
-hi("BufferCurrentMod", {{ fg = colors.yellow, bg = "NONE" }})
-hi("BufferCurrentSign", {{ fg = colors.mauve, bg = "NONE" }})
-hi("BufferCurrentTarget", {{ fg = colors.red, bg = "NONE" }})
-hi("BufferVisible", {{ fg = colors.text, bg = "NONE" }})
-hi("BufferVisibleIndex", {{ fg = colors.overlay0, bg = "NONE" }})
-hi("BufferVisibleMod", {{ fg = colors.yellow, bg = "NONE" }})
-hi("BufferVisibleSign", {{ fg = colors.overlay0, bg = "NONE" }})
-hi("BufferVisibleTarget", {{ fg = colors.red, bg = "NONE" }})
-hi("BufferInactive", {{ fg = colors.overlay0, bg = "NONE" }})
-hi("BufferInactiveIndex", {{ fg = colors.overlay0, bg = "NONE" }})
-hi("BufferInactiveMod", {{ fg = colors.yellow, bg = "NONE" }})
-hi("BufferInactiveSign", {{ fg = colors.overlay0, bg = "NONE" }})
-hi("BufferInactiveTarget", {{ fg = colors.red, bg = "NONE" }})
-hi("BufferTabpages", {{ fg = colors.mauve, bg = "NONE", style = "bold" }})
-hi("BufferTabpageFill", {{ bg = "NONE" }})
+    -- Barbar plugin
+    hi("BufferCurrent", {{ fg = colors.text, bg = "NONE", style = "bold" }})
+    hi("BufferCurrentIndex", {{ fg = colors.mauve, bg = "NONE" }})
+    hi("BufferCurrentMod", {{ fg = colors.yellow, bg = "NONE" }})
+    hi("BufferCurrentSign", {{ fg = colors.mauve, bg = "NONE" }})
+    hi("BufferCurrentTarget", {{ fg = colors.red, bg = "NONE" }})
+    hi("BufferVisible", {{ fg = colors.text, bg = "NONE" }})
+    hi("BufferVisibleIndex", {{ fg = colors.overlay0, bg = "NONE" }})
+    hi("BufferVisibleMod", {{ fg = colors.yellow, bg = "NONE" }})
+    hi("BufferVisibleSign", {{ fg = colors.overlay0, bg = "NONE" }})
+    hi("BufferVisibleTarget", {{ fg = colors.red, bg = "NONE" }})
+    hi("BufferInactive", {{ fg = colors.overlay0, bg = "NONE" }})
+    hi("BufferInactiveIndex", {{ fg = colors.overlay0, bg = "NONE" }})
+    hi("BufferInactiveMod", {{ fg = colors.yellow, bg = "NONE" }})
+    hi("BufferInactiveSign", {{ fg = colors.overlay0, bg = "NONE" }})
+    hi("BufferInactiveTarget", {{ fg = colors.red, bg = "NONE" }})
+    hi("BufferTabpages", {{ fg = colors.mauve, bg = "NONE", style = "bold" }})
+    hi("BufferTabpageFill", {{ bg = "NONE" }})
 
--- Overseer (task runner) - often appears in bufferline
-hi("OverseerTask", {{ fg = colors.blue, bg = "NONE" }})
-hi("OverseerTaskBorder", {{ fg = colors.blue, bg = "NONE" }})
-hi("OverseerRunning", {{ fg = colors.yellow, bg = "NONE" }})
-hi("OverseerSuccess", {{ fg = colors.green, bg = "NONE" }})
-hi("OverseerCanceled", {{ fg = colors.overlay0, bg = "NONE" }})
-hi("OverseerFailure", {{ fg = colors.red, bg = "NONE" }})
+    -- Overseer (task runner) - often appears in bufferline
+    hi("OverseerTask", {{ fg = colors.blue, bg = "NONE" }})
+    hi("OverseerTaskBorder", {{ fg = colors.blue, bg = "NONE" }})
+    hi("OverseerRunning", {{ fg = colors.yellow, bg = "NONE" }})
+    hi("OverseerSuccess", {{ fg = colors.green, bg = "NONE" }})
+    hi("OverseerCanceled", {{ fg = colors.overlay0, bg = "NONE" }})
+    hi("OverseerFailure", {{ fg = colors.red, bg = "NONE" }})
 
--- Additional top bar highlights (in case it's something else)
-hi("WinBar", {{ fg = colors.text, bg = "NONE" }})
-hi("WinBarNC", {{ fg = colors.overlay0, bg = "NONE" }})
-hi("Title", {{ fg = colors.blue, bg = "NONE" }})
-hi("BufferLineDevIconLua", {{ bg = "NONE" }})
-hi("BufferLineDevIconDefault", {{ bg = "NONE" }})
+    -- Additional top bar highlights (in case it's something else)
+    hi("WinBar", {{ fg = "NONE", bg = "NONE" }})
+    hi("SatelliteBar", {{ fg = "NONE", bg = "NONE" }})
+    hi("SatelliteCursor", {{ fg = "NONE", bg = "NONE" }})
+    hi("NvimScrollbarHandle", {{ fg = "NONE", bg = "NONE" }})
+    hi("NvimScrollbarCursor", {{ fg = "NONE", bg = "NONE" }})
+    hi("NvimScrollbarError", {{ fg = "NONE", bg = "NONE" }})
+    hi("NvimScrollbarWarn", {{ fg = "NONE", bg = "NONE" }})
+    hi("NvimScrollbarInfo", {{ fg = "NONE", bg = "NONE" }})
+    hi("NvimScrollbarHint", {{fg = "NONE", bg = "NONE" }})
+    hi("NeoTreeScrollbar", {{ fg = "NONE", bg = "NONE" }})
+    hi("NeoTreeScrollbarThumb", {{ fg = "NONE", bg = "NONE" }})
+    hi("WinScrollbar", {{ fg = "NONE", bg = "NONE" }})
+    hi("WinScrollbarThumb", {{ fg = "NONE", bg = "NONE" }})
+    hi("WinBarNC", {{ fg = "NONE", bg = "NONE" }})
+    hi("Title", {{ fg = colors.blue, bg = "NONE" }})
+    hi("BufferLineDevIconLua", {{ bg = "NONE" }})
+    hi("BufferLineDevIconDefault", {{ bg = "NONE" }})
 
 
--- ============================================================================
--- TEXT
--- ============================================================================
-hi("Comment", {{ fg = colors.pink }})
-hi("Constant", {{ fg = colors.teal }})
--- ============================================================================
--- PLUGIN: ALPHA (Dashboard)
--- ============================================================================
-hi("AlphaIconNew", {{ fg = colors.blue }})
-hi("AlphaIconRecent", {{ fg = colors.pink }})
-hi("AlphaIconYazi", {{ fg = colors.peach }})
-hi("AlphaIconSessions", {{ fg = colors.green }})
-hi("AlphaIconProjects", {{ fg = colors.mauve }})
-hi("AlphaIconQuit", {{ fg = colors.red }})
+    -- ============================================================================
+    -- TEXT
+    -- ============================================================================
+    hi("Comment", {{ fg = colors.pink }})
+    hi("Constant", {{ fg = colors.teal }})
+    -- ============================================================================
+    -- PLUGIN: ALPHA (Dashboard)
+    -- ============================================================================
+    hi("DashboardHeader", {{ fg = colors.sapphire }})
+    hi("AlphaShortcut", {{ fg = colors.red }})
+    hi("AlphaIconNew", {{ fg = colors.blue }})
+    hi("AlphaIconRecent", {{ fg = colors.pink }})
+    hi("AlphaIconYazi", {{ fg = colors.peach }})
+    hi("AlphaIconSessions", {{ fg = colors.green }})
+    hi("AlphaIconProjects", {{ fg = colors.mauve }})
+    hi("AlphaIconQuit", {{ fg = colors.red }})
+
+
+    hi("DiffAdd", {{ fg = colors.green, bg = "NONE" }})
+    hi("DiffChange", {{ fg = colors.blue, bg = "NONE" }})
+    hi("DiffDelete", {{ fg = colors.red, bg = "NONE" }})
+    hi("DiffText", {{ fg = colors.yellow, bg = "NONE", style = "bold" }})
+
+    -- Git signs in the gutter
+    hi("GitSignsAdd", {{ fg = colors.green, bg = "NONE" }})
+    hi("GitSignsChange", {{ fg = colors.blue, bg = "NONE" }})
+    hi("GitSignsDelete", {{ fg = colors.red, bg = "NONE" }})
+
+    -- For syntax highlighting of color hex codes in your editor
+    -- This will make the bright red/green hex codes themselves appear in purple tones
+    hi("@string.special", {{ fg = colors.green }})  -- For color strings like "#FF0000"
+    hi("@number.css", {{ fg = colors.peach }})
 
 -- ============================================================================
 -- TRANSPARENCY REASSERTION (CRITICAL)
 -- ============================================================================
-local transparent_groups = {{
-  -- Core editor / windows
-  "Normal",
-  "NormalFloat",
-  "FloatBorder",
-  "SignColumn",
-  "EndOfBuffer",
-  "VertSplit",
-  "WinSeparator",
-  "WinBar",
-  "WinBarNC",
-  "Title",
+    local transparent_groups = {{
+      -- Core editor / windows
+      "Normal",
+      "NormalFloat",
+      "FloatBorder",
+      "SignColumn",
+      "EndOfBuffer",
+      "VertSplit",
+      "WinSeparator",
+      "WinBar",
+      "WinBarNC",
+      "Title",
 
-  -- Cursor / columns (IMPORTANT)
-  "CursorLine",
-  "CursorColumn",
-  "ColorColumn",
+      -- Cursor / columns (IMPORTANT)
+      "CursorLine",
+      "CursorColumn",
+      "ColorColumn",
 
-  -- Status / tabline
-  "StatusLine",
-  "StatusLineNC",
-  "TabLine",
-  "TabLineFill",
-  "TabLineSel",
+      -- Status / tabline
+      "StatusLine",
+      "StatusLineNC",
+      "TabLine",
+      "TabLineFill",
+      "TabLineSel",
 
-  -- Popup / completion
-  "Pmenu",
-  "PmenuSbar",
-  "PmenuThumb",
-  "PmenuBorder",
+      -- Popup / completion
+      "Pmenu",
+      "PmenuSbar",
+      "PmenuThumb",
+      "PmenuBorder",
+      "TelescopePromptBorder",
+      "TelescopeResultsBorder",
+      "TelescopePreviewBorder",
 
-  -- Completion item kinds (nvim-cmp)
-  "CmpItemKindVariable",
-  "CmpItemKindFunction",
-  "CmpItemKindMethod",
-  "CmpItemKindConstructor",
-  "CmpItemKindClass",
-  "CmpItemKindInterface",
-  "CmpItemKindStruct",
-  "CmpItemKindEnum",
-  "CmpItemKindEnumMember",
-  "CmpItemKindModule",
-  "CmpItemKindProperty",
-  "CmpItemKindField",
-  "CmpItemKindTypeParameter",
-  "CmpItemKindConstant",
-  "CmpItemKindKeyword",
-  "CmpItemKindSnippet",
-  "CmpItemKindText",
-  "CmpItemKindFile",
-  "CmpItemKindFolder",
-  "CmpItemKindColor",
-  "CmpItemKindReference",
-  "CmpItemKindOperator",
-  "CmpItemKindUnit",
-  "CmpItemKindValue",
 
-  -- Completion text
-  "CmpItemAbbr",
-  "CmpItemAbbrDeprecated",
-  "CmpItemAbbrMatch",
-  "CmpItemAbbrMatchFuzzy",
-  "CmpItemMenu",
+      -- Completion item kinds (nvim-cmp)
+      "CmpItemKindVariable",
+      "CmpItemKindFunction",
+      "CmpItemKindMethod",
+      "CmpItemKindConstructor",
+      "CmpItemKindClass",
+      "CmpItemKindInterface",
+      "CmpItemKindStruct",
+      "CmpItemKindEnum",
+      "CmpItemKindEnumMember",
+      "CmpItemKindModule",
+      "CmpItemKindProperty",
+      "CmpItemKindField",
+      "CmpItemKindTypeParameter",
+      "CmpItemKindConstant",
+      "CmpItemKindKeyword",
+      "CmpItemKindSnippet",
+      "CmpItemKindText",
+      "CmpItemKindFile",
+      "CmpItemKindFolder",
+      "CmpItemKindColor",
+      "CmpItemKindReference",
+      "CmpItemKindOperator",
+      "CmpItemKindUnit",
+      "CmpItemKindValue",
 
-  -- Which-key
-  "WhichKey",
-  "WhichKeyFloat",
-  "WhichKeyTile",
+      -- Completion text
+      "CmpItemAbbr",
+      "CmpItemAbbrDeprecated",
+      "CmpItemAbbrMatch",
+      "CmpItemAbbrMatchFuzzy",
+      "CmpItemMenu",
 
-  -- Neo-tree
-  "NeoTreeTabActive",
-  "NeoTreeTabInactive",
-  "NeoTreeTabSeparatorActive",
-  "NeoTreeTabSeparatorInactive",
+      -- Which-key
+      "WhichKey",
+      "WhichKeyFloat",
+      "WhichKeyTile",
 
-  -- Render / markdown
-  "RenderMarkdownCode",
+      -- Neo-tree
+      "NeoTreeTabActive",
+      "NeoTreeTabInactive",
+      "NeoTreeTabSeparatorActive",
+      "NeoTreeTabSeparatorInactive",
 
-  -- Bufferline / Barbar
-  "BufferLineFill",
-  "BufferLineBackground",
-  "BufferLineBuffer",
-  "BufferLineBufferVisible",
-  "BufferLineBufferSelected",
-  "BufferLineTab",
-  "BufferLineTabSelected",
-  "BufferLineSeparator",
-  "BufferLineSeparatorVisible",
-  "BufferLineSeparatorSelected",
+      -- Render / markdown
+      "RenderMarkdownCode",
 
-  "BufferCurrent",
-  "BufferCurrentIndex",
-  "BufferCurrentMod",
-  "BufferCurrentSign",
-  "BufferCurrentTarget",
+      -- Bufferline / Barbar
+      "BufferLineFill",
+      "BufferLineBackground",
+      "BufferLineBuffer",
+      "BufferLineBufferVisible",
+      "BufferLineBufferSelected",
+      "BufferLineTab",
+      "BufferLineTabSelected",
+      "BufferLineSeparator",
+      "BufferLineSeparatorVisible",
+      "BufferLineSeparatorSelected",
 
-  "BufferVisible",
-  "BufferVisibleIndex",
-  "BufferVisibleMod",
-  "BufferVisibleSign",
-  "BufferVisibleTarget",
+      "BufferCurrent",
+      "BufferCurrentIndex",
+      "BufferCurrentMod",
+      "BufferCurrentSign",
+      "BufferCurrentTarget",
 
-  "BufferInactive",
-  "BufferInactiveIndex",
-  "BufferInactiveMod",
-  "BufferInactiveSign",
-  "BufferInactiveTarget",
+      "BufferVisible",
+      "BufferVisibleIndex",
+      "BufferVisibleMod",
+      "BufferVisibleSign",
+      "BufferVisibleTarget",
 
-  "BufferTabpages",
-  "BufferTabpageFill",
+      "BufferInactive",
+      "BufferInactiveIndex",
+      "BufferInactiveMod",
+      "BufferInactiveSign",
+      "BufferInactiveTarget",
 
-  -- Devicons
-  "BufferLineDevIconLua",
-  "BufferLineDevIconDefault",
+      "BufferTabpages",
+      "BufferTabpageFill",
 
-  -- Overseer
-  "OverseerTask",
-  "OverseerTaskBorder",
-  "OverseerRunning",
-  "OverseerSuccess",
-  "OverseerCanceled",
-  "OverseerFailure",
-    }}
+      -- Devicons
+      "BufferLineDevIconLua",
+      "BufferLineDevIconDefault",
 
-for _, group in ipairs(transparent_groups) do
-  local ok, hl = pcall(vim.api.nvim_get_hl, 0, {{ name = group }})
-  if ok then
-    hl.bg = "NONE"
-    vim.api.nvim_set_hl(0, group, hl)
-  end
+      -- Overseer
+      "OverseerTask",
+      "OverseerTaskBorder",
+      "OverseerRunning",
+      "OverseerSuccess",
+      "OverseerCanceled",
+      "OverseerFailure",
+        }}
+
+    for _, group in ipairs(transparent_groups) do
+        local ok, hl = pcall(vim.api.nvim_get_hl, 0, {{ name = group }})
+        if ok then
+            hl.bg = "NONE"
+            hl.ctermbg = nil
+            vim.api.nvim_set_hl(0, group, hl)
+        end
+    end
 end
+
+setup_highlights()
+
+local augroup = vim.api.nvim_create_augroup("MaterialPurpleMocha", {{ clear = true }})
+
+-- Reapply highlights after colorscheme changes
+vim.api.nvim_create_autocmd("ColorScheme", {{
+    group = augroup,
+    pattern = "material_purple_mocha",
+    callback = function()
+    setup_highlights()
+    end,
+    }})
+
+-- Reapply after plugins load (VimEnter runs after all plugins)
+vim.api.nvim_create_autocmd("VimEnter", {{
+    group = augroup,
+    callback = function()
+    -- Delay slightly to ensure plugins are fully loaded
+    vim.defer_fn(function()
+                 if vim.g.colors_name == "material_purple_mocha" then
+                 setup_highlights()
+                 end
+                 end, 50)
+    end,
+    }})
+
+-- Reapply when entering a buffer (catches late-loading plugins)
+vim.api.nvim_create_autocmd("BufEnter", {{
+    group = augroup,
+    once = true,
+    callback = function()
+    vim.defer_fn(function()
+                 if vim.g.colors_name == "material_purple_mocha" then
+                 setup_highlights()
+                 end
+                 end, 100)
+    end,
+    }})
+
+vim.api.nvim_create_autocmd("FileType", {{
+    pattern = {{ "lua", "python", "javascript", "typescript", "css", "scss" }},
+    callback = function()
+    -- When editing code files with color values,
+    -- syntax highlight the hex codes themselves in muted colors
+    vim.cmd([[syn match ColorHex /#[0-9A-Fa-f]\{{6\}}/ containedin=ALL]])
+    vim.cmd(string.format([[hi ColorHex guifg=%s]], colors.peach))
+    end,
+    }})
 
 '''
 
@@ -898,6 +1089,67 @@ end
 
     if args.debug:
         print(f"\nNeovim colorscheme written to: {nvim_output}")
+
+# Add this near the end of your script, after the Neovim colorscheme generation
+
+# Generate LazyGit config
+if args.termscheme is not None and lazygit_colors:
+    lazygit_config_dir = Path.home() / '.config' / 'lazygit'
+    lazygit_config_dir.mkdir(parents=True, exist_ok=True)
+    lazygit_config_file = str(lazygit_config_dir / 'config.yml')
+
+    # Read existing config if it exists
+    existing_config = ""
+    if os.path.exists(lazygit_config_file):
+        with open(lazygit_config_file, 'r') as f:
+            existing_config = f.read()
+
+    lazygit_config = f'''# Auto-generated LazyGit theme colors
+gui:
+  theme:
+    activeBorderColor:
+      - "{lazygit_colors['activeBorder']}"
+      - bold
+    inactiveBorderColor:
+      - "{lazygit_colors['inactiveBorder']}"
+    optionsTextColor:
+      - "{lazygit_colors['optionsText']}"
+    selectedLineBgColor:
+      - "{lazygit_colors['selectedLineBg']}"
+    selectedRangeBgColor:
+      - "{lazygit_colors['selectedRangeBg']}"
+    cherryPickedCommitBgColor:
+      - "{lazygit_colors['cherryPickedBg']}"
+    cherryPickedCommitFgColor:
+      - "{lazygit_colors['cherryPickedFg']}"
+    unstagedChangesColor:
+      - "{lazygit_colors['unstagedChanges']}"
+    defaultFgColor:
+      - "{lazygit_colors['defaultFg']}"
+    searchingActiveBorderColor:
+      - "{lazygit_colors['searchMatching']}"
+
+  nerdFontsVersion: "3"
+  showFileTree: true
+  showRandomTip: false
+
+# Git diff settings with custom colors
+git:
+  paging:
+    colorArg: always
+    useConfig: false
+    # Using delta for better diff rendering
+    pager: delta --dark --paging=never --line-numbers --minus-style='syntax "{lazygit_colors['unstagedChanges']}"' --minus-emph-style='syntax "{lazygit_colors['unstagedChanges']}"' --plus-style='syntax "{lazygit_colors['stagedChanges']}"' --plus-emph-style='syntax "{lazygit_colors['stagedChanges']}"' --hunk-header-style='file line-number syntax'
+'''
+
+    with open(lazygit_config_file, 'w') as f:
+        f.write(lazygit_config)
+
+    if args.debug:
+        print(f"\nLazyGit config written to: {lazygit_config_file}")
+        print("Note: You may need to install 'delta' for best diff rendering:")
+        print("  cargo install git-delta")
+        print("  or: brew install git-delta")
 
 if args.debug == False:
     print(f"$darkmode: {darkmode};")
@@ -959,4 +1211,15 @@ else:
         for k, v in neovim_colors.items():
             f.write(f"$nvim_{k}: {v};\n")
 
+if args.termscheme is not None and term_colors:
+    kitty_config_dir = Path.home() / '.config' / 'kitty'
+    kitty_config_dir.mkdir(parents=True, exist_ok=True)
+    kitty_colors_file = str(kitty_config_dir / 'current-theme.conf')
+
+    with open(kitty_colors_file, 'w') as f:
+        f.write('# Auto-generated colors\n')
+        f.write(f'background {term_colors["term0"]}\n')
+        f.write(f'foreground {term_colors["term7"]}\n')
+        for i in range(16):
+            f.write(f'color{i} {term_colors[f"term{i}"]}\n')
 

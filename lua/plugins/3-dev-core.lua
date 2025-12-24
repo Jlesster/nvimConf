@@ -190,7 +190,13 @@ return {
     "brenoprata10/nvim-highlight-colors",
     event = "User BaseFile",
     cmd = { "HighlightColors" }, -- followed by 'On' / 'Off' / 'Toggle'
-    opts = { enabled_named_colors = false },
+    opts = {
+      enabled_named_colors = false,
+      virtual_symbol = '■',
+      enable_named_colors = false,
+      enable_tailwind = false,
+      render = 'virtual',
+    },
   },
 
   --  LSP -------------------------------------------------------------------
@@ -211,6 +217,13 @@ return {
       verification = {
         invalid_order = false,
         duplicate_setup_calls = false,
+      },
+      dap = {
+        enabled = false,
+      },
+      bundles = {
+        vim.fn.expand("~/.local/share/java/java-debug.jar"),
+        vim.fn.expand("~/.local/share/java/java-test.jar"),
       },
       notifications = {
         dap = false,
@@ -256,13 +269,6 @@ return {
     },
     config = function(_, opts)
       require("java").setup(opts)         -- Setup.
-      if vim.bo.filetype == "java" then
-        require("lspconfig").jdtls.setup({
-          handlers = {
-
-          },
-        })
-      end
     end
   },
 

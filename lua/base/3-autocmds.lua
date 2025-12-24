@@ -506,9 +506,21 @@ vim.api.nvim_create_autocmd("WinEnter", {
 vim.api.nvim_create_autocmd("TermOpen", {
   desc = "Apply dynamic terminal colors",
   callback = function()
-    -- Small delay to ensure terminal is ready
     vim.defer_fn(function()
-      require('dynamic-colors').apply_colors()
+      local ok, dc = pcall(require, "dynamic-colors")
+      if ok and type(dc.reload) == "function" then
+        dc.reload()
+      end
     end, 50)
   end,
 })
+
+-- vim.api.nvim_create_autocmd("VimEnter", {
+--   once = true,
+--   callback = function()
+--     vim.fn.jobstart({
+--       os.getenv("HOME") .. "/.config/quickshell/ii/scripts/colors/applycolor.sh"
+--     }, { detach = true })
+--   end,
+-- })
+

@@ -1,60 +1,23 @@
+
+-- lua/dynamic-colors.lua
+-- ZERO-FLASH dynamic theme loader
+
 local M = {}
+local transition = require("material-transition")
 
-local state_dir = os.getenv("XDG_STATE_HOME") or (os.getenv("HOME") .. "/.local/state")
-local color_file = state_dir .. "/quickshell/user/generated/material_colors.scss"
-local colorscheme = "material_purple_mocha"
+local state_dir = os.getenv("XDG_STATE_HOME")
+  or (os.getenv("HOME") .. "/.local/state")
 
--- ------------------------------------------------------------------
--- Load colors from SCSS
--- ------------------------------------------------------------------
-function M.load_colors()
-  local file = io.open(color_file, "r")
-  if not file then
-    return nil
-  end
+local scss_file = state_dir .. "/quickshell/user/generated/material_colors.scss"
+local theme_file = vim.fn.stdpath("config")
+  .. "/colors/material_purple_mocha.lua"
 
-  local colors = {}
-  for line in file:lines() do
-    local name, value = line:match("%$([%w_]+):%s*(#[%w]+)")
-    if name and value then
-      colors[name] = value
-    end
-  end
-  file:close()
+local is_transitioning = false
 
-  return colors
-end
-
--- ------------------------------------------------------------------
--- Apply terminal + UI colors
--- ------------------------------------------------------------------
-function M.apply_colors()
-  local colors = M.load_colors()
-  if not colors or not colors.term0 then
-    return
-  end
-
-  -- terminal colors - apply immediately, not in schedule
-  for i = 0, 15 do
-    vim.g["terminal_color_" .. i] = colors["term" .. i]
-  end
-end
-
--- ------------------------------------------------------------------
--- FULL reload (this fixes transparency + LSP issues)
--- ------------------------------------------------------------------
-function M.reload()
-  -- Apply terminal colors BEFORE the scheduled reload
-  M.apply_colors()
-
-  vim.schedule(function()
-    vim.cmd("hi clear")
-    vim.cmd("syntax reset")
-    vim.cmd("colorscheme " .. colorscheme)
-
-    -- Reassert transparency (CRITICAL)
-    local transparent_groups = {
-      -- Core editor / windows
+-- ------------------------------------------------------------
+-- Transparency invariants
+-- ------------------------------------------------------------
+local transparent_groups = {
       "Normal",
       "NormalFloat",
       "FloatBorder",
@@ -83,6 +46,10 @@ function M.reload()
       "PmenuSbar",
       "PmenuThumb",
       "PmenuBorder",
+      "TelescopePromptBorder",
+      "TelescopeResultsBorder",
+      "TelescopePreviewBorder",
+
 
       -- Completion item kinds (nvim-cmp)
       "CmpItemKindVariable",
@@ -175,37 +142,108 @@ function M.reload()
       "OverseerSuccess",
       "OverseerCanceled",
       "OverseerFailure",
-    }
+}
 
-    for _, group in ipairs(transparent_groups) do
-      local ok, hl = pcall(vim.api.nvim_get_hl, 0, { name = group })
-      if ok then
-        hl.bg = "NONE"
-        vim.api.nvim_set_hl(0, group, hl)
-      end
-    end
-  end)
+local function enforce_transparency()
+  for _, g in ipairs(transparent_groups) do
+    vim.api.nvim_set_hl(0, g, { bg = "NONE" })
+  end
 end
 
--- ------------------------------------------------------------------
--- Setup file watcher
--- ------------------------------------------------------------------
-function M.setup()
-  -- Initial load - apply colors immediately
-  M.apply_colors()
+-- ------------------------------------------------------------
+-- Parse theme file as DATA
+-- ------------------------------------------------------------
+local function load_theme()
+  local f = io.open(theme_file, "r")
+  if not f then return end
+  local lines = {}
+  for l in f:lines() do table.insert(lines, l) end
+  f:close()
 
-  -- Then do the full reload (which will apply colors again before scheduling)
+  local colors, highlights = {}, {}
+
+  for _, l in ipairs(lines) do
+    local k, v = l:match("^%s*([%w_]+)%s*=%s*\"(#[%x]+)\"")
+    if k and v then colors[k] = v end
+
+    local g, body = l:match('hi%("([^"]+)",%s*{(.-)}')
+    if g then
+      local spec = {}
+      spec.fg = body:match("fg%s*=%s*colors%.([%w_]+)")
+      spec.bg = body:match("bg%s*=%s*colors%.([%w_]+)")
+      spec.style = body:match('style%s*=%s*"([^"]+)"')
+      highlights[g] = spec
+    end
+  end
+
+  return colors, highlights
+end
+
+local function apply_highlights(colors, highlights)
+  for group, spec in pairs(highlights) do
+    local hl = {}
+    if spec.fg then hl.fg = colors[spec.fg] end
+    if spec.bg then hl.bg = colors[spec.bg] end
+    if spec.style then
+      for f in spec.style:gmatch("[^,]+") do hl[f] = true end
+    end
+    vim.api.nvim_set_hl(0, group, hl)
+  end
+end
+
+-- ------------------------------------------------------------
+-- Reload (NO :colorscheme)
+-- ------------------------------------------------------------
+function M.reload()
+  if is_transitioning then return end
+  is_transitioning = true
+
+  local colors, highlights = load_theme()
+  if not colors then
+    is_transitioning = false
+    return
+  end
+
+  local from = {}
+  for _, g in ipairs({ "Normal", "StatusLine", "TabLine" }) do
+    local hl = vim.api.nvim_get_hl(0, { name = g })
+    if hl.bg then
+      from[g] = { bg = string.format("#%06X", hl.bg) }
+    end
+  end
+
+  apply_highlights(colors, highlights)
+  enforce_transparency()
+
+  local to = {}
+  for g, _ in pairs(from) do
+    local spec = highlights[g]
+    if spec and spec.bg then
+      to[g] = { bg = colors[spec.bg] }
+    end
+  end
+
+  transition.run(from, to, {
+    steps = 20,
+    delay = 10,
+    on_done = function()
+      enforce_transparency()
+      is_transitioning = false
+    end,
+  })
+end
+
+function M.setup()
   M.reload()
 
-  -- Watch for file changes
-  vim.loop.fs_event_start(
-    vim.loop.new_fs_event(),
-    color_file,
-    {},
-    function()
-      M.reload()
-    end
-  )
+  local uv = vim.uv or vim.loop
+  local fs = uv.new_fs_event()
+  local timer = uv.new_timer()
+
+  uv.fs_event_start(fs, scss_file, {}, function()
+    timer:stop()
+    timer:start(200, 0, vim.schedule_wrap(M.reload))
+  end)
 end
 
 return M

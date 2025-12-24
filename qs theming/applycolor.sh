@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 QUICKSHELL_CONFIG_NAME="ii"
 XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
