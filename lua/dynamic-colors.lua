@@ -1,4 +1,3 @@
-
 -- lua/dynamic-colors.lua
 -- ZERO-FLASH dynamic theme loader
 
@@ -28,20 +27,14 @@ local transparent_groups = {
       "WinBar",
       "WinBarNC",
       "Title",
-
-      -- Cursor / columns (IMPORTANT)
       "CursorLine",
       "CursorColumn",
       "ColorColumn",
-
-      -- Status / tabline
       "StatusLine",
       "StatusLineNC",
       "TabLine",
       "TabLineFill",
       "TabLineSel",
-
-      -- Popup / completion
       "Pmenu",
       "PmenuSbar",
       "PmenuThumb",
@@ -49,9 +42,6 @@ local transparent_groups = {
       "TelescopePromptBorder",
       "TelescopeResultsBorder",
       "TelescopePreviewBorder",
-
-
-      -- Completion item kinds (nvim-cmp)
       "CmpItemKindVariable",
       "CmpItemKindFunction",
       "CmpItemKindMethod",
@@ -76,29 +66,19 @@ local transparent_groups = {
       "CmpItemKindOperator",
       "CmpItemKindUnit",
       "CmpItemKindValue",
-
-      -- Completion text
       "CmpItemAbbr",
       "CmpItemAbbrDeprecated",
       "CmpItemAbbrMatch",
       "CmpItemAbbrMatchFuzzy",
       "CmpItemMenu",
-
-      -- Which-key
       "WhichKey",
       "WhichKeyFloat",
-      "WhichKeyTile",
-
-      -- Neo-tree
+      "WhichKeyTitle",
       "NeoTreeTabActive",
       "NeoTreeTabInactive",
       "NeoTreeTabSeparatorActive",
       "NeoTreeTabSeparatorInactive",
-
-      -- Render / markdown
       "RenderMarkdownCode",
-
-      -- Bufferline / Barbar
       "BufferLineFill",
       "BufferLineBackground",
       "BufferLineBuffer",
@@ -109,33 +89,25 @@ local transparent_groups = {
       "BufferLineSeparator",
       "BufferLineSeparatorVisible",
       "BufferLineSeparatorSelected",
-
       "BufferCurrent",
       "BufferCurrentIndex",
       "BufferCurrentMod",
       "BufferCurrentSign",
       "BufferCurrentTarget",
-
       "BufferVisible",
       "BufferVisibleIndex",
       "BufferVisibleMod",
       "BufferVisibleSign",
       "BufferVisibleTarget",
-
       "BufferInactive",
       "BufferInactiveIndex",
       "BufferInactiveMod",
       "BufferInactiveSign",
       "BufferInactiveTarget",
-
       "BufferTabpages",
       "BufferTabpageFill",
-
-      -- Devicons
       "BufferLineDevIconLua",
       "BufferLineDevIconDefault",
-
-      -- Overseer
       "OverseerTask",
       "OverseerTaskBorder",
       "OverseerRunning",
@@ -146,7 +118,15 @@ local transparent_groups = {
 
 local function enforce_transparency()
   for _, g in ipairs(transparent_groups) do
-    vim.api.nvim_set_hl(0, g, { bg = "NONE" })
+    local ok = pcall(function()
+      local hl = vim.api.nvim_get_hl(0, { name = g })
+      hl.bg = "NONE"
+      hl.ctermbg = nil
+      vim.api.nvim_set_hl(0, g, hl)
+    end)
+    if not ok then
+      -- Silently fail for groups that don't exist yet
+    end
   end
 end
 
@@ -206,8 +186,8 @@ function M.reload()
 
   local from = {}
   for _, g in ipairs({ "Normal", "StatusLine", "TabLine" }) do
-    local hl = vim.api.nvim_get_hl(0, { name = g })
-    if hl.bg then
+    local ok, hl = pcall(vim.api.nvim_get_hl, 0, { name = g })
+    if ok and hl.bg then
       from[g] = { bg = string.format("#%06X", hl.bg) }
     end
   end
@@ -234,9 +214,13 @@ function M.reload()
 end
 
 function M.setup()
-  M.reload()
+  -- Initial load with delay to ensure plugins are ready
+  vim.defer_fn(function()
+    M.reload()
+  end, 100)
 
-  local uv = vim.uv or vim.loop
+  -- File watcher using vim.loop (compatible with older Neovim)
+  local uv = vim.loop
   local fs = uv.new_fs_event()
   local timer = uv.new_timer()
 
@@ -244,6 +228,14 @@ function M.setup()
     timer:stop()
     timer:start(200, 0, vim.schedule_wrap(M.reload))
   end)
+
+  -- Add autocmd to reapply on Neo-tree open
+  vim.api.nvim_create_autocmd("FileType", {
+    pattern = "neo-tree",
+    callback = function()
+      vim.defer_fn(enforce_transparency, 50)
+    end,
+  })
 end
 
 return M
