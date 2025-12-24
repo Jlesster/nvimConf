@@ -433,6 +433,7 @@ local function setup_highlights()
     -- PLUGIN: ALPHA (Dashboard)
     -- ============================================================================
     hi("DashboardHeader", { fg = colors.sapphire })
+    hi("DashboardFooter", { fg = colors.mauve })
     hi("AlphaShortcut", { fg = colors.red })
     hi("AlphaIconNew", { fg = colors.blue })
     hi("AlphaIconRecent", { fg = colors.pink })

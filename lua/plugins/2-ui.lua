@@ -328,10 +328,17 @@ return {
             ".............................",
           }
           opts.section.footer.opts.hl = "DashboardFooter"
-          vim.cmd("highlight DashboardFooter guifg=#D29B68")
           pcall(vim.cmd.AlphaRedraw)
         end,
       })
+          vim.api.nvim_create_autocmd("User", {
+      pattern = "AlphaReady",
+      callback = function()
+        -- Reapply colorscheme highlights
+        vim.cmd("colorscheme material_purple_mocha")
+      end,
+      once = false, -- Keep reapplying on every Alpha open
+    })
     end,
   },
 
