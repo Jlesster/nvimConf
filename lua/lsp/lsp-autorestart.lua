@@ -13,6 +13,7 @@ local config = {
     "null-ls",
     "copilot",
     "spring-boot",
+    "jdtls",
   },
   -- LSP to filetype/workspace mappings
   lsp_context = {

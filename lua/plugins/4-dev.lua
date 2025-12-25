@@ -151,14 +151,14 @@ return {
     event = "User BaseFile",
     opts = {
       filter_kind = { -- Symbols that will appear on the tree
-        "Class",
+        -- "Class",
         "Constructor",
         "Enum",
         "Function",
         "Interface",
         -- "Module",
         "Method",
-        "Struct",
+        -- "Struct",
       },
       open_automatic = false, -- Open if the buffer is compatible
       nerd_font = (vim.g.fallback_icons_enabled and false) or true,
@@ -166,7 +166,7 @@ return {
       link_folds_to_tree = false,
       link_tree_to_folds = false,
       attach_mode = "global",
-      backends = { "treesitter", "lsp", "markdown", "man" },
+      backends = { "lsp", "treesitter", "markdown", "man" },
       disable_max_lines = vim.g.big_file.lines,
       disable_max_size = vim.g.big_file.size,
       layout = {
@@ -339,12 +339,6 @@ return {
       }
     end,
   },
-
-  --  Write to get AI suggestion for your code on the fly.
-  --
-  --  NOTE: This plugin is disabled by default.
-  --        and login using your GitHub account.
-
   -- [guess-indent]
   -- https://github.com/NMAC427/guess-indent.nvim
   -- Note that this plugin won't autoformat the code.
@@ -393,22 +387,22 @@ return {
     },
     opts = {
      task_list = { -- the window that shows the results.
-       direction = "bottom",
-       min_height = 5,
-       max_height = 5,
-       default_detail = 1,
+        direction = "bottom",
+        min_height = 25,
+        max_height = 25,
+        default_detail = 1,
       },
-     --component_aliases = {
-       --default = {
-     -- Behaviors that will apply to all tasks.
+      -- component_aliases = {
+      --   default = {
+      --     -- Behaviors that will apply to all tasks.
       --     "on_exit_set_status",                   -- don't delete this one.
       --     "on_output_summarize",                  -- show last line on the list.
       --     "display_duration",                     -- display duration.
       --     "on_complete_notify",                   -- notify on task start.
       --     "open_output",                          -- focus last executed task.
-        --  { "on_complete_dispose", timeout=300 }, -- dispose old tasks.
-         --},
-       --},
+      --     { "on_complete_dispose", timeout=300 }, -- dispose old tasks.
+      --   },
+      -- },
     },
   },
 
@@ -881,5 +875,24 @@ return {
   -- guttentags_plus [auto generate C/C++ tags]
   -- https://github.com/skywind3000/gutentags_plus
   -- This plugin is necessary for using <C-]> (go to ctag).
+  {
+    "skywind3000/gutentags_plus",
+    ft = { "c", "cpp", "lisp" },
+    dependencies = { "ludovicchabant/vim-gutentags" },
+    config = function()
+      -- NOTE: On vimplugins we use config instead of opts.
+      vim.g.gutentags_plus_nomap = 1
+      vim.g.gutentags_resolve_symlinks = 1
+      vim.g.gutentags_cache_dir = vim.fn.stdpath "cache" .. "/tags"
+      vim.api.nvim_create_autocmd("FileType", {
+        desc = "Auto generate C/C++ tags",
+        callback = function()
+          local is_c = vim.bo.filetype == "c" or vim.bo.filetype == "cpp"
+          if is_c then vim.g.gutentags_enabled = 1
+          else vim.g.gutentags_enabled = 0 end
+        end,
+      })
+    end,
+  },
 
 } -- end of return

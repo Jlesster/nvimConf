@@ -1,8 +1,8 @@
--- lua/dynamic-colors.lua
+-- lua/ui/dynamic-colors.lua
 -- ZERO-FLASH dynamic theme loader
 
 local M = {}
-local transition = require("material-transition")
+local transition = require("ui.material-transition")
 
 local state_dir = os.getenv("XDG_STATE_HOME")
   or (os.getenv("HOME") .. "/.local/state")
@@ -12,6 +12,8 @@ local theme_file = vim.fn.stdpath("config")
   .. "/colors/material_purple_mocha.lua"
 
 local is_transitioning = false
+local fs_event = nil
+local debounce_timer = nil
 
 -- ------------------------------------------------------------
 -- Transparency invariants
@@ -125,7 +127,6 @@ local function enforce_transparency()
       vim.api.nvim_set_hl(0, g, hl)
     end)
     if not ok then
-      -- Silently fail for groups that don't exist yet
     end
   end
 end
@@ -135,7 +136,10 @@ end
 -- ------------------------------------------------------------
 local function load_theme()
   local f = io.open(theme_file, "r")
-  if not f then return end
+  if not f then
+    vim.notify("Dynamic colors: theme file not found at " .. theme_file, vim.log.levels.WARN)
+    return
+  end
   local lines = {}
   for l in f:lines() do table.insert(lines, l) end
   f:close()
@@ -214,20 +218,48 @@ function M.reload()
 end
 
 function M.setup()
+  -- Check if SCSS file exists
+  local f = io.open(scss_file, "r")
+  if not f then
+    vim.notify("Dynamic colors: SCSS file not found at " .. scss_file, vim.log.levels.WARN)
+    return
+  end
+  f:close()
+
   -- Initial load with delay to ensure plugins are ready
   vim.defer_fn(function()
     M.reload()
   end, 100)
 
   -- File watcher using vim.loop (compatible with older Neovim)
-  local uv = vim.loop
-  local fs = uv.new_fs_event()
-  local timer = uv.new_timer()
+  local uv = vim.loop or vim.uv -- Support both old and new API
 
-  uv.fs_event_start(fs, scss_file, {}, function()
-    timer:stop()
-    timer:start(200, 0, vim.schedule_wrap(M.reload))
+  -- Clean up existing watchers
+  if fs_event then
+    pcall(fs_event.stop, fs_event)
+  end
+  if debounce_timer then
+    pcall(debounce_timer.stop, debounce_timer)
+  end
+
+  fs_event = uv.new_fs_event()
+  debounce_timer = uv.new_timer()
+
+  local ok, err = pcall(function()
+    uv.fs_event_start(fs_event, scss_file, {}, function()
+      debounce_timer:stop()
+      debounce_timer:start(200, 0, vim.schedule_wrap(function()
+        vim.notify("Theme changed", vim.log.levels.INFO)
+        M.reload()
+      end))
+    end)
   end)
+
+  if not ok then
+    vim.notify("Dynamic colors: Failed to start file watcher - " .. tostring(err), vim.log.levels.ERROR)
+  else
+    vim.notify("Dynamic colors loaded", vim.log.levels.INFO)
+  end
 
   -- Add autocmd to reapply on Neo-tree open
   vim.api.nvim_create_autocmd("FileType", {

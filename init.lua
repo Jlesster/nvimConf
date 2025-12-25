@@ -3,6 +3,8 @@
 -- This is the entry point of your config.
 -- ---------------------------------------
 
+
+
 local function load_source(source)
   local status_ok, error = pcall(require, source)
   if not status_ok then
@@ -11,8 +13,6 @@ local function load_source(source)
     )
   end
 end
-
--- Load dynamic terminal colors
 
 local function load_sources(source_files)
   vim.loader.enable()
@@ -40,35 +40,24 @@ local function load_colorscheme(colorscheme)
     end
 end
 
-
-
--- In your init.lua or a separate file like lua/lsp-autorestart.lua
-local lsp_autorestart = require('lsp-autorestart')
-
-lsp_autorestart.setup({
-  max_restarts = 3,        -- Optional: customize max restarts
-  restart_window = 60000,  -- Optional: time window in ms
-  cooldown_period = 5000,  -- Optional: cooldown before restart
-  blacklist = {            -- Optional: clients to never restart
-    "null-ls",
-    "copilot",
-  }
-})
-
 -- Call the functions defined above.
 load_sources({
   "base.1-options",
   "base.2-lazy",
   "base.3-autocmds", -- critical stuff, don't change the execution order.
+  "lsp.lsp-autorestart",
 })
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = "java",
-  callback = function()
-    vim.opt_local.tabstop = 2
-    vim.opt_local.shiftwidth = 2
-    vim.opt_local.softtabstop = 2
-    vim.opt_local.expandtab = true
-  end,
+load_colorscheme(vim.g.default_colorscheme)
+load_sources_async({
+  "base.4-mappings",
 })
-require('dynamic-colors').setup()
-load_sources_async({ "base.4-mappings" })
+
+-- Setup dynamic colors AFTER colorscheme is loaded
+vim.defer_fn(function()
+  local ok, dynamic_colors = pcall(require, "ui.dynamic-colors")
+  if ok then
+    dynamic_colors.setup()
+  else
+    vim.notify("Failed to load dynamic-colors", vim.log.levels.WARN)
+  end
+end, 150)

@@ -261,169 +261,6 @@ end, { desc = "Run e2e tests for the current nodejs project" })
 -- Extra commands
 ----------------------------------------------
 
--- -- Debug version that actually shows output
--- autocmd({ "BufEnter" }, {
---   desc = "Auto change to project root on buffer enter (DEBUG)",
---   callback = function(args)
---
---     -- Defer slightly to avoid race conditions with buffer creation
---     vim.defer_fn(function()
---
---       -- Always prefer the buffer that triggered the autocmd
---       local bufnr = args.buf or vim.api.nvim_get_current_buf()
---
---       -- SAFETY: buffer may no longer exist by the time this runs
---       if not bufnr or not vim.api.nvim_buf_is_valid(bufnr) then
---         return
---       end
---
---       -- Read buffer-local options safely
---       local buftype = vim.bo[bufnr].buftype
---       local filetype = vim.bo[bufnr].filetype
---
---       -- Buffers that should NEVER affect cwd
---       local ignore_buftypes = {
---         nofile = true,
---         terminal = true,
---         prompt = true,
---         quickfix = true,
---       }
---
---       -- Filetypes that should NEVER affect cwd
---       local ignore_filetypes = {
---         alpha = true,
---         ["neo-tree"] = true,
---         Trouble = true,
---         lazy = true,
---         aerial = true,
---         [""] = true,
---       }
---       -- Skip buffers we do not care about
---       if ignore_buftypes[buftype] or ignore_filetypes[filetype] then
---         return
---       end
---       -- Absolute path to the file backing this buffer
---       local filepath = vim.api.nvim_buf_get_name(bufnr)
---       -- Must be a real, readable file
---       if filepath == "" or vim.fn.filereadable(filepath) ~= 1 then
---         return
---       end
---       -- Save cwd so we can see whether it actually changes
---       local old_cwd = vim.fn.getcwd()
---       local project_ok, project = pcall(require, "project_nvim.project")
---       if project_ok then
---         -- Ask project.nvim for the root that owns THIS FILE
---         local root = project.get_project_root(filepath)
---         -- Only change directory if we got a valid result
---         if root and vim.fn.isdirectory(root) == 1 then
---           -- Avoid useless :cd calls
---           if old_cwd ~= root then
---             vim.cmd.cd(root)
---           end
---
---           return
---         end
---       end
---
---       ------------------------------------------------------------------
---       -- Fallback: if project.nvim fails, cd to file's directory
---       ------------------------------------------------------------------
---
---       local fallback_dir = vim.fn.fnamemodify(filepath, ":p:h")
---
---       if vim.fn.isdirectory(fallback_dir) == 1 then
---         vim.cmd.cd(fallback_dir)
---       end
---
---     end, 50) -- defer time (ms)
---   end,
--- })
-
--- Debug version that actually shows output
--- Auto change to project root on buffer enter - IMPROVED VERSION
--- Auto change to project root on buffer enter - DIRECT DETECTION
-autocmd({ "BufEnter" }, {
-  desc = "Auto change to project root on buffer enter with direct detection",
-  callback = function(args)
-    vim.defer_fn(function()
-      local bufnr = args.buf or vim.api.nvim_get_current_buf()
-      if not bufnr or not vim.api.nvim_buf_is_valid(bufnr) then
-        return
-      end
-
-      local buftype = vim.api.nvim_get_option_value("buftype", { buf = bufnr })
-      local filetype = vim.api.nvim_get_option_value("filetype", { buf = bufnr })
-
-      local ignore_buftypes = { "nofile", "terminal", "prompt", "quickfix" }
-      local ignore_filetypes = { "alpha", "neo-tree", "Trouble", "lazy", "aerial", "" }
-
-      if vim.tbl_contains(ignore_buftypes, buftype) or vim.tbl_contains(ignore_filetypes, filetype) then
-        return
-      end
-
-      local filepath = vim.api.nvim_buf_get_name(bufnr)
-      if filepath == "" or vim.fn.filereadable(filepath) ~= 1 then
-        return
-      end
-
-      -- Direct project root detection
-      local function find_project_root(path)
-        local patterns = {
-          "pom.xml",
-          "build.gradle",
-          "build.gradle.kts",
-          ".git",
-          "Makefile",
-          "package.json",
-          ".solution",
-          "gradlew",
-        }
-
-        local current_dir = path
-
-        -- Walk up the directory tree
-        while current_dir ~= "/" do
-          for _, pattern in ipairs(patterns) do
-            local marker = current_dir .. "/" .. pattern
-            if vim.fn.filereadable(marker) == 1 or vim.fn.isdirectory(marker) == 1 then
-              return current_dir
-            end
-          end
-
-          -- Go up one directory
-          local parent = vim.fn.fnamemodify(current_dir, ":h")
-          if parent == current_dir then
-            break
-          end
-          current_dir = parent
-        end
-
-        return nil
-      end
-
-      -- Get the directory of the current file
-      local file_dir = vim.fn.fnamemodify(filepath, ":p:h")
-
-      -- Find project root starting from file's directory
-      local project_root = find_project_root(file_dir)
-
-      if project_root then
-        local current_cwd = vim.fn.getcwd()
-
-        if current_cwd ~= project_root then
-          vim.cmd.cd(vim.fn.fnameescape(project_root))
-          local project_name = vim.fn.fnamemodify(project_root, ":t")
-        end
-      else
-        -- No project root found, just cd to file's directory
-        if vim.fn.getcwd() ~= file_dir then
-          vim.cmd.cd(vim.fn.fnameescape(file_dir))
-        end
-      end
-    end, 50)
-  end,
-})
-
 -- Change working directory
 cmd("Cwd", function()
   vim.cmd(":cd %:p:h")
@@ -446,81 +283,161 @@ cmd("CloseNotifications", function()
   require("notify").dismiss({ pending = true, silent = true })
 end, { desc = "Dismiss all notifications" })
 
-vim.api.nvim_create_autocmd("LspAttach", {
+-- Add at the end of the file
+
+-- ## PROJECT ROOT MANAGEMENT -----------------------------------------------
+-- -- Auto-change directory when switching buffers (for project.nvim)
+-- if is_available("project.nvim") then
+--   autocmd({ "BufEnter", "BufWinEnter" }, {
+--     desc = "Change directory to project root on buffer enter",
+--     callback = function(args)
+--       -- Skip for special buffers
+--       local buftype = vim.api.nvim_get_option_value("buftype", { buf = args.buf })
+--       local filetype = vim.api.nvim_get_option_value("filetype", { buf = args.buf })
+--
+--       -- Don't change directory for these buffer types
+--       if buftype ~= "" or
+--          vim.tbl_contains({ "alpha", "neo-tree", "OverseerList", "toggleterm" }, filetype) then
+--         return
+--       end
+--
+--       -- Get the buffer's file path
+--       local bufname = vim.api.nvim_buf_get_name(args.buf)
+--       if bufname == "" or not vim.loop.fs_stat(bufname) then
+--         return
+--       end
+--
+--       -- Try to find project root
+--       vim.defer_fn(function()
+--         local ok = pcall(vim.cmd, "ProjectRoot")
+--         if ok then
+--           -- Update Neo-tree if it's open
+--           if is_available("neo-tree.nvim") then
+--             local manager_ok, manager = pcall(require, "neo-tree.sources.manager")
+--             if manager_ok then
+--               pcall(function()
+--                 manager.refresh("filesystem")
+--               end)
+--             end
+--           end
+--         end
+--       end, 10)
+--     end,
+--   })
+--
+--   -- Also update Neo-tree when changing directories manually
+--   autocmd("DirChanged", {
+--     desc = "Update Neo-tree when directory changes",
+--     callback = function()
+--       if is_available("neo-tree.nvim") then
+--         vim.defer_fn(function()
+--           local manager_ok, manager = pcall(require, "neo-tree.sources.manager")
+--           if manager_ok then
+--             pcall(function()
+--               manager.refresh("filesystem")
+--             end)
+--           end
+--         end, 50)
+--       end
+--     end,
+--   })
+-- end
+
+
+-- Change to project root or buffer's directory on buffer enter
+autocmd("BufEnter", {
+  desc = "Change directory to project root or current buffer's directory",
   callback = function(args)
-    local client = vim.lsp.get_client_by_id(args.data.client_id)
-    if client and client.server_capabilities.semanticTokensProvider then
-      vim.lsp.semantic_tokens.start(args.buf, client.id)
+    -- Skip for special buffers
+    local buftype = vim.api.nvim_get_option_value("buftype", { buf = args.buf })
+    local filetype = vim.api.nvim_get_option_value("filetype", { buf = args.buf })
+    if buftype ~= "" or
+       vim.tbl_contains({ "alpha", "neo-tree", "OverseerList", "toggleterm" }, filetype) then
+      return
     end
-  end,
-})
 
-vim.api.nvim_create_autocmd("LspAttach", {
-  callback = function(args)
-    local client = vim.lsp.get_client_by_id(args.data.client_id)
-    if client
-      and client.name == "jdtls"
-      and client.server_capabilities.semanticTokensProvider
-    then
-      vim.lsp.semantic_tokens.start(args.buf, client.id)
+    -- Get the buffer's file path
+    local bufname = vim.api.nvim_buf_get_name(args.buf)
+    if bufname == "" or not vim.loop.fs_stat(bufname) then
+      return
     end
+
+    local old_cwd = vim.fn.getcwd()
+    local new_cwd = old_cwd
+    local found_project_root = false
+
+    -- Try to find project root using project.nvim
+    if is_available("project.nvim") then
+      local ok, project = pcall(require, "project_nvim.project")
+      if ok then
+        local project_root = project.get_project_root(bufname)
+
+        if project_root then
+          -- Additional validation: make sure the file is actually under this project root
+          local file_dir = vim.fn.fnamemodify(bufname, ":h")
+
+          -- Check if the file's directory starts with the project root path
+          if file_dir:sub(1, #project_root) == project_root then
+            found_project_root = true
+            -- Change to project root if we're not already there
+            if project_root ~= old_cwd then
+              vim.cmd("cd " .. vim.fn.fnameescape(project_root))
+              new_cwd = vim.fn.getcwd()
+            else
+              -- We're already at project root, so set new_cwd to prevent fallback
+              new_cwd = project_root
+            end
+          end
+        end
+      end
+    end
+
+    -- Only fallback to file's directory if NO project root was found
+    if not found_project_root then
+      local file_dir = vim.fn.fnamemodify(bufname, ":h")
+      if vim.fn.isdirectory(file_dir) == 1 and file_dir ~= old_cwd then
+        vim.cmd("cd " .. vim.fn.fnameescape(file_dir))
+        new_cwd = vim.fn.getcwd()
+      end
+    end
+
+-- Refresh Neo-tree if directory actually changed (works for both project root and file dir)
+if new_cwd ~= old_cwd and is_available("neo-tree.nvim") then
+  vim.schedule(function()
+    pcall(function()
+      local manager = require("neo-tree.sources.manager")
+      local commands = require("neo-tree.sources.filesystem.commands")
+      local state = manager.get_state("filesystem")
+
+      -- Always navigate to the new directory
+      if state then
+        commands.navigate(state, new_cwd)
+      end
+    end)
+  end)
+end
   end,
 })
 
-vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
-  pattern = "*.java",
+-- Also update Neo-tree when changing directories manually
+autocmd("DirChanged", {
+  desc = "Update Neo-tree when directory changes",
   callback = function()
-    vim.defer_fn(function()
-      vim.cmd("LspStart jdtls")
-    end, 0)
-  end,
-})
--- Force JDTLS to download sources for external libraries
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = "java",
-  callback = function()
-    vim.defer_fn(function()
-      -- Execute LSP command to download sources
-      vim.lsp.buf.execute_command({
-        command = "java.project.updateSourceAttachment",
-      })
-    end, 2000) -- Wait 2 seconds for JDTLS to fully start
-  end,
-})
-vim.api.nvim_create_autocmd("WinEnter", {
-  callback = function()
-    local win = vim.api.nvim_get_current_win()
-    local config = vim.api.nvim_win_get_config(win)
+    if is_available("neo-tree.nvim") then
+      vim.schedule(function()
+        pcall(function()
+          local manager = require("neo-tree.sources.manager")
+          local state = manager.get_state("filesystem")
+          local new_cwd = vim.fn.getcwd()
 
-    -- If it's a floating window
-    if config.relative ~= "" then
-      vim.wo[win].winblend = 0  -- No transparency blend
-      -- Force the window to use transparent background
-      vim.api.nvim_win_call(win, function()
-        vim.cmd([[setlocal winhighlight=Normal:NormalFloat,FloatBorder:FloatBorder]])
+          -- Navigate Neo-tree to new directory
+          if state and state.path ~= new_cwd then
+            require("neo-tree.sources.filesystem.commands").navigate(state, new_cwd)
+          end
+
+          manager.refresh("filesystem")
+        end)
       end)
     end
   end,
 })
--- Apply dynamic colors to terminals (including ToggleTerm)
-vim.api.nvim_create_autocmd("TermOpen", {
-  desc = "Apply dynamic terminal colors",
-  callback = function()
-    vim.defer_fn(function()
-      local ok, dc = pcall(require, "dynamic-colors")
-      if ok and type(dc.reload) == "function" then
-        dc.reload()
-      end
-    end, 50)
-  end,
-})
-
--- vim.api.nvim_create_autocmd("VimEnter", {
---   once = true,
---   callback = function()
---     vim.fn.jobstart({
---       os.getenv("HOME") .. "/.config/quickshell/ii/scripts/colors/applycolor.sh"
---     }, { detach = true })
---   end,
--- })
-

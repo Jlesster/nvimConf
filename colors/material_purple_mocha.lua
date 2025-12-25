@@ -330,7 +330,7 @@ local function setup_highlights()
     -- ============================================================================
     -- PLUGIN: NOTIFY
     -- ============================================================================
-    hi("NotifyBackground", { bg = "#000000" })
+    hi("NotifyBackground", { bg = colors.base })
     hi("NotifyERRORBorder", { fg = colors.red })
     hi("NotifyWARNBorder", { fg = colors.yellow })
     hi("NotifyINFOBorder", { fg = colors.blue })

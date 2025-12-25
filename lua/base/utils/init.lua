@@ -22,6 +22,7 @@
 --      -> trigger_event                 → Manually trigger an event.
 --      -> which_key_register            → When setting a mapping, add it to whichkey.
 
+
 local M = {}
 
 --- Run a shell command and capture the output and whether the command
@@ -31,7 +32,9 @@ local M = {}
 --- @return string|nil # The result of a successfully executed command, or nil if it failed.
 function M.run_cmd(cmd, show_error)
   -- Split cmd string into a list, if needed.
-  if type(cmd) == "string" then cmd = vim.split(cmd, " ") end
+  if type(cmd) == "string" then
+    cmd = vim.split(cmd, " ")
+  end
 
   -- If windows, and prepend cmd.exe
   if vim.fn.has("win32") == 1 then
@@ -44,19 +47,16 @@ function M.run_cmd(cmd, show_error)
 
   -- If the command failed and show_error is true or not provided, print error.
   if not success and (show_error == nil or show_error) then
-    vim.api.nvim_echo({
-      {
-        ("Error running command %s\nError message:\n%s"):format(
-          table.concat(cmd, " "), -- Convert the cmd back to string.
-          result -- Show the error result
-        ),
-      },
-    }, true, { err = true })
+    vim.api.nvim_echo({{
+      ("Error running command %s\nError message:\n%s"):format(
+        table.concat(cmd, " "), -- Convert the cmd back to string.
+        result                  -- Show the error result
+      )}}, true, { err = true }
+    )
   end
 
   -- strip out terminal escape sequences and control characters.
-  local cleaned_result =
-    result:gsub("[\27\155][][()#;?%d]*[A-PRZcf-ntqry=><~]", "")
+  local cleaned_result = result:gsub("[\27\155][][()#;?%d]*[A-PRZcf-ntqry=><~]", "")
 
   -- Return the cleaned result if the command succeeded, or nil if it failed
   return (success and cleaned_result) or nil
@@ -72,8 +72,7 @@ function M.add_autocmds_to_buffer(augroup, bufnr, autocmds)
   if not vim.islist(autocmds) then autocmds = { autocmds } end
 
   -- Attempt to retrieve existing autocmds associated with the specified augroup and bufnr
-  local cmds_found, cmds =
-    pcall(vim.api.nvim_get_autocmds, { group = augroup, buffer = bufnr })
+  local cmds_found, cmds = pcall(vim.api.nvim_get_autocmds, { group = augroup, buffer = bufnr })
 
   -- If no existing autocmds are found or the cmds_found call fails
   if not cmds_found or vim.tbl_isempty(cmds) then
@@ -98,53 +97,18 @@ end
 
 --- This function define how LSP diagnostics will look.
 M.apply_lsp_diagnostic_defaults = function()
+
   -- Define LSP diagnostics icons defined in ../icons/icons.lua
   local signs = {
-    {
-      name = "DiagnosticSignError",
-      text = M.get_icon("DiagnosticError"),
-      texthl = "DiagnosticSignError",
-    },
-    {
-      name = "DiagnosticSignWarn",
-      text = M.get_icon("DiagnosticWarn"),
-      texthl = "DiagnosticSignWarn",
-    },
-    {
-      name = "DiagnosticSignHint",
-      text = M.get_icon("DiagnosticHint"),
-      texthl = "DiagnosticSignHint",
-    },
-    {
-      name = "DiagnosticSignInfo",
-      text = M.get_icon("DiagnosticInfo"),
-      texthl = "DiagnosticSignInfo",
-    },
-    {
-      name = "DapStopped",
-      text = M.get_icon("DapStopped"),
-      texthl = "DiagnosticWarn",
-    },
-    {
-      name = "DapBreakpoint",
-      text = M.get_icon("DapBreakpoint"),
-      texthl = "DiagnosticInfo",
-    },
-    {
-      name = "DapBreakpointRejected",
-      text = M.get_icon("DapBreakpointRejected"),
-      texthl = "DiagnosticError",
-    },
-    {
-      name = "DapBreakpointCondition",
-      text = M.get_icon("DapBreakpointCondition"),
-      texthl = "DiagnosticInfo",
-    },
-    {
-      name = "DapLogPoint",
-      text = M.get_icon("DapLogPoint"),
-      texthl = "DiagnosticInfo",
-    },
+    { name = "DiagnosticSignError",    text = M.get_icon("DiagnosticError"),        texthl = "DiagnosticSignError" },
+    { name = "DiagnosticSignWarn",     text = M.get_icon("DiagnosticWarn"),         texthl = "DiagnosticSignWarn" },
+    { name = "DiagnosticSignHint",     text = M.get_icon("DiagnosticHint"),         texthl = "DiagnosticSignHint" },
+    { name = "DiagnosticSignInfo",     text = M.get_icon("DiagnosticInfo"),         texthl = "DiagnosticSignInfo" },
+    { name = "DapStopped",             text = M.get_icon("DapStopped"),             texthl = "DiagnosticWarn" },
+    { name = "DapBreakpoint",          text = M.get_icon("DapBreakpoint"),          texthl = "DiagnosticInfo" },
+    { name = "DapBreakpointRejected",  text = M.get_icon("DapBreakpointRejected"),  texthl = "DiagnosticError" },
+    { name = "DapBreakpointCondition", text = M.get_icon("DapBreakpointCondition"), texthl = "DiagnosticInfo" },
+    { name = "DapLogPoint",            text = M.get_icon("DapLogPoint"),            texthl = "DiagnosticInfo" }
   }
   for _, sign in ipairs(signs) do
     vim.fn.sign_define(sign.name, sign)
@@ -160,6 +124,7 @@ M.apply_lsp_diagnostic_defaults = function()
         [vim.diagnostic.severity.WARN] = M.get_icon("DiagnosticWarn"),
         [vim.diagnostic.severity.INFO] = M.get_icon("DiagnosticInfo"),
       },
+      active = signs,
     },
     update_in_insert = true,
     underline = true,
@@ -177,28 +142,23 @@ M.apply_lsp_diagnostic_defaults = function()
   -- Define the table of options used by vim.g.diagnostics_mode in ../1-options.lua
   M.diagnostics_enum = {
     -- diagnostics off
-    [0] = vim.tbl_deep_extend("force", diagnostics_opts, {
-      underline = false,
-      virtual_text = false,
-      signs = false,
-      update_in_insert = false,
-    }),
-    -- status only
-    vim.tbl_deep_extend(
+    [0] = vim.tbl_deep_extend(
       "force",
       diagnostics_opts,
-      { virtual_text = false, signs = false }
+      { underline = false, virtual_text = false, signs = false, update_in_insert = false }
     ),
+    -- status only
+    vim.tbl_deep_extend("force", diagnostics_opts, { virtual_text = false, signs = false }),
     -- virtual text off, signs on
     vim.tbl_deep_extend("force", diagnostics_opts, { virtual_text = false }),
     -- all diagnostics on
-    vim.tbl_deep_extend("force", {}, diagnostics_opts),
+    diagnostics_opts,
   }
 
   vim.api.nvim_create_autocmd("UIEnter", { -- Prevents nvim lifecycle bugs.
     once = true,
     callback = function()
-      vim.diagnostic.config(M.diagnostics_enum[vim.g.diagnostics_mode])
+        vim.diagnostic.config(M.diagnostics_enum[vim.g.diagnostics_mode])
     end,
   })
 end
@@ -211,8 +171,7 @@ end
 function M.apply_user_lsp_mappings(client, bufnr)
   local lsp_mappings = require("base.4-mappings").lsp_mappings(client, bufnr)
   if not vim.tbl_isempty(lsp_mappings.v) then
-    lsp_mappings.v["<leader>l"] =
-      { desc = M.get_icon("ActiveLSP", true) .. "LSP" }
+    lsp_mappings.v["<leader>l"] = { desc = M.get_icon("ActiveLSP", true) .. "LSP" }
   end
   M.set_mappings(lsp_mappings, { buffer = bufnr })
 end
@@ -222,8 +181,7 @@ end
 --- @param bufnr number The buffer number from which the autocmds should be removed.
 function M.del_autocmds_from_buffer(augroup, bufnr)
   -- Attempt to retrieve existing autocmds associated with the specified augroup and bufnr
-  local cmds_found, cmds =
-    pcall(vim.api.nvim_get_autocmds, { group = augroup, buffer = bufnr })
+  local cmds_found, cmds = pcall(vim.api.nvim_get_autocmds, { group = augroup, buffer = bufnr })
 
   -- If retrieval was successful
   if cmds_found then
@@ -240,19 +198,16 @@ end
 --- @return string icon.
 function M.get_icon(icon_name, fallback_to_empty_string)
   -- guard clause
-  if fallback_to_empty_string and vim.g.fallback_icons_enabled then
-    return ""
-  end
+  if fallback_to_empty_string and vim.g.fallback_icons_enabled then return "" end
 
   -- get icon_pack
-  local icon_pack = (vim.g.fallback_icons_enabled and "fallback_icons")
-    or "icons"
+  local icon_pack = (vim.g.fallback_icons_enabled and "fallback_icons") or "icons"
 
   -- cache icon_pack into M
   if not M[icon_pack] then -- only if not cached already.
     if icon_pack == "icons" then
       M.icons = require("base.icons.icons")
-    elseif icon_pack == "fallback_icons" then
+    elseif icon_pack =="fallback_icons" then
       M.fallback_icons = require("base.icons.fallback_icons")
     end
   end
@@ -266,24 +221,9 @@ end
 --- @return table<string,table> # a table with entries for each map mode.
 function M.get_mappings_template()
   local maps = {}
-  for _, mode in ipairs({
-    "",
-    "n",
-    "v",
-    "x",
-    "s",
-    "o",
-    "!",
-    "i",
-    "l",
-    "c",
-    "t",
-    "ia",
-    "ca",
-    "!a",
-  }) do
-    maps[mode] = {}
-  end
+  for _, mode in ipairs {
+    "", "n", "v", "x", "s", "o", "!", "i", "l", "c", "t", "ia", "ca", "!a"
+  } do maps[mode] = {} end
   return maps
 end
 
@@ -305,7 +245,7 @@ function M.is_big_file(bufnr)
   local filesize = vim.fn.getfsize(vim.api.nvim_buf_get_name(bufnr))
   local nlines = vim.api.nvim_buf_line_count(bufnr)
   local is_big_file = (filesize > vim.g.big_file.size)
-    or (nlines > vim.g.big_file.lines)
+      or (nlines > vim.g.big_file.lines)
   return is_big_file
 end
 
@@ -315,15 +255,10 @@ end
 --- @param type number|nil The type of the notification (:help vim.log.levels).
 --- @param opts? table The nvim-notify options to use (:help notify-options).
 function M.notify(msg, type, opts)
-  vim.schedule(
-    function()
-      vim.notify(
-        msg,
-        type,
-        vim.tbl_deep_extend("force", { title = "Neovim" }, opts or {})
-      )
-    end
-  )
+  vim.schedule(function()
+    vim.notify(
+      msg, type, vim.tbl_deep_extend("force", { title = "Neovim" }, opts or {}))
+  end)
 end
 
 --- Convert a path to the path format of the current operative system.
@@ -334,7 +269,7 @@ function M.os_path(path)
   if path == nil then return nil end
   -- Get the platform-specific path separator
   local separator = string.sub(package.config, 1, 1)
-  return string.gsub(path, "[/\\]", separator)
+  return string.gsub(path, '[/\\]', separator)
 end
 
 --- Get the options of a plugin managed by lazy.
@@ -375,9 +310,7 @@ function M.set_mappings(map_table, base)
         end
         if not cmd then -- if which-key mapping, queue it
           keymap_opts[1], keymap_opts.mode = keymap, mode
-          if not keymap_opts.group then
-            keymap_opts.group = keymap_opts.desc
-          end
+          if not keymap_opts.group then keymap_opts.group = keymap_opts.desc end
           if not M.which_key_queue then M.which_key_queue = {} end
           table.insert(M.which_key_queue, keymap_opts)
         else -- if not which-key mapping, set it
@@ -390,15 +323,17 @@ function M.set_mappings(map_table, base)
   if package.loaded["which-key"] then M.which_key_register() end
 end
 
+
 --- Set a highlight to apply to URLs.
 function M.set_url_hl()
   --- regex used for matching a valid URL/URI string
-  local url_matcher = "\\v\\c%(%(h?ttps?|ftp|file|ssh|git)://|[a-z]+[@][a-z]+[.][a-z]+:)"
-    .. "%([&:#*@~%_\\-=?!+;/0-9a-z]+%(%([.;/?]|[.][.]+)"
-    .. "[&:#*@~%_\\-=?!+/0-9a-z]+|:\\d+|,%(%(%(h?ttps?|ftp|file|ssh|git)://|"
-    .. "[a-z]+[@][a-z]+[.][a-z]+:)@![0-9a-z]+))*|\\([&:#*@~%_\\-=?!+;/.0-9a-z]*\\)"
-    .. "|\\[[&:#*@~%_\\-=?!+;/.0-9a-z]*\\]|\\{%([&:#*@~%_\\-=?!+;/.0-9a-z]*"
-    .. "|\\{[&:#*@~%_\\-=?!+;/.0-9a-z]*})\\})+"
+  local url_matcher =
+      "\\v\\c%(%(h?ttps?|ftp|file|ssh|git)://|[a-z]+[@][a-z]+[.][a-z]+:)" ..
+      "%([&:#*@~%_\\-=?!+;/0-9a-z]+%(%([.;/?]|[.][.]+)" ..
+      "[&:#*@~%_\\-=?!+/0-9a-z]+|:\\d+|,%(%(%(h?ttps?|ftp|file|ssh|git)://|" ..
+      "[a-z]+[@][a-z]+[.][a-z]+:)@![0-9a-z]+))*|\\([&:#*@~%_\\-=?!+;/.0-9a-z]*\\)" ..
+      "|\\[[&:#*@~%_\\-=?!+;/.0-9a-z]*\\]|\\{%([&:#*@~%_\\-=?!+;/.0-9a-z]*" ..
+      "|\\{[&:#*@~%_\\-=?!+;/.0-9a-z]*})\\})+"
 
   M.delete_url_hl()
   if vim.g.url_hl_enabled then -- set url hl
@@ -427,7 +362,7 @@ function M.open_with_program(path)
   if vim.fn.has("mac") == 1 then
     cmd = { "open" }
   elseif vim.fn.has("win32") == 1 then
-    if vim.fn.executable("rundll32") then
+    if vim.fn.executable "rundll32" then
       cmd = { "rundll32", "url.dll,FileProtocolHandler" }
     else
       cmd = { "cmd.exe", "/K", "explorer" }
@@ -439,14 +374,12 @@ function M.open_with_program(path)
       cmd = { "xdg-open" }
     end
   end
-  if not cmd then
-    M.notify("Available system opening tool not found!", vim.log.levels.ERROR)
-  end
+  if not cmd then M.notify("Available system opening tool not found!", vim.log.levels.ERROR) end
 
   -- No path provided? use the file under the cursor; else, expand the path.
   if not path then
     path = vim.fn.expand("<cfile>")
-  elseif not path:match("%w+:") then
+  elseif not path:match "%w+:" then
     path = vim.fn.expand(path)
   end
 

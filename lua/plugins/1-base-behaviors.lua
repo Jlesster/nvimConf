@@ -42,44 +42,69 @@ return {
     },
   },
 
-  -- project.nvim [project search + auto cd]
-  -- https://github.com/ahmedkhalf/project.nvim
+-- Add this to your plugins table in the appropriate file
+
+-- project.nvim [project root detection]
+-- https://github.com/ahmedkhalf/project.nvim
   {
-    "zeioth/project.nvim",
-    event = "User BaseDefered",
-    cmd = "ProjectRoot",
-    opts = {
-      -- How to find root directory
-      patterns = {
-        ".git",
-        "_darcs",
-        ".hg",
-        ".bzr",
-        ".svn",
-        "pom.xml",
-        "Makefile",
-        "package.json",
-        ".solution",
-        ".solution.toml"
-      },
-      -- Don't list the next projects
-      exclude_dirs = {
-        "~/"
-      },
-      silent_chdir = true,
-      manual_mode = false,
+    "ahmedkhalf/project.nvim",
+    lazy = false,
+    priority = 1000,
+    config = function()
+      require("project_nvim").setup({
+        detection_methods = { "lsp", "pattern" },
+        patterns = {
+          ".git",
+          "_darcs",
+          ".hg",
+          ".bzr",
+          ".svn",
+          "Makefile",
+          "package.json",
+          "pom.xml",
+          "build.gradle",
+          "build.gradle.kts",
+          "settings.gradle",
+          "settings.gradle.kts",
+          "mvnw",
+          "gradlew",
+          "cargo.toml",
+          "pyproject.toml",
+          "setup.py",
+          "requirements.txt",
+          "go.mod",
+          "composer.json",
+          "Gemfile",
+          ".project",
+          ".classpath",
+          "*.sln",
+          "*.csproj",
+          "CMakeLists.txt",
+          "tsconfig.json",
+          "jsconfig.json",
+          ".eslintrc",
+          ".prettierrc",
+          "webpack.config.js",
+          "vite.config.js",
+          "rollup.config.js",
+          "pubspec.yaml",
+          "mix.exs",
+          "rebar.config",
+          "Dockerfile",
+          "docker-compose.yml",
+        },
+        show_hidden = false,
+        silent_chdir = true,
+        scope_chdir = 'global',
+        datapath = vim.fn.stdpath("data"),
 
-      -- Don't chdir for certain buffers
-      exclude_chdir = {
-        filetype = {"", "OverseerList", "alpha"},
-        buftype = {"nofile", "terminal"},
-      },
-
-      --ignore_lsp = { "lua_ls" },
-    },
-    config = function(_, opts) require("project_nvim").setup(opts) end,
+        -- This is the key setting to prevent finding parent project roots
+        exclude_dirs = {},
+        -- Don't search outside of home directory
+        respect_buf_cwd = false,
+      })
+    end,
   },
-
   -- trim.nvim [auto trim spaces]
   -- https://github.com/cappyzawa/trim.nvim
   {
@@ -131,6 +156,16 @@ return {
     "akinsho/toggleterm.nvim",
     cmd = { "ToggleTerm", "TermExec" },
     opts = {
+      highlights = {
+        Normal = { link = "Normal" },
+        NormalNC = { link = "NormalNC" },
+        NormalFloat = { link = "Normal" },
+        FloatBorder = { link = "FloatBorder" },
+        StatusLine = { link = "StatusLine" },
+        StatusLineNC = { link = "StatusLineNC" },
+        WinBar = { link = "WinBar" },
+        WinBarNC = { link = "WinBarNC" },
+      },
       size = 10,
       open_mapping = [[<F7>]],
       shading_factor = 2,
@@ -452,8 +487,7 @@ return {
         event_handlers = {
           {
             event = "neo_tree_buffer_enter",
-            handler = function(_)
-              vim.opt_local.signcolumn = "auto" end,
+            handler = function(_) vim.opt_local.signcolumn = "auto" end,
           },
         },
       }
@@ -476,35 +510,6 @@ return {
           scrollD = "<C-d>",
         },
       },
-      fold_virt_text_handler = function(virtText, lnum, endLnum, width, truncate)
-        local newVirtText = {}
-        local suffix = ('  ··· %d lines '):format(endLnum - lnum)
-        local sufWidth = vim.fn.strdisplaywidth(suffix)
-        local targetWidth = width - sufWidth
-        local curWidth = 0
-
-        -- Get the first line's content
-        for _, chunk in ipairs(virtText) do
-          local chunkText = chunk[1]
-          local chunkWidth = vim.fn.strdisplaywidth(chunkText)
-          if targetWidth > curWidth + chunkWidth then
-            table.insert(newVirtText, chunk)
-          else
-            chunkText = truncate(chunkText, targetWidth - curWidth)
-            local hlGroup = chunk[2]
-            table.insert(newVirtText, {chunkText, hlGroup})
-            chunkWidth = vim.fn.strdisplaywidth(chunkText)
-            if curWidth + chunkWidth < targetWidth then
-              suffix = suffix .. (' '):rep(targetWidth - curWidth - chunkWidth)
-            end
-            break
-          end
-          curWidth = curWidth + chunkWidth
-        end
-
-        table.insert(newVirtText, {suffix, 'FoldIndicator'})
-        return newVirtText
-      end,
       provider_selector = function(_, filetype, buftype)
         local function handleFallbackException(bufnr, err, providerName)
           if type(err) == "string" and err:match "UfoFallbackException" then

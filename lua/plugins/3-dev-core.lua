@@ -57,20 +57,15 @@ return {
 
       highlight = {
         enable = true,
-        disable = function(lang, bufnr)
-          if utils.is_big_file(bufnr) then
-            return true
-          end
-          return false
-        end,
+        disable = function(_, bufnr) return utils.is_big_file(bufnr) end,
       },
       matchup = {
         enable = true,
         enable_quotes = true,
         disable = function(_, bufnr) return utils.is_big_file(bufnr) end,
       },
-      incremental_selection = { enable = false },
-      indent = { enable = false },
+      incremental_selection = { enable = true },
+      indent = { enable = true },
       textobjects = {
         select = {
           enable = true,
@@ -190,13 +185,7 @@ return {
     "brenoprata10/nvim-highlight-colors",
     event = "User BaseFile",
     cmd = { "HighlightColors" }, -- followed by 'On' / 'Off' / 'Toggle'
-    opts = {
-      enabled_named_colors = false,
-      virtual_symbol = '■',
-      enable_named_colors = false,
-      enable_tailwind = false,
-      render = 'virtual',
-    },
+    opts = { enabled_named_colors = false },
   },
 
   --  LSP -------------------------------------------------------------------
@@ -204,57 +193,29 @@ return {
   -- nvim-java [java support]
   -- https://github.com/nvim-java/nvim-java
   -- Reliable jdtls support. Must go before lsp-config and mason-lspconfig.
-  {
-    "nvim-java/nvim-java",
+{
+  "nvim-java/nvim-java",
     ft = { "java" },
-    dependencies = {
-      "MunifTanjim/nui.nvim",
-      "neovim/nvim-lspconfig",
-      "mfussenegger/nvim-dap",
-      "mason-org/mason.nvim",
-    },
-    opts = {
-      verification = {
-        invalid_order = false,
-        duplicate_setup_calls = false,
+  dependencies = {
+    "nvim-java/lua-async-await",
+    "nvim-java/nvim-java-core",
+    "nvim-java/nvim-java-test",
+    "nvim-java/nvim-java-dap",
+    "MunifTanjim/nui.nvim",
+    "neovim/nvim-lspconfig",
+    "mfussenegger/nvim-dap",
+  },
+  config = function()
+    require('java').setup({
+      spring_boot_tools = {
+        enable = false,
       },
-      dap = {
-        enabled = false,
-      },
-      bundles = {
-        vim.fn.expand("~/.local/share/java/java-debug.jar"),
-        vim.fn.expand("~/.local/share/java/java-test.jar"),
+      jdk = {
+        auto_install = false,
       },
       notifications = {
-        dap = false,
+        dap = false,  -- Enable to see what's happening
       },
-      spring_boot_tools = {
-        enable = false;
-      },
-      jdtls = {
-        settings = {
-          java = {
-            configuration = {
-              updateBuildConfiguration = "automatic",
-            },
-            maven = {
-              downloadSources = true,
-              downloadJavadoc = true,
-            },
-            sources = {
-              organisedImports = {
-                starThreshold = 9999;
-                staticStarThreshold = 9999;
-              },
-            },
-            contentProvider = {
-              preferred = "fernflower",
-            },
-          },
-        },
-      },
-      -- NOTE: One of these files must be in your project root directory.
-      --       Otherwise the debugger will end in the wrong directory and fail.
       root_markers = {
         'settings.gradle',
         'settings.gradle.kts',
@@ -262,16 +223,17 @@ return {
         'build.gradle',
         'mvnw',
         'gradlew',
-        'build.gradle',
         'build.gradle.kts',
         '.git',
       },
-    },
-    config = function(_, opts)
-      require("java").setup(opts)         -- Setup.
-    end
-  },
-
+      verification = {
+        invalid_order = false,
+        duplicate_setup_calls = false,
+      },
+    })
+    require('lspconfig').jdtls.setup({})
+  end
+},
   --  nvim-lspconfig [lsp default configs]
   --  https://github.com/neovim/nvim-lspconfig
   --  This plugin is just a dependency for other plugins.
@@ -285,61 +247,46 @@ return {
   -- mason-lspconfig [auto start lsp clients]
   -- https://github.com/mason-org/mason-lspconfig.nvim
   -- This plugin auto start the lsp clients installed by Mason.
-  {
-    "mason-org/mason-lspconfig.nvim",
-    dependencies = { "neovim/nvim-lspconfig" },
-    event = "User BaseFile",
-    opts = {
-      ensure_installed = {
-        "clangd",
-      },
+-- In your 3-dev-core.lua, update the mason-lspconfig config:
+
+{
+  "mason-org/mason-lspconfig.nvim",
+  dependencies = { "neovim/nvim-lspconfig", "nvim-java/nvim-java" },
+  event = "User BaseFile",
+  config = function()
+    require("mason-lspconfig").setup({
       handlers = {
         function(server_name)
+          if server_name == "jdtls" then
+            return
+          end
           require("lspconfig")[server_name].setup({})
         end,
-
-        ["clangd"] = function()
-          require("lspconfig").clangd.setup({
-            cmd = {
-              "clangd",
-              "--background-index",
-              "--clang-tidy",
-              "--header-insertion=iwyu",
-              "--completion-style=detailed",
-              "--function-arg-placeholders",
-            },
-            capabilities = vim.lsp.protocol.make_client_capabilities(),
-          })
-        end,
       },
-    },
-    config = function(_, opts)
-      require("mason-lspconfig").setup(opts)
-      utils.apply_lsp_diagnostic_defaults() -- Only needs to be called once.
+    })
 
-    vim.defer_fn(function()
-      local mode = vim.g.diagnostics_mode or 3
-      vim.diagnostic.config(utils.diagnostics_enum[mode])
-      -- Force refresh all buffers
-      for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
-        if vim.api.nvim_buf_is_loaded(bufnr) then
-          vim.diagnostic.show(nil, bufnr)
+    -- This sets up the diagnostic enum and creates the UIEnter autocmd
+    require("base.utils").apply_lsp_diagnostic_defaults()
+
+    -- IMMEDIATELY apply the diagnostic config for the current mode
+    -- This ensures diagnostics are configured before LSP attaches
+    local utils = require("base.utils")
+    if utils.diagnostics_enum and utils.diagnostics_enum[vim.g.diagnostics_mode] then
+      vim.diagnostic.config(utils.diagnostics_enum[vim.g.diagnostics_mode])
+    end
+
+    vim.api.nvim_create_autocmd('LspAttach', {
+      callback = function(args)
+        local client = vim.lsp.get_client_by_id(args.data.client_id)
+        local bufnr = args.buf
+
+        if client and client.name then
+          require("base.utils").apply_user_lsp_mappings(client.name, bufnr)
         end
-      end
-    end, 1000)
-
-      -- Apply the lsp mappings to each client in each buffer.
-      vim.api.nvim_create_autocmd('LspAttach', {
-        callback = function(args)
-          local client = vim.lsp.get_client_by_id(args.data.client_id)
-          local bufnr = args.buf
-          if client and client.name then
-            utils.apply_user_lsp_mappings(client.name, bufnr)
-          end
-        end,
-      })
-    end,
-  },
+      end,
+    })
+  end,
+},
 
   --  mason [lsp package manager]
   --  https://github.com/mason-org/mason.nvim
@@ -434,7 +381,7 @@ return {
     opts = {
       aggressive_mode = false,
       excluded_lsp_clients = {
-        "null-ls", "jdtls", "marksman", "lua_ls", "spring-boot"
+        "null-ls", "jdtls", "marksman", "lua_ls"
       },
       grace_period = (60 * 15),
       wakeup_delay = 3000,
@@ -553,6 +500,8 @@ return {
         { path = "neotest-rust", mods = { "neotest-rust" } },
         { path = "neotest-zig", mods = { "neotest-zig" } },
         { path = "nvim-coverage.nvim", mods = { "coverage" } },
+        { path = "gutentags_plus", mods = { "gutentags_plus" } }, -- has vimscript
+        { path = "vim-gutentags", mods = { "vim-gutentags" } }, -- has vimscript
 
         -- To make it work exactly like neodev, you can add all plugins
         -- without conditions instead like this but it will load slower
@@ -691,6 +640,10 @@ return {
           ["<Tab>"] = cmp.mapping(function(fallback)
             if cmp.visible() then
               cmp.select_next_item()
+            elseif luasnip.expand_or_jumpable() then
+              luasnip.expand_or_jump()
+            elseif has_words_before() then
+              cmp.complete()
             else
               fallback()
             end
@@ -698,6 +651,8 @@ return {
           ["<S-Tab>"] = cmp.mapping(function(fallback)
             if cmp.visible() then
               cmp.select_prev_item()
+            elseif luasnip.jumpable(-1) then
+              luasnip.jump(-1)
             else
               fallback()
             end
