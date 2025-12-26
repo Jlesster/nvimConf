@@ -2,6 +2,7 @@
 import argparse
 import math
 import json
+import os
 from PIL import Image
 from materialyoucolor.quantize import QuantizeCelebi
 from materialyoucolor.score.score import Score
@@ -9,6 +10,9 @@ from materialyoucolor.hct import Hct
 from materialyoucolor.dynamiccolor.material_dynamic_colors import MaterialDynamicColors
 from materialyoucolor.utils.color_utils import (rgba_from_argb, argb_from_rgb, argb_from_rgba)
 from materialyoucolor.utils.math_utils import (sanitize_degrees_double, difference_degrees, rotation_direction)
+
+scss_out = os.path.expanduser("~/.local/state/quickshell/user/generated/material_colors.scss")
+os.makedirs(os.path.dirname(scss_out), exist_ok=True)
 
 parser = argparse.ArgumentParser(description='Color generation script')
 parser.add_argument('--path', type=str, default=None, help='generate colorscheme from image')
@@ -130,6 +134,7 @@ def boost_saturation(argb: int, multiplier: float = 1.5) -> int:
     hct = Hct.from_int(argb)
     return Hct.from_hct(hct.hue, min(hct.chroma * multiplier, 100), hct.tone).to_int()
 
+
 if args.scheme == 'scheme-fruit-salad':
     from materialyoucolor.scheme.scheme_fruit_salad import SchemeFruitSalad as Scheme
 elif args.scheme == 'scheme-expressive':
@@ -175,51 +180,48 @@ else:
     material_colors['onSuccessContainer'] = '#0C1F13'
 
 # Terminal Colors - PURPLE MONOCHROMATIC SCHEME
+# Terminal Colors - Harmonized with wallpaper accent
 if args.termscheme is not None:
     with open(args.termscheme, 'r') as f:
         json_termscheme = f.read()
     term_source_colors = json.loads(json_termscheme)['dark' if darkmode else 'light']
 
-    # Get primary purple hue - this will be the base for EVERYTHING
-    primary_color_argb = hex_to_argb(material_colors['primary_paletteKeyColor'])
-    primary_hct = Hct.from_int(primary_color_argb)
-    base_hue = primary_hct.hue
+    # Use the SAME accent as Neovim harmonization
+    accent_hct = hct  # <- This is from your wallpaper image!
+    base_hue = accent_hct.hue
+    base_chroma = accent_hct.chroma
 
-    # Define purple color palette with variations in tone and slight chroma
-    purple_palette = {
-        'term0':  Hct.from_hct(base_hue, min(primary_hct.chroma * 0.6, 25), 6),   # Very dark black-purple bg
+    # Define color palette harmonized with wallpaper
+    term_palette = {
+        'term0':  Hct.from_hct(base_hue, min(base_chroma * 0.6, 25), 6),
 
-        # RED (term1) - Subtle reddish-purple for errors/deletions
-        'term1':  Hct.from_hct(base_hue - 12, min(primary_hct.chroma * 0.8, 45), 58), # DESATURATED red-purple
+        # RED (term1) - Shift toward red from accent
+        'term1':  Hct.from_hct(base_hue - 12, min(base_chroma * 0.8, 45), 58),
 
-        # GREEN (term2) - Subtle cyan-purple for success/additions
-        'term2':  Hct.from_hct(base_hue + 25, min(primary_hct.chroma * 0.9, 48), 62), # DESATURATED blue-purple/teal
+        # GREEN (term2) - Shift toward cyan from accent
+        'term2':  Hct.from_hct(base_hue + 25, min(base_chroma * 0.9, 48), 62),
 
-        'term3':  Hct.from_hct(base_hue + 5, min(primary_hct.chroma * 2.0, 95), 92), # Light purple (Keys/Values) - WHITE-ISH PURPLE
-        'term4':  Hct.from_hct(base_hue + 5, min(primary_hct.chroma * 1.7, 85), 82),  # Medium purple (info)
-        'term5':  Hct.from_hct(base_hue - 5, min(primary_hct.chroma * 1.8, 88), 80), # Pink-purple
-        'term6':  Hct.from_hct(base_hue + 10, min(primary_hct.chroma * 1.7, 85), 82), # Cyan-purple
-        'term7':  Hct.from_hct(base_hue, min(primary_hct.chroma * 0.25, 20), 88),      # Light gray-purple (normal text)
-        'term8':  Hct.from_hct(base_hue, min(primary_hct.chroma * 1.0, 42), 35),      # Medium dark purple
+        'term3':  Hct.from_hct(base_hue + 5, min(base_chroma * 2.0, 95), 92),
+        'term4':  Hct.from_hct(base_hue + 5, min(base_chroma * 1.7, 85), 82),
+        'term5':  Hct.from_hct(base_hue - 5, min(base_chroma * 1.8, 88), 80),
+        'term6':  Hct.from_hct(base_hue + 10, min(base_chroma * 1.7, 85), 82),
+        'term7':  Hct.from_hct(base_hue, min(base_chroma * 0.25, 20), 88),
+        'term8':  Hct.from_hct(base_hue, min(base_chroma * 1.0, 42), 35),
 
-        # BRIGHT RED (term9) - Subtle bright reddish-purple
-        'term9':  Hct.from_hct(base_hue - 12, min(primary_hct.chroma * 1.0, 55), 68), # DESATURATED bright red-purple
-
-        # BRIGHT GREEN (term10) - Subtle bright cyan-purple
-        'term10': Hct.from_hct(base_hue + 25, min(primary_hct.chroma * 1.1, 58), 70), # DESATURATED bright blue-purple
-
-        'term11': Hct.from_hct(base_hue + 5, min(primary_hct.chroma * 2.0, 95), 92), # Bright light purple
-        'term12': Hct.from_hct(base_hue + 5, min(primary_hct.chroma * 1.8, 88), 88),  # Bright medium purple
-        'term13': Hct.from_hct(base_hue - 5, min(primary_hct.chroma * 1.8, 88), 87), # Bright pink-purple
-        'term14': Hct.from_hct(base_hue + 10, min(primary_hct.chroma * 1.7, 85), 86), # Bright cyan-purple
-        'term15': Hct.from_hct(base_hue, min(primary_hct.chroma * 0.12, 10), 96),      # Nearly pure white with tiny purple hint
+        'term9':  Hct.from_hct(base_hue - 12, min(base_chroma * 1.0, 55), 68),
+        'term10': Hct.from_hct(base_hue + 25, min(base_chroma * 1.1, 58), 70),
+        'term11': Hct.from_hct(base_hue + 5, min(base_chroma * 2.0, 95), 92),
+        'term12': Hct.from_hct(base_hue + 5, min(base_chroma * 1.8, 88), 88),
+        'term13': Hct.from_hct(base_hue - 5, min(base_chroma * 1.8, 88), 87),
+        'term14': Hct.from_hct(base_hue + 10, min(base_chroma * 1.7, 85), 86),
+        'term15': Hct.from_hct(base_hue, min(base_chroma * 0.12, 10), 96),
     }
 
     for color in term_source_colors.keys():
-        if color in purple_palette:
-            term_colors[color] = argb_to_hex(purple_palette[color].to_int())
+        if color in term_palette:
+            term_colors[color] = argb_to_hex(term_palette[color].to_int())
         else:
-            # Fallback - force everything to purple hue
+            # Fallback
             term_colors[color] = argb_to_hex(Hct.from_hct(base_hue, 40, 70).to_int())
 
 
@@ -365,14 +367,14 @@ if args.termscheme is not None:
     accent_argb = hex_to_argb(material_colors["primary_paletteKeyColor"])
 
     # VERY gentle harmonization
-    BG_HARMONY = 0.08
-    UI_HARMONY = 5.15
-    SYNTAX_HARMONY = 00.55 #lower is more harmony
-    TEXT_HARMONY = 0.06
+    BG_HARMONY = 0.88
+    UI_HARMONY = 0.15
+    SYNTAX_HARMONY = 0.65 #lower is more harmony
+    TEXT_HARMONY = 0.46
 
-    BG_THRESH = 10.0
-    UI_THRESH = 18.0
-    SYNTAX_THRESH = 90.05 #less is more contr
+    BG_THRESH = 05.0
+    UI_THRESH = 10.0
+    SYNTAX_THRESH = 50.55 #less is more contr
     TEXT_THRESH = 8.0
 
     # Background / surfaces (keep Mocha depth)
@@ -426,6 +428,49 @@ if args.termscheme is not None:
         neovim_colors[k] = argb_to_hex(
             force_tone(hex_to_argb(neovim_colors[k]), tone)
         )
+
+def boost_for_rainbow(argb: int, chroma_boost=1.4, min_tone=70) -> str:
+    hct = Hct.from_int(argb)
+    return argb_to_hex(
+        Hct.from_hct(
+            hct.hue,
+            min(hct.chroma * chroma_boost, 90),
+            max(hct.tone, min_tone)
+        ).to_int()
+    )
+
+def force_vivid_dark(argb: int, chroma: float, tone: float) -> str:
+    hct = Hct.from_int(argb)
+    return argb_to_hex(
+        Hct.from_hct(
+            hct.hue,
+            min(chroma, 95),
+            tone
+        ).to_int()
+    )
+
+
+rainbow_colors = {
+    "red":     boost_for_rainbow(hex_to_argb(neovim_colors["red"]),     1.3, 68),
+    "orange": boost_for_rainbow(hex_to_argb(neovim_colors["peach"]),   1.4, 72),
+    "yellow": boost_for_rainbow(hex_to_argb(neovim_colors["yellow"]),  1.6, 82),
+    "green":  boost_for_rainbow(hex_to_argb(neovim_colors["green"]),   1.3, 74),
+    "cyan":   boost_for_rainbow(hex_to_argb(neovim_colors["teal"]),    1.4, 76),
+
+    # 🔥 FIXED PROBLEM CHILDREN
+    "blue": force_vivid_dark(
+        hex_to_argb(neovim_colors["sky"]),
+        chroma=70,
+        tone=68
+    ),
+
+    "violet": force_vivid_dark(
+        hex_to_argb(neovim_colors["mauve"]),
+        chroma=95,
+        tone=66
+    ),
+}
+
 
 # Generate Neovim colorscheme file
 if args.termscheme is not None and neovim_colors:
@@ -496,10 +541,10 @@ end
 -- ============================================================================
 -- BASE UI ELEMENTS
 -- ============================================================================
-local fucntion setup_highlights()
+local function setup_highlights()
     hi("Normal", {{ fg = colors.text, bg = "NONE" }})
     hi("NormalFloat", {{ fg = colors.text, bg = colors.mantle }})
-    hi("FloatBorder", {{ fg = "NONE", bg = colors.mantle }})
+    hi("FloatBorder", {{ fg = "NONE", bg = colors.lavender }})
     hi("FloatTitle", {{ fg = colors.mauve, bg = "NONE", style = "bold,italic" }})
     hi("Folded", {{ fg = "NONE", bg = "NONE" }})
     hi("FoldColumn", {{ fg = colors.red }})
@@ -523,7 +568,7 @@ local fucntion setup_highlights()
     hi("VertSplit", {{ fg = colors.surface0, bg = "NONE" }})
     hi("WinSeparator", {{ fg = colors.surface0, bg = "NONE" }})
 
-    hi("Search", {{ fg = colors.red, bg = colors.rosewater }})
+    hi("Search", {{ fg = colors.red, bg = colors.surface0 }})
     hi("IncSearch", {{ fg = "NONE", bg = colors.red }})
     hi("CurSearch", {{ fg = "NONE", bg = colors.red }})
     hi("Visual", {{ bg = colors.surface1 }})
@@ -604,6 +649,7 @@ local fucntion setup_highlights()
 
     hi("@constructor", {{ fg = colors.sapphire }})
     hi("@operator", {{ fg = "#00ffff" }})
+    hi("@operator.java", {{ fg = "#00ffff" }})
 
     hi("@keyword", {{ fg = colors.mauve, style = "bold" }})
     hi("@keyword.conditional", {{ fg = colors.mauve, style = "bold,italic" }})
@@ -623,7 +669,7 @@ local fucntion setup_highlights()
     hi("@punctuation.bracket", {{ fg = colors.overlay2 }})
     hi("@punctuation.special", {{ fg = colors.sky }})
 
-    hi("@comment", {{ fg = colors.pink, italic = true }})
+    hi("@comment", {{ fg = colors.pink, style = "italic" }})
     hi("@comment.todo", {{ fg = colors.yellow, bg = colors.surface0, style = "bold" }})
     hi("@comment.note", {{ fg = colors.blue, bg = colors.surface0, style = "bold" }})
     hi("@comment.warning", {{ fg = colors.peach, bg = colors.surface0, style = "bold" }})
@@ -715,7 +761,7 @@ local fucntion setup_highlights()
     -- ============================================================================
     -- PLUGIN: TELESCOPE
     -- ============================================================================
-    hi("TelescopeBorder", {{ fg = colors.lavender, bg = colors.mantle }})
+    hi("TelescopeBorder", {{ fg = colors.lavender, bg = "NONE" }})
     hi("TelescopePromptBorder", {{ fg = colors.mauve, bg = "NONE"}})
     hi("TelescopeResultsBorder", {{ fg = colors.lavender, bg = "NONE" }})
     hi("TelescopePreviewBorder", {{ fg = colors.lavender, bg = "NONE" }})
@@ -744,12 +790,21 @@ local fucntion setup_highlights()
     hi("NeoTreeDirectoryName", {{ fg = colors.sky }})
     hi("NeoTreeCursorLine", {{ fg = colors.red }})
 
+    hi("DressingInput", {{ fg = colors.text, bg = colors.mantle }})
+    hi("DressingInputBorder", {{ fg = colors.lavender, bg = "NONE" }})
+    hi("DressingInputTitle", {{ fg = colors.mauve, bg = "NONE", style = "bold" }})
+    hi("DressingInputPrompt", {{ fg = colors.text, bg = "NONE" }})  -- This is the key one!
+    hi("DressingInputText", {{ fg = colors.text, bg = "NONE" }})
+    hi("Prompt", {{ fg = colors.text, bg = "NONE" }})
+    hi("Question", {{ fg = colors.text, bg = "NONE" }})
+
     -- ============================================================================
     -- PLUGIN: INDENT-BLANKLINE
     -- ============================================================================
-    hi("IblIndent", {{ fg = colors.lavender }})
+    hi("IblIndent", {{ fg = colors.red }})
     hi("IblScope", {{ fg = colors.mauve }})
-    hi("MiniIndentscopeSymbol", {{ fg = colors.mauve }} )
+    hi("MiniIndentscopeSymbol", {{ fg = colors.lavender }} )
+    hi("MiniIndentscopeSymbolOff", {{ fg = colors.overlay0 }} )
 
     -- ============================================================================
     -- PLUGIN: WHICH-KEY
@@ -765,7 +820,7 @@ local fucntion setup_highlights()
     -- ============================================================================
     -- PLUGIN: NOTIFY
     -- ============================================================================
-    hi("NotifyBackground", {{ bg = "#000000" }})
+    hi("NotifyBackground", {{ bg = colors.base }})
     hi("NotifyERRORBorder", {{ fg = colors.red }})
     hi("NotifyWARNBorder", {{ fg = colors.yellow }})
     hi("NotifyINFOBorder", {{ fg = colors.blue }})
@@ -785,13 +840,13 @@ local fucntion setup_highlights()
     -- ============================================================================
     -- PLUGIN: RAINBOW DELIMITERS
     -- ============================================================================
-    hi("RainbowDelimiterRed", {{ fg = colors.red }})
-    hi("RainbowDelimiterOrange", {{ fg = colors.peach }})
-    hi("RainbowDelimiterYellow", {{ fg = colors.yellow }})
-    hi("RainbowDelimiterGreen", {{ fg = colors.green }})
-    hi("RainbowDelimiterCyan", {{ fg = colors.teal }})
-    hi("RainbowDelimiterBlue", {{ fg = colors.sky }})
-    hi("RainbowDelimiterViolet", {{ fg = colors.mauve }})
+    hi("RainbowDelimiterRed",    {{ fg = "{rainbow_colors['red']}" }})
+    hi("RainbowDelimiterOrange", {{ fg = "{rainbow_colors['orange']}" }})
+    hi("RainbowDelimiterYellow", {{ fg = "{rainbow_colors['yellow']}" }})
+    hi("RainbowDelimiterGreen",  {{ fg = "{rainbow_colors['green']}" }})
+    hi("RainbowDelimiterCyan",   {{ fg = "{rainbow_colors['cyan']}" }})
+    hi("RainbowDelimiterBlue",   {{ fg = "{rainbow_colors['blue']}" }})
+    hi("RainbowDelimiterViolet", {{ fg = "{rainbow_colors['violet']}" }})
 
     -- ============================================================================
     -- PLUGIN: RENDER-MARKDOWN
@@ -825,7 +880,7 @@ local fucntion setup_highlights()
     hi("BufferVisibleTarget", {{ fg = colors.red, bg = "NONE" }})
     hi("BufferInactive", {{ fg = colors.overlay0, bg = "NONE" }})
     hi("BufferInactiveIndex", {{ fg = colors.overlay0, bg = "NONE" }})
-    hi("BufferInactiveMod", {{ fg = colors.yellow, bg = "NONE" }})
+    hi("BufferInactiveMod", {{ fg = colors.lavender, bg = "NONE" }})
     hi("BufferInactiveSign", {{ fg = colors.overlay0, bg = "NONE" }})
     hi("BufferInactiveTarget", {{ fg = colors.red, bg = "NONE" }})
     hi("BufferTabpages", {{ fg = colors.mauve, bg = "NONE", style = "bold" }})
@@ -838,11 +893,19 @@ local fucntion setup_highlights()
     hi("OverseerSuccess", {{ fg = colors.green, bg = "NONE" }})
     hi("OverseerCanceled", {{ fg = colors.overlay0, bg = "NONE" }})
     hi("OverseerFailure", {{ fg = colors.red, bg = "NONE" }})
+    hi("OverseerBorder", {{ fg = colors.lavender, bg = "NONE" }})
+    hi("OverseerNormal", {{ fg = colors.text, bg = colors.surface0 }})
 
     -- Additional top bar highlights (in case it's something else)
     hi("WinBar", {{ fg = "NONE", bg = "NONE" }})
     hi("SatelliteBar", {{ fg = "NONE", bg = "NONE" }})
     hi("SatelliteCursor", {{ fg = "NONE", bg = "NONE" }})
+    hi("NeoTreeTitleBar", {{ fg = colors.mantle, bg = colors.teal }})
+    hi("NeoTreeDimmedText", {{ fg = colors.red }})
+    hi("NeoTreeMessage", {{ fg = colors.subtext0 }})
+    hi("NeoTreeFloatNormal", {{ fg = colors.red }})
+    hi("NeoTreeFloatBorder", {{ fg = colors.teal }})
+    hi("NeoTreeFloatTitle", {{ fg = colors.red }})
     hi("NvimScrollbarHandle", {{ fg = "NONE", bg = "NONE" }})
     hi("NvimScrollbarCursor", {{ fg = "NONE", bg = "NONE" }})
     hi("NvimScrollbarError", {{ fg = "NONE", bg = "NONE" }})
@@ -868,6 +931,7 @@ local fucntion setup_highlights()
     -- PLUGIN: ALPHA (Dashboard)
     -- ============================================================================
     hi("DashboardHeader", {{ fg = colors.sapphire }})
+    hi("DashboardFooter", {{ fg = colors.mauve }})
     hi("AlphaShortcut", {{ fg = colors.red }})
     hi("AlphaIconNew", {{ fg = colors.blue }})
     hi("AlphaIconRecent", {{ fg = colors.pink }})
@@ -1021,6 +1085,7 @@ local fucntion setup_highlights()
       "OverseerSuccess",
       "OverseerCanceled",
       "OverseerFailure",
+      "OverseerBorder",
         }}
 
     for _, group in ipairs(transparent_groups) do
@@ -1034,54 +1099,6 @@ local fucntion setup_highlights()
 end
 
 setup_highlights()
-
-local augroup = vim.api.nvim_create_augroup("MaterialPurpleMocha", {{ clear = true }})
-
--- Reapply highlights after colorscheme changes
-vim.api.nvim_create_autocmd("ColorScheme", {{
-    group = augroup,
-    pattern = "material_purple_mocha",
-    callback = function()
-    setup_highlights()
-    end,
-    }})
-
--- Reapply after plugins load (VimEnter runs after all plugins)
-vim.api.nvim_create_autocmd("VimEnter", {{
-    group = augroup,
-    callback = function()
-    -- Delay slightly to ensure plugins are fully loaded
-    vim.defer_fn(function()
-                 if vim.g.colors_name == "material_purple_mocha" then
-                 setup_highlights()
-                 end
-                 end, 50)
-    end,
-    }})
-
--- Reapply when entering a buffer (catches late-loading plugins)
-vim.api.nvim_create_autocmd("BufEnter", {{
-    group = augroup,
-    once = true,
-    callback = function()
-    vim.defer_fn(function()
-                 if vim.g.colors_name == "material_purple_mocha" then
-                 setup_highlights()
-                 end
-                 end, 100)
-    end,
-    }})
-
-vim.api.nvim_create_autocmd("FileType", {{
-    pattern = {{ "lua", "python", "javascript", "typescript", "css", "scss" }},
-    callback = function()
-    -- When editing code files with color values,
-    -- syntax highlight the hex codes themselves in muted colors
-    vim.cmd([[syn match ColorHex /#[0-9A-Fa-f]\{{6\}}/ containedin=ALL]])
-    vim.cmd(string.format([[hi ColorHex guifg=%s]], colors.peach))
-    end,
-    }})
-
 '''
 
     with open(nvim_output, 'w') as f:
@@ -1090,7 +1107,8 @@ vim.api.nvim_create_autocmd("FileType", {{
     if args.debug:
         print(f"\nNeovim colorscheme written to: {nvim_output}")
 
-# Add this near the end of your script, after the Neovim colorscheme generation
+
+
 
 # Generate LazyGit config
 if args.termscheme is not None and lazygit_colors:
