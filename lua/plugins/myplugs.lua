@@ -35,8 +35,10 @@ return {
       opts = {
         scope = {
           enabled = false,
-          char = "┃",
+          char = "•",
           highlight = "IblScope",
+          show_start = true,
+          show_end = false,
         },
         indent = {
           char = "•",

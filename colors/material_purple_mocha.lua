@@ -169,6 +169,7 @@ local function setup_highlights()
 
     hi("@constructor", { fg = colors.sapphire })
     hi("@operator", { fg = "#00ffff" })
+    hi("@operator.java", { fg = "#00ffff" })
 
     hi("@keyword", { fg = colors.mauve, style = "bold" })
     hi("@keyword.conditional", { fg = colors.mauve, style = "bold,italic" })
@@ -320,9 +321,10 @@ local function setup_highlights()
     -- ============================================================================
     -- PLUGIN: INDENT-BLANKLINE
     -- ============================================================================
-    hi("IblIndent", { fg = colors.lavender })
+    hi("IblIndent", { fg = colors.red })
     hi("IblScope", { fg = colors.mauve })
-    hi("MiniIndentscopeSymbol", { fg = colors.mauve } )
+    hi("MiniIndentscopeSymbol", { fg = colors.lavender } )
+    hi("MiniIndentscopeSymbolOff", { fg = colors.overlay0 } )
 
     -- ============================================================================
     -- PLUGIN: WHICH-KEY
@@ -398,7 +400,7 @@ local function setup_highlights()
     hi("BufferVisibleTarget", { fg = colors.red, bg = "NONE" })
     hi("BufferInactive", { fg = colors.overlay0, bg = "NONE" })
     hi("BufferInactiveIndex", { fg = colors.overlay0, bg = "NONE" })
-    hi("BufferInactiveMod", { fg = colors.yellow, bg = "NONE" })
+    hi("BufferInactiveMod", { fg = colors.lavender, bg = "NONE" })
     hi("BufferInactiveSign", { fg = colors.overlay0, bg = "NONE" })
     hi("BufferInactiveTarget", { fg = colors.red, bg = "NONE" })
     hi("BufferTabpages", { fg = colors.mauve, bg = "NONE", style = "bold" })
@@ -418,11 +420,11 @@ local function setup_highlights()
     hi("WinBar", { fg = "NONE", bg = "NONE" })
     hi("SatelliteBar", { fg = "NONE", bg = "NONE" })
     hi("SatelliteCursor", { fg = "NONE", bg = "NONE" })
-    hi("NeoTreeTitleBar", { fg = colors.red, bg = "NONE" })
+    hi("NeoTreeTitleBar", { fg = colors.mantle, bg = colors.teal })
     hi("NeoTreeDimmedText", { fg = colors.red })
     hi("NeoTreeMessage", { fg = colors.subtext0 })
     hi("NeoTreeFloatNormal", { fg = colors.red })
-    hi("NeoTreeFloatBorder", { fg = colors.lavender })
+    hi("NeoTreeFloatBorder", { fg = colors.teal })
     hi("NeoTreeFloatTitle", { fg = colors.red })
     hi("NvimScrollbarHandle", { fg = "NONE", bg = "NONE" })
     hi("NvimScrollbarCursor", { fg = "NONE", bg = "NONE" })

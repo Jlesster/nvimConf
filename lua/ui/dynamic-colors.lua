@@ -15,125 +15,217 @@ local is_transitioning = false
 local fs_event = nil
 local debounce_timer = nil
 
--- ------------------------------------------------------------
+-- Cursorline indent highlighting
+local cursorline_ns = vim.api.nvim_create_namespace("cursorline_indent")
+
+-- Filetypes to exclude from cursorline indent highlighting
+local excluded_filetypes = {
+  "alpha",
+  "dashboard",
+  "neo-tree",
+  "aerial",
+  "NvimTree",
+  "help",
+  "Trouble",
+  "lazy",
+  "mason",
+  "notify",
+  "toggleterm",
+  "lazyterm",
+  "starter",
+}
+
 -- Transparency invariants
--- ------------------------------------------------------------
 local transparent_groups = {
-      "Normal",
-      "NormalFloat",
-      "FloatBorder",
-      "SignColumn",
-      "EndOfBuffer",
-      "VertSplit",
-      "WinSeparator",
-      "WinBar",
-      "WinBarNC",
-      "Title",
-      "CursorLine",
-      "CursorColumn",
-      "ColorColumn",
-      "StatusLine",
-      "StatusLineNC",
-      "TabLine",
-      "TabLineFill",
-      "TabLineSel",
-      "Pmenu",
-      "PmenuSbar",
-      "PmenuThumb",
-      "PmenuBorder",
-      "TelescopePromptBorder",
-      "TelescopeResultsBorder",
-      "TelescopePreviewBorder",
-      "CmpItemKindVariable",
-      "CmpItemKindFunction",
-      "CmpItemKindMethod",
-      "CmpItemKindConstructor",
-      "CmpItemKindClass",
-      "CmpItemKindInterface",
-      "CmpItemKindStruct",
-      "CmpItemKindEnum",
-      "CmpItemKindEnumMember",
-      "CmpItemKindModule",
-      "CmpItemKindProperty",
-      "CmpItemKindField",
-      "CmpItemKindTypeParameter",
-      "CmpItemKindConstant",
-      "CmpItemKindKeyword",
-      "CmpItemKindSnippet",
-      "CmpItemKindText",
-      "CmpItemKindFile",
-      "CmpItemKindFolder",
-      "CmpItemKindColor",
-      "CmpItemKindReference",
-      "CmpItemKindOperator",
-      "CmpItemKindUnit",
-      "CmpItemKindValue",
-      "CmpItemAbbr",
-      "CmpItemAbbrDeprecated",
-      "CmpItemAbbrMatch",
-      "CmpItemAbbrMatchFuzzy",
-      "CmpItemMenu",
-      "WhichKey",
-      "WhichKeyFloat",
-      "WhichKeyTitle",
-      "NeoTreeTabActive",
-      "NeoTreeTabInactive",
-      "NeoTreeTabSeparatorActive",
-      "NeoTreeTabSeparatorInactive",
-      "RenderMarkdownCode",
-      "BufferLineFill",
-      "BufferLineBackground",
-      "BufferLineBuffer",
-      "BufferLineBufferVisible",
-      "BufferLineBufferSelected",
-      "BufferLineTab",
-      "BufferLineTabSelected",
-      "BufferLineSeparator",
-      "BufferLineSeparatorVisible",
-      "BufferLineSeparatorSelected",
-      "BufferCurrent",
-      "BufferCurrentIndex",
-      "BufferCurrentMod",
-      "BufferCurrentSign",
-      "BufferCurrentTarget",
-      "BufferVisible",
-      "BufferVisibleIndex",
-      "BufferVisibleMod",
-      "BufferVisibleSign",
-      "BufferVisibleTarget",
-      "BufferInactive",
-      "BufferInactiveIndex",
-      "BufferInactiveMod",
-      "BufferInactiveSign",
-      "BufferInactiveTarget",
-      "BufferTabpages",
-      "BufferTabpageFill",
-      "BufferLineDevIconLua",
-      "BufferLineDevIconDefault",
-      "OverseerTask",
-      "OverseerTaskBorder",
-      "OverseerRunning",
-      "OverseerSuccess",
-      "OverseerCanceled",
-      "OverseerFailure",
+  "Normal", "NormalFloat", "FloatBorder", "SignColumn", "EndOfBuffer",
+  "VertSplit", "WinSeparator", "WinBar", "WinBarNC", "Title",
+  "CursorLine", "CursorColumn", "ColorColumn", "StatusLine", "StatusLineNC",
+  "TabLine", "TabLineFill", "TabLineSel", "Pmenu", "PmenuSbar", "PmenuThumb",
+  "PmenuBorder", "TelescopePromptBorder", "TelescopeResultsBorder",
+  "TelescopePreviewBorder", "CmpItemKindVariable", "CmpItemKindFunction",
+  "CmpItemKindMethod", "CmpItemKindConstructor", "CmpItemKindClass",
+  "CmpItemKindInterface", "CmpItemKindStruct", "CmpItemKindEnum",
+  "CmpItemKindEnumMember", "CmpItemKindModule", "CmpItemKindProperty",
+  "CmpItemKindField", "CmpItemKindTypeParameter", "CmpItemKindConstant",
+  "CmpItemKindKeyword", "CmpItemKindSnippet", "CmpItemKindText",
+  "CmpItemKindFile", "CmpItemKindFolder", "CmpItemKindColor",
+  "CmpItemKindReference", "CmpItemKindOperator", "CmpItemKindUnit",
+  "CmpItemKindValue", "CmpItemAbbr", "CmpItemAbbrDeprecated",
+  "CmpItemAbbrMatch", "CmpItemAbbrMatchFuzzy", "CmpItemMenu",
+  "WhichKey", "WhichKeyFloat", "WhichKeyTitle", "NeoTreeTabActive",
+  "NeoTreeTabInactive", "NeoTreeTabSeparatorActive", "NeoTreeTabSeparatorInactive",
+  "RenderMarkdownCode", "BufferLineFill", "BufferLineBackground",
+  "BufferLineBuffer", "BufferLineBufferVisible", "BufferLineBufferSelected",
+  "BufferLineTab", "BufferLineTabSelected", "BufferLineSeparator",
+  "BufferLineSeparatorVisible", "BufferLineSeparatorSelected",
+  "BufferCurrent", "BufferCurrentIndex", "BufferCurrentMod",
+  "BufferCurrentSign", "BufferCurrentTarget", "BufferVisible",
+  "BufferVisibleIndex", "BufferVisibleMod", "BufferVisibleSign",
+  "BufferVisibleTarget", "BufferInactive", "BufferInactiveIndex",
+  "BufferInactiveMod", "BufferInactiveSign", "BufferInactiveTarget",
+  "BufferTabpages", "BufferTabpageFill", "BufferLineDevIconLua",
+  "BufferLineDevIconDefault", "OverseerTask", "OverseerTaskBorder",
+  "OverseerRunning", "OverseerSuccess", "OverseerCanceled", "OverseerFailure",
 }
 
 local function enforce_transparency()
   for _, g in ipairs(transparent_groups) do
-    local ok = pcall(function()
+    pcall(function()
       local hl = vim.api.nvim_get_hl(0, { name = g })
       hl.bg = "NONE"
       hl.ctermbg = nil
       vim.api.nvim_set_hl(0, g, hl)
     end)
-    if not ok then
-    end
   end
 end
 
--- ------------------------------------------------------------
--- Parse theme file as DATA
--- ------------------------------------------------------------
+-- Helper function to dim a hex color
+local function dim_color(hex, factor)
+  if not hex or hex == "NONE" then return hex end
+
+  local r = tonumber(hex:sub(2, 3), 16)
+  local g = tonumber(hex:sub(4, 5), 16)
+  local b = tonumber(hex:sub(6, 7), 16)
+
+  r = math.floor(r * factor)
+  g = math.floor(g * factor)
+  b = math.floor(b * factor)
+
+  return string.format("#%02x%02x%02x", r, g, b)
+end
+
+-- Check if current buffer should be excluded
+local function should_exclude_buffer()
+  local ft = vim.bo.filetype
+  for _, excluded_ft in ipairs(excluded_filetypes) do
+    if ft == excluded_ft then
+      return true
+    end
+  end
+  return false
+end
+
+-- Cursorline indent functions
+local function highlight_current_line_indent()
+  -- Skip if excluded filetype
+  if should_exclude_buffer() then
+    return
+  end
+
+  pcall(function()
+    vim.api.nvim_buf_clear_namespace(0, cursorline_ns, 0, -1)
+
+    local line = vim.fn.line(".") - 1
+    local text = vim.api.nvim_buf_get_lines(0, line, line + 1, false)[1]
+
+    if not text then return end
+
+    -- Count leading whitespace
+    local leading_whitespace = text:match("^%s*")
+    if not leading_whitespace or #leading_whitespace == 0 then return end
+
+    -- Get indentation settings
+    local tabstop = vim.bo.tabstop
+    local shiftwidth = vim.bo.shiftwidth
+    if shiftwidth == 0 then shiftwidth = tabstop end
+    if shiftwidth == 0 then shiftwidth = 2 end
+
+    -- Calculate visual column position for each character
+    local col = 0
+    for i = 1, #leading_whitespace do
+      local char = leading_whitespace:sub(i, i)
+
+      -- Place marker at indent levels (matching ibl's logic)
+      if col % shiftwidth == 0 then
+        vim.api.nvim_buf_set_extmark(0, cursorline_ns, line, i - 1, {
+          virt_text = { { "•", "IblScopeCursorLine" } },
+          virt_text_pos = "overlay",
+          priority = 2,
+        })
+      end
+
+      -- Advance column position
+      if char == "\t" then
+        col = col + tabstop - (col % tabstop)
+      else
+        col = col + 1
+      end
+    end
+  end)
+end
+
+local function update_indent_colors(colors)
+  -- Dim the regular indent guides
+  local dimmed = dim_color(colors.lavender, 0.3)
+
+  -- For indent-blankline.nvim (ibl) - regular indent guides
+  pcall(function()
+    vim.api.nvim_set_hl(0, "IblIndent", { fg = dimmed })
+    vim.api.nvim_set_hl(0, "IblScope", { fg = colors.mauve })
+    vim.api.nvim_set_hl(0, "IblWhitespace", { fg = colors.surface0 })
+    -- Highlight for current line (used by extmarks)
+    vim.api.nvim_set_hl(0, "IblScopeCursorLine", { fg = colors.mauve, bold = true })
+  end)
+
+  -- For mini.indentscope (the animated scope line)
+  pcall(function()
+    vim.api.nvim_set_hl(0, "MiniIndentscopeSymbol", { fg = colors.lavender })
+    vim.api.nvim_set_hl(0, "MiniIndentscopeSymbolOff", { fg = colors.overlay0 })
+  end)
+
+  -- For older indent-blankline versions
+  pcall(function()
+    vim.api.nvim_set_hl(0, "IndentBlanklineChar", { fg = dimmed })
+    vim.api.nvim_set_hl(0, "IndentBlanklineContextChar", { fg = colors.mauve })
+  end)
+
+  -- Force refresh indent-blankline if it's loaded
+  local ok, ibl = pcall(require, "ibl")
+  if ok then
+    vim.schedule(function()
+      vim.cmd("IBLDisable")
+      vim.cmd("IBLEnable")
+    end)
+  end
+
+  -- Refresh current line highlight
+  vim.schedule(highlight_current_line_indent)
+end
+
+-- Add this function after your enforce_transparency function
+local function reload_heirline_colors(colors)
+  -- Check if heirline is available
+  local ok, heirline = pcall(require, "heirline")
+  if not ok then
+    return
+  end
+
+  local ok2, heirline_components = pcall(require, "heirline-components.all")
+  if not ok2 then
+    return
+  end
+
+  -- Get base colors from heirline-components
+  local hl_colors = heirline_components.hl.get_colors()
+
+  -- Override buffer colors with your theme colors
+  hl_colors.buffer_fg = colors.overlay0 or "#706F86"  -- Inactive tab text
+  hl_colors.buffer_bg = "NONE"                         -- Inactive tab background
+  hl_colors.buffer_visible_fg = colors.text or "#D1D5F4"  -- Visible but not active
+  hl_colors.buffer_active_fg = colors.mauve or "#F493B5"  -- Active tab text
+  hl_colors.tabline_bg = "NONE"                        -- Background of entire tabline
+
+  -- Reload heirline with new colors
+  heirline.load_colors(hl_colors)
+
+  -- Force heirline to redraw
+  vim.schedule(function()
+    vim.cmd("redrawstatus!")
+    vim.cmd("redrawtabline")
+  end)
+end
+
+-- Parse theme file as DATA (IMPROVED)
 local function load_theme()
   local f = io.open(theme_file, "r")
   if not f then
@@ -147,14 +239,36 @@ local function load_theme()
   local colors, highlights = {}, {}
 
   for _, l in ipairs(lines) do
+    -- Parse color definitions
     local k, v = l:match("^%s*([%w_]+)%s*=%s*\"(#[%x]+)\"")
     if k and v then colors[k] = v end
 
+    -- Parse highlight definitions
     local g, body = l:match('hi%("([^"]+)",%s*{(.-)}')
     if g then
       local spec = {}
-      spec.fg = body:match("fg%s*=%s*colors%.([%w_]+)")
-      spec.bg = body:match("bg%s*=%s*colors%.([%w_]+)")
+
+      -- Handle fg - can be colors.xxx or literal hex
+      local fg_color = body:match("fg%s*=%s*colors%.([%w_]+)")
+      local fg_literal = body:match('fg%s*=%s*"(#[%x]+)"')
+      if fg_color then
+        spec.fg = fg_color
+      elseif fg_literal then
+        spec.fg_literal = fg_literal
+      end
+
+      -- Handle bg - can be colors.xxx or literal hex or "NONE"
+      local bg_color = body:match("bg%s*=%s*colors%.([%w_]+)")
+      local bg_literal = body:match('bg%s*=%s*"(#[%x]+)"')
+      local bg_none = body:match('bg%s*=%s*"NONE"')
+      if bg_color then
+        spec.bg = bg_color
+      elseif bg_literal then
+        spec.bg_literal = bg_literal
+      elseif bg_none then
+        spec.bg_literal = "NONE"
+      end
+
       spec.style = body:match('style%s*=%s*"([^"]+)"')
       highlights[g] = spec
     end
@@ -166,18 +280,36 @@ end
 local function apply_highlights(colors, highlights)
   for group, spec in pairs(highlights) do
     local hl = {}
-    if spec.fg then hl.fg = colors[spec.fg] end
-    if spec.bg then hl.bg = colors[spec.bg] end
-    if spec.style then
-      for f in spec.style:gmatch("[^,]+") do hl[f] = true end
+
+    -- Handle foreground
+    if spec.fg then
+      hl.fg = colors[spec.fg]
+    elseif spec.fg_literal then
+      hl.fg = spec.fg_literal
     end
+
+    -- Handle background
+    if spec.bg then
+      hl.bg = colors[spec.bg]
+    elseif spec.bg_literal then
+      hl.bg = spec.bg_literal
+    end
+
+    -- Handle style
+    if spec.style then
+      for f in spec.style:gmatch("[^,]+") do
+        hl[vim.trim(f)] = true
+      end
+    end
+
     vim.api.nvim_set_hl(0, group, hl)
   end
+
+  reload_heirline_colors(colors)
+  update_indent_colors(colors)
 end
 
--- ------------------------------------------------------------
 -- Reload (NO :colorscheme)
--- ------------------------------------------------------------
 function M.reload()
   if is_transitioning then return end
   is_transitioning = true
@@ -202,8 +334,12 @@ function M.reload()
   local to = {}
   for g, _ in pairs(from) do
     local spec = highlights[g]
-    if spec and spec.bg then
-      to[g] = { bg = colors[spec.bg] }
+    if spec then
+      if spec.bg then
+        to[g] = { bg = colors[spec.bg] }
+      elseif spec.bg_literal then
+        to[g] = { bg = spec.bg_literal }
+      end
     end
   end
 
@@ -212,6 +348,7 @@ function M.reload()
     delay = 10,
     on_done = function()
       enforce_transparency()
+      update_indent_colors(colors)
       is_transitioning = false
     end,
   })
@@ -226,13 +363,33 @@ function M.setup()
   end
   f:close()
 
+  -- Setup cursorline indent highlighting
+  vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
+    callback = highlight_current_line_indent,
+  })
+
+  vim.api.nvim_create_autocmd("BufEnter", {
+    callback = function()
+      vim.defer_fn(highlight_current_line_indent, 10)
+    end,
+  })
+
+  -- Clear highlights when leaving buffer
+  vim.api.nvim_create_autocmd("BufLeave", {
+    callback = function()
+      pcall(function()
+        vim.api.nvim_buf_clear_namespace(0, cursorline_ns, 0, -1)
+      end)
+    end,
+  })
+
   -- Initial load with delay to ensure plugins are ready
   vim.defer_fn(function()
     M.reload()
   end, 100)
 
   -- File watcher using vim.loop (compatible with older Neovim)
-  local uv = vim.loop or vim.uv -- Support both old and new API
+  local uv = vim.loop or vim.uv
 
   -- Clean up existing watchers
   if fs_event then
