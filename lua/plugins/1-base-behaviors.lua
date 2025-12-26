@@ -326,6 +326,7 @@ return {
       return {
         auto_clean_after_session_restore = true,
         close_if_last_window = true,
+        popout_border_style = "rounded",
         buffers = {
           show_unloaded = true
         },

@@ -283,66 +283,7 @@ cmd("CloseNotifications", function()
   require("notify").dismiss({ pending = true, silent = true })
 end, { desc = "Dismiss all notifications" })
 
--- Add at the end of the file
-
 -- ## PROJECT ROOT MANAGEMENT -----------------------------------------------
--- -- Auto-change directory when switching buffers (for project.nvim)
--- if is_available("project.nvim") then
---   autocmd({ "BufEnter", "BufWinEnter" }, {
---     desc = "Change directory to project root on buffer enter",
---     callback = function(args)
---       -- Skip for special buffers
---       local buftype = vim.api.nvim_get_option_value("buftype", { buf = args.buf })
---       local filetype = vim.api.nvim_get_option_value("filetype", { buf = args.buf })
---
---       -- Don't change directory for these buffer types
---       if buftype ~= "" or
---          vim.tbl_contains({ "alpha", "neo-tree", "OverseerList", "toggleterm" }, filetype) then
---         return
---       end
---
---       -- Get the buffer's file path
---       local bufname = vim.api.nvim_buf_get_name(args.buf)
---       if bufname == "" or not vim.loop.fs_stat(bufname) then
---         return
---       end
---
---       -- Try to find project root
---       vim.defer_fn(function()
---         local ok = pcall(vim.cmd, "ProjectRoot")
---         if ok then
---           -- Update Neo-tree if it's open
---           if is_available("neo-tree.nvim") then
---             local manager_ok, manager = pcall(require, "neo-tree.sources.manager")
---             if manager_ok then
---               pcall(function()
---                 manager.refresh("filesystem")
---               end)
---             end
---           end
---         end
---       end, 10)
---     end,
---   })
---
---   -- Also update Neo-tree when changing directories manually
---   autocmd("DirChanged", {
---     desc = "Update Neo-tree when directory changes",
---     callback = function()
---       if is_available("neo-tree.nvim") then
---         vim.defer_fn(function()
---           local manager_ok, manager = pcall(require, "neo-tree.sources.manager")
---           if manager_ok then
---             pcall(function()
---               manager.refresh("filesystem")
---             end)
---           end
---         end, 50)
---       end
---     end,
---   })
--- end
-
 
 -- Change to project root or buffer's directory on buffer enter
 autocmd("BufEnter", {
@@ -401,21 +342,23 @@ autocmd("BufEnter", {
       end
     end
 
--- Refresh Neo-tree if directory actually changed (works for both project root and file dir)
-if new_cwd ~= old_cwd and is_available("neo-tree.nvim") then
-  vim.schedule(function()
-    pcall(function()
-      local manager = require("neo-tree.sources.manager")
-      local commands = require("neo-tree.sources.filesystem.commands")
-      local state = manager.get_state("filesystem")
+    -- Refresh Neo-tree if directory actually changed (works for both project root and file dir)
+    if new_cwd ~= old_cwd and is_available("neo-tree.nvim") then
+      vim.schedule(function()
+        pcall(function()
+          local manager = require("neo-tree.sources.manager")
+          local state = manager.get_state("filesystem")
 
-      -- Always navigate to the new directory
-      if state then
-        commands.navigate(state, new_cwd)
-      end
-    end)
-  end)
-end
+          if state then
+            -- Set the new path directly
+            state.path = new_cwd
+
+            -- Refresh to show the new directory
+            manager.refresh("filesystem")
+          end
+        end)
+      end)
+    end
   end,
 })
 
@@ -430,12 +373,13 @@ autocmd("DirChanged", {
           local state = manager.get_state("filesystem")
           local new_cwd = vim.fn.getcwd()
 
-          -- Navigate Neo-tree to new directory
-          if state and state.path ~= new_cwd then
-            require("neo-tree.sources.filesystem.commands").navigate(state, new_cwd)
-          end
+          if state then
+            -- Set the new path directly
+            state.path = new_cwd
 
-          manager.refresh("filesystem")
+            -- Refresh to show the new directory
+            manager.refresh("filesystem")
+          end
         end)
       end)
     end

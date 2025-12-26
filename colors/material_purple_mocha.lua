@@ -64,7 +64,7 @@ end
 local function setup_highlights()
     hi("Normal", { fg = colors.text, bg = "NONE" })
     hi("NormalFloat", { fg = colors.text, bg = colors.mantle })
-    hi("FloatBorder", { fg = "NONE", bg = colors.mantle })
+    hi("FloatBorder", { fg = "NONE", bg = colors.lavender })
     hi("FloatTitle", { fg = colors.mauve, bg = "NONE", style = "bold,italic" })
     hi("Folded", { fg = "NONE", bg = "NONE" })
     hi("FoldColumn", { fg = colors.red })
@@ -309,6 +309,14 @@ local function setup_highlights()
     hi("NeoTreeDirectoryName", { fg = colors.sky })
     hi("NeoTreeCursorLine", { fg = colors.red })
 
+    hi("DressingInput", { fg = colors.text, bg = colors.mantle })
+    hi("DressingInputBorder", { fg = colors.lavender, bg = "NONE" })
+    hi("DressingInputTitle", { fg = colors.mauve, bg = "NONE", style = "bold" })
+    hi("DressingInputPrompt", { fg = colors.text, bg = "NONE" })  -- This is the key one!
+    hi("DressingInputText", { fg = colors.text, bg = "NONE" })
+    hi("Prompt", { fg = colors.text, bg = "NONE" })
+    hi("Question", { fg = colors.text, bg = "NONE" })
+
     -- ============================================================================
     -- PLUGIN: INDENT-BLANKLINE
     -- ============================================================================
@@ -403,11 +411,19 @@ local function setup_highlights()
     hi("OverseerSuccess", { fg = colors.green, bg = "NONE" })
     hi("OverseerCanceled", { fg = colors.overlay0, bg = "NONE" })
     hi("OverseerFailure", { fg = colors.red, bg = "NONE" })
+    hi("OverseerBorder", { fg = colors.lavender, bg = "NONE" })
+    hi("OverseerNormal", { fg = colors.text, bg = colors.surface0 })
 
     -- Additional top bar highlights (in case it's something else)
     hi("WinBar", { fg = "NONE", bg = "NONE" })
     hi("SatelliteBar", { fg = "NONE", bg = "NONE" })
     hi("SatelliteCursor", { fg = "NONE", bg = "NONE" })
+    hi("NeoTreeTitleBar", { fg = colors.red, bg = "NONE" })
+    hi("NeoTreeDimmedText", { fg = colors.red })
+    hi("NeoTreeMessage", { fg = colors.subtext0 })
+    hi("NeoTreeFloatNormal", { fg = colors.red })
+    hi("NeoTreeFloatBorder", { fg = colors.lavender })
+    hi("NeoTreeFloatTitle", { fg = colors.red })
     hi("NvimScrollbarHandle", { fg = "NONE", bg = "NONE" })
     hi("NvimScrollbarCursor", { fg = "NONE", bg = "NONE" })
     hi("NvimScrollbarError", { fg = "NONE", bg = "NONE" })
@@ -587,6 +603,7 @@ local function setup_highlights()
       "OverseerSuccess",
       "OverseerCanceled",
       "OverseerFailure",
+      "OverseerBorder",
         }
 
     for _, group in ipairs(transparent_groups) do
