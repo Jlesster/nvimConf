@@ -134,6 +134,18 @@ def boost_saturation(argb: int, multiplier: float = 1.5) -> int:
     hct = Hct.from_int(argb)
     return Hct.from_hct(hct.hue, min(hct.chroma * multiplier, 100), hct.tone).to_int()
 
+def lift_tone(argb: int, delta: float) -> int:
+    """
+    Increase brightness ONLY.
+    Preserves hue and chroma.
+    """
+    hct = Hct.from_int(argb)
+    return Hct.from_hct(
+        hct.hue,
+        hct.chroma,
+        min(hct.tone + delta, 100)
+    ).to_int()
+
 
 if args.scheme == 'scheme-fruit-salad':
     from materialyoucolor.scheme.scheme_fruit_salad import SchemeFruitSalad as Scheme
@@ -369,12 +381,12 @@ if args.termscheme is not None:
     # VERY gentle harmonization
     BG_HARMONY = 0.88
     UI_HARMONY = 0.15
-    SYNTAX_HARMONY = 0.65 #lower is more harmony
+    SYNTAX_HARMONY = 0.75 #lower is more harmony
     TEXT_HARMONY = 0.46
 
     BG_THRESH = 05.0
     UI_THRESH = 10.0
-    SYNTAX_THRESH = 50.55 #less is more contr
+    SYNTAX_THRESH = 40.55 #less is more contr
     TEXT_THRESH = 8.0
 
     # Background / surfaces (keep Mocha depth)
@@ -391,8 +403,8 @@ if args.termscheme is not None:
 
     # Syntax accents (PASTEL, controlled)
     syntax_colors = {
-        "rosewater": (SYNTAX_HARMONY, SYNTAX_THRESH, 65),  # Medium-high chroma
-        "flamingo": (SYNTAX_HARMONY, SYNTAX_THRESH, 68),
+        "rosewater": (SYNTAX_HARMONY, SYNTAX_THRESH, 75),  # Medium-high chroma
+        "flamingo": (SYNTAX_HARMONY, SYNTAX_THRESH, 76),
         "pink": (SYNTAX_HARMONY, SYNTAX_THRESH, 75),       # High chroma
         "mauve": (SYNTAX_HARMONY, SYNTAX_THRESH, 72),
         "red": (SYNTAX_HARMONY, SYNTAX_THRESH, 65),
@@ -403,8 +415,8 @@ if args.termscheme is not None:
         "teal": (SYNTAX_HARMONY, SYNTAX_THRESH, 72),       # High chroma
         "sky": (SYNTAX_HARMONY, SYNTAX_THRESH, 68),
         "sapphire": (SYNTAX_HARMONY, SYNTAX_THRESH, 80),
-        "blue": (SYNTAX_HARMONY, SYNTAX_THRESH, 72),
-        "lavender": (SYNTAX_HARMONY, SYNTAX_THRESH, 68),
+        "blue": (SYNTAX_HARMONY, SYNTAX_THRESH, 78),
+        "lavender": (SYNTAX_HARMONY, SYNTAX_THRESH, 75),
     }
 
     for k, (harmony, thresh, max_chroma) in syntax_colors.items():
@@ -413,15 +425,25 @@ if args.termscheme is not None:
             clamp_chroma(hex_to_argb(raw), max_chroma=max_chroma)
         )
 
+    # ------------------------------------------------
+    # FINAL SYNTAX BRIGHTNESS LIFT (NO SATURATION CHANGE)
+    # ------------------------------------------------
+    SYNTAX_TONE_LIFT = 0.5  # try 4–8 range
+
+    for k in syntax_colors.keys():
+        neovim_colors[k] = argb_to_hex(
+            lift_tone(hex_to_argb(neovim_colors[k]), SYNTAX_TONE_LIFT)
+        )
+
     # Force specific tones for better contrast and vibrancy
     TONE_MAP = {
-        "mauve": 72,      # Brighter
-        "blue": 76,       # Brighter
+        "mauve": 65,      # Brighter
+        "blue": 71,       # Brighter
         "green": 78,      # Brighter
         "teal": 80,       # Very bright
         "yellow": 85,     # Very bright
         "pink": 78,       # Brighter
-        "sapphire": 74,   # Medium-bright
+        "sapphire": 73,   # Medium-bright
     }
 
     for k, tone in TONE_MAP.items():
@@ -451,7 +473,7 @@ def force_vivid_dark(argb: int, chroma: float, tone: float) -> str:
 
 
 rainbow_colors = {
-    "red":     boost_for_rainbow(hex_to_argb(neovim_colors["red"]),     1.3, 68),
+    "red":    boost_for_rainbow(hex_to_argb(neovim_colors["red"]),     1.3, 68),
     "orange": boost_for_rainbow(hex_to_argb(neovim_colors["peach"]),   1.4, 72),
     "yellow": boost_for_rainbow(hex_to_argb(neovim_colors["yellow"]),  1.6, 82),
     "green":  boost_for_rainbow(hex_to_argb(neovim_colors["green"]),   1.3, 74),
@@ -461,7 +483,7 @@ rainbow_colors = {
     "blue": force_vivid_dark(
         hex_to_argb(neovim_colors["sky"]),
         chroma=70,
-        tone=68
+        tone=74
     ),
 
     "violet": force_vivid_dark(
@@ -570,7 +592,7 @@ local function setup_highlights()
 
     hi("Search", {{ fg = colors.red, bg = colors.surface0 }})
     hi("IncSearch", {{ fg = "NONE", bg = colors.red }})
-    hi("CurSearch", {{ fg = "NONE", bg = colors.red }})
+    hi("CurSearch", {{ fg = "NONE", bg = colors.surface0 }})
     hi("Visual", {{ bg = colors.surface1 }})
     hi("VisualNOS", {{ bg = colors.surface1 }})
 
@@ -646,16 +668,18 @@ local function setup_highlights()
     hi("@function.builtin", {{ fg = colors.blue, style = "italic" }})
     hi("@function.macro", {{ fg = colors.mauve }})
     hi("@function.method", {{ fg = colors.blue, style = "bold" }})
+    hi("@function.method.call", {{ fg = colors.blue }})
 
     hi("@constructor", {{ fg = colors.sapphire }})
     hi("@operator", {{ fg = "#00ffff" }})
     hi("@operator.java", {{ fg = "#00ffff" }})
 
     hi("@keyword", {{ fg = colors.mauve, style = "bold" }})
+    hi("@keyword.repeat.java", {{ fg = colors.mauve, style = "italic,bold"}})
     hi("@keyword.conditional", {{ fg = colors.mauve, style = "bold,italic" }})
     hi("@keyword.function", {{ fg = colors.mauve, style = "bold" }})
     hi("@keyword.operator", {{ fg = colors.mauve }})
-    hi("@keyword.return", {{ fg = colors.pink, style = "bold" }})
+    hi("@keyword.return", {{ fg = colors.mauve, style = "bold" }})
 
     hi("@type", {{ fg = colors.yellow }})
     hi("@type.builtin", {{ fg = colors.yellow, style = "italic" }})
@@ -687,21 +711,21 @@ local function setup_highlights()
     hi("@lsp.type.variable", {{ fg = colors.text }})
     hi("@lsp.type.parameter", {{ fg = colors.red, style = "italic" }})
     hi("@lsp.typemod.variable.readonly", {{ fg = colors.teal }})
-    hi("@lsp.typemod.variable.declaration", {{ fg = colors.flamingo, style = "italic" }})
+    hi("@lsp.typemod.variable.declaration", {{ fg = colors.maroon, style = "italic" }})
     hi("@lsp.typemod.variable.static", {{ fg = colors.flamingo }})
     hi("@lsp.typemod.variable.global", {{ fg = colors.flamingo }})
 
     -- Properties and Fields
     hi("@lsp.type.property", {{ fg = colors.text }})
     hi("@lsp.typemod.property.static", {{ fg = colors.teal, style = "italic" }})
-    hi("@lsp.typemod.property.static.java", {{ fg = colors.green, style = "italic,bold" }})
+    hi("@lsp.typemod.property.static.java", {{ fg = colors.teal, style = "italic,bold" }})
 
     -- Functions and Methods
     hi("@lsp.type.function", {{ fg = colors.blue, style = "bold" }})
-    hi("@lsp.type.method.java", {{ fg = colors.sapphire, style = "bold" }})
+    hi("@lsp.type.method.java", {{ fg = colors.sapphire, style = "italic" }})
     hi("@lsp.type.method", {{ fg = colors.sapphire, style = "bold" }})
     hi("@lsp.typemod.function.static", {{ fg = colors.sky, style = "bold" }})
-    hi("@lsp.typemod.method.static", {{ fg = colors.sapphire, style = "bold" }})
+    hi("@lsp.typemod.method.static", {{ fg = colors.sapphire, style = "italic" }})
 
     -- Types and Classes
     hi("@lsp.type.class", {{ fg = colors.yellow, style = "bold" }})
@@ -754,9 +778,12 @@ local function setup_highlights()
     -- ============================================================================
     -- LSP REFERENCES
     -- ============================================================================
-    hi("LspReferenceText", {{ bg = colors.surface1 }})
-    hi("LspReferenceRead", {{ bg = colors.surface1 }})
-    hi("LspReferenceWrite", {{ bg = colors.surface1, style = "bold" }})
+    hi("LspReferenceText", {{ bg = colors.mantle }})
+    hi("LspReferenceRead", {{ bg = colors.mantle }})
+    hi("LspReferenceWrite", {{ bg = colors.surface0, style = "bold" }})
+
+    hi("MatchParen", {{ bg = colors.mantle }})
+    hi("MatchParenCur", {{ bg = colors.mantle }})
 
     -- ============================================================================
     -- PLUGIN: TELESCOPE
@@ -1241,3 +1268,263 @@ if args.termscheme is not None and term_colors:
         for i in range(16):
             f.write(f'color{i} {term_colors[f"term{i}"]}\n')
 
+# =============================================================================
+# DISCORD THEME GENERATION (add this to the end of generate_colors_material.py)
+# =============================================================================
+
+# Add after the kitty config generation (around line 1270)
+
+# Discord theme generation
+if args.path is not None:  # Only generate if we have an image source
+    betterdiscord_dir = Path.home() / '.config' / 'vesktop' / 'themes'
+
+    # Check if BetterDiscord directory exists
+    if betterdiscord_dir.exists():
+        discord_theme_file = str(betterdiscord_dir / 'MaterialYou_Translucence.css')
+        translucence_base = str(betterdiscord_dir / 'Translucence_theme.css')
+
+        # Get wallpaper path
+        wallpaper_url = f"file://{os.path.abspath(args.path)}"
+
+        # Extract colors from the generated scheme
+        accent_hex = argb_to_hex(argb)
+        accent_hct_obj = Hct.from_int(argb)
+
+        # Generate complementary colors from the accent
+        primary_color = material_colors.get('primary', accent_hex)
+        secondary_color = material_colors.get('secondary', accent_hex)
+        tertiary_color = material_colors.get('tertiary', accent_hex)
+
+        # Background colors based on dark/light mode
+        if darkmode:
+            bg_base = material_colors.get('surface', '#1e1e2e')
+            bg_surface = material_colors.get('surfaceContainerLow', '#181825')
+            text_primary = material_colors.get('onSurface', '#cdd6f4')
+            text_secondary = material_colors.get('onSurfaceVariant', '#bac2de')
+        else:
+            bg_base = material_colors.get('surface', '#eff1f5')
+            bg_surface = material_colors.get('surfaceContainerLow', '#e6e9ef')
+            text_primary = material_colors.get('onSurface', '#4c4f69')
+            text_secondary = material_colors.get('onSurfaceVariant', '#5c5f77')
+
+        # Convert hex to RGB for rgba usage
+        def hex_to_rgb(hex_color):
+            hex_color = hex_color.lstrip('#')
+            return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+
+        accent_rgb = hex_to_rgb(accent_hex)
+        bg_rgb = hex_to_rgb(bg_base)
+        surface_rgb = hex_to_rgb(bg_surface)
+
+        # Generate Discord theme CSS
+        discord_theme = f'''/**
+ * @name Material You Translucence
+ * @description Auto-generated Material You theme with wallpaper
+ * @author Generated by material color script
+ * @version 1.0
+ * @source {args.path}
+ */
+
+/* Import base Translucence theme */
+@import url("Translucence_theme.css");
+
+:root {{
+  /* WALLPAPER */
+  --app-bg: url({wallpaper_url}) !important;
+  --app-blur: 8px;
+  --app-margin: 24px;
+  --app-radius: 12px;
+
+  /* MATERIAL YOU COLORS FROM WALLPAPER */
+  --main-rgb: {bg_rgb[0]}, {bg_rgb[1]}, {bg_rgb[2]};
+  --surface-rgb: {surface_rgb[0]}, {surface_rgb[1]}, {surface_rgb[2]};
+  --accent-rgb: {accent_rgb[0]}, {accent_rgb[1]}, {accent_rgb[2]};
+
+  /* OPACITY SETTINGS */
+  --main-content-opacity: 0.25;
+  --sidebar-opacity: 0.35;
+  --main-content-color: rgba(var(--main-rgb), var(--main-content-opacity));
+  --sidebar-color: rgba(var(--main-rgb), var(--sidebar-opacity));
+
+  /* ACCENT COLOR (Material You Primary) */
+  --accent-hue: {accent_hct_obj.hue:.0f};
+  --accent-saturation: {min(accent_hct_obj.chroma * 1.3, 100):.1f}%;
+  --accent-lightness: {accent_hct_obj.tone:.1f}%;
+  --accent-hsl: var(--accent-hue), calc(var(--accent-saturation) * var(--saturation-factor, 1)), var(--accent-lightness);
+  --accent-opacity: 1;
+  --accent-text-color: {material_colors.get('onPrimary', '#000000')};
+
+  /* SECONDARY ACCENT */
+  --accent-secondary-color: rgba(var(--accent-rgb), 0.5);
+  --accent-secondary-text-color: {text_primary};
+
+  /* MESSAGE COLORS */
+  --message-color: rgba(var(--surface-rgb), 0.4);
+  --message-color-hover: rgba(var(--surface-rgb), 0.55);
+  --message-radius: var(--app-radius);
+
+  /* INPUT/TEXTAREA */
+  --textarea-color: var(--accent-rgb);
+  --textarea-alpha: 0.12;
+  --textarea-alpha-focus: 0.2;
+  --textarea-text-color: {text_primary};
+  --textarea-placeholder-color: {text_secondary};
+  --textarea-radius: 28px;
+
+  /* CARDS */
+  --card-color: rgba(var(--surface-rgb), 0.35);
+  --card-color-hover: rgba(var(--surface-rgb), 0.45);
+  --card-color-select: rgba(var(--surface-rgb), 0.55);
+  --card-radius: var(--app-radius);
+
+  /* POPOUTS */
+  --popout-color: rgba(var(--main-rgb), 0.75);
+  --popout-blur: 15px;
+  --popout-radius: var(--app-radius);
+
+  /* BUTTONS */
+  --button-color: rgba(var(--accent-rgb), var(--accent-opacity));
+  --button-text-color: var(--accent-text-color);
+  --button-radius: 16px;
+
+  /* TOOLTIPS */
+  --tooltip-color: rgba(var(--accent-rgb), 0.95);
+  --tooltip-text-color: var(--accent-text-color);
+  --tooltip-radius: var(--app-radius);
+
+  /* SCROLLBAR */
+  --scrollbar-color: var(--accent-rgb);
+  --scrollbar-opacity: 0.3;
+  --scrollbar-opacity-hover: 0.5;
+}}
+
+@supports (color: color-mix(in lch, red, blue)) {{
+  .visual-refresh.theme-{'dark' if darkmode else 'light'},
+  .visual-refresh .theme-{'dark' if darkmode else 'light'} {{
+    /* TEXT COLORS */
+    --text-primary: {text_primary};
+    --text-secondary: {text_secondary};
+    --text-muted: {material_colors.get('outline', '#a6adc8')};
+    --text-link: {primary_color};
+    --text-brand: {accent_hex};
+
+    /* INTERACTIVE COLORS */
+    --interactive-normal: {text_secondary};
+    --interactive-hover: {text_primary};
+    --interactive-active: {accent_hex};
+    --interactive-muted: {material_colors.get('surfaceVariant', '#6c7086')};
+
+    /* CHANNEL COLORS */
+    --channels-default: {text_secondary};
+    --channel-icon: {material_colors.get('onSurfaceVariant', '#a6adc8')};
+
+    /* BACKGROUND MODIFIERS */
+    --background-modifier-hover: rgba(var(--accent-rgb), 0.1);
+    --background-modifier-active: rgba(var(--accent-rgb), 0.15);
+    --background-modifier-selected: rgba(var(--accent-rgb), 0.2);
+    --background-modifier-accent: rgba(var(--accent-rgb), 0.25);
+
+    /* BACKGROUNDS */
+    --background-primary: transparent;
+    --background-secondary: transparent;
+    --background-tertiary: transparent;
+    --background-accent: rgba(var(--accent-rgb), 0.2);
+    --background-floating: rgba(var(--main-rgb), 0.85);
+
+    /* BRAND COLORS */
+    --brand-experiment: {accent_hex} !important;
+    --brand-experiment-hover: {primary_color} !important;
+    --brand-500: {accent_hex};
+    --brand-560: {primary_color};
+
+    /* STATUS COLORS */
+    --status-positive: {material_colors.get('success', '#a6e3a1')};
+    --status-warning: {material_colors.get('tertiary', '#f9e2af')};
+    --status-danger: {material_colors.get('error', '#f38ba8')};
+
+    /* HEADER COLORS */
+    --header-primary: {text_primary};
+    --header-secondary: {text_secondary};
+  }}
+}}
+
+/* Enhanced text shadows for better readability */
+._51fd70792ee2e563-appMount * {{
+  text-shadow: 0 1px 3px rgba(0, 0, 0, {'0.8' if darkmode else '0.3'}) !important;
+}}
+
+/* Message content readability */
+[class*="messageContent"],
+[class*="markup"] {{
+  text-shadow: 0 0.5px 2px rgba(0, 0, 0, {'0.7' if darkmode else '0.2'}) !important;
+}}
+
+/* Code blocks with Material You colors */
+code {{
+  background-color: rgba(var(--surface-rgb), 0.8) !important;
+  color: {material_colors.get('onSurface', text_primary)} !important;
+  border-color: rgba(var(--accent-rgb), 0.3) !important;
+}}
+
+pre {{
+  background-color: rgba(var(--surface-rgb), 0.8) !important;
+  border-color: rgba(var(--accent-rgb), 0.3) !important;
+}}
+
+/* Mention styling */
+[class*="mentioned"] {{
+  background-color: rgba(var(--accent-rgb), 0.15) !important;
+}}
+
+[class*="mention"] {{
+  background-color: rgba(var(--accent-rgb), 0.25) !important;
+  color: {accent_hex} !important;
+}}
+
+/* Selection */
+::selection {{
+  background: rgba(var(--accent-rgb), 0.5);
+  color: var(--accent-text-color);
+}}
+
+/* Scrollbar styling */
+::-webkit-scrollbar-thumb {{
+  background-color: rgba(var(--accent-rgb), var(--scrollbar-opacity)) !important;
+}}
+
+::-webkit-scrollbar-thumb:hover {{
+  background-color: rgba(var(--accent-rgb), var(--scrollbar-opacity-hover)) !important;
+}}
+
+/* Button hover effects */
+[class*="button"]:hover {{
+  background-color: rgba(var(--accent-rgb), 0.8) !important;
+  transform: translateY(-1px);
+  transition: all 0.2s ease;
+}}
+
+/* Active/selected states */
+[class*="selected"],
+[class*="active"] {{
+  background-color: rgba(var(--accent-rgb), 0.2) !important;
+  border-left: 3px solid {accent_hex} !important;
+}}
+'''
+
+        # Write the theme file
+        with open(discord_theme_file, 'w') as f:
+            f.write(discord_theme)
+
+        if args.debug:
+            print(f"\n✓ Discord theme generated: {discord_theme_file}")
+            print(f"  Wallpaper: {wallpaper_url}")
+            print(f"  Accent: {accent_hex}")
+            print(f"  Mode: {'Dark' if darkmode else 'Light'}")
+            print("\nTo use:")
+            print("  1. Make sure Translucence_theme.css is in the same folder")
+            print("  2. Enable 'MaterialYou_Translucence' in Discord settings")
+            print("  3. Press Ctrl+R in Discord to reload")
+    else:
+        if args.debug:
+            print(f"\n⚠ BetterDiscord directory not found at: {betterdiscord_dir}")
+            print("  Skipping Discord theme generation")
