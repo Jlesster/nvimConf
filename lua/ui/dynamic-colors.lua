@@ -141,6 +141,7 @@ local function highlight_current_line_indent()
           virt_text = { { "•", "IblScopeCursorLine" } },
           virt_text_pos = "overlay",
           priority = 2,
+          hl_mode = "combine",
         })
       end
 
@@ -151,6 +152,14 @@ local function highlight_current_line_indent()
         col = col + 1
       end
     end
+
+    -- Add a full-line background highlight for CursorLine
+    vim.api.nvim_buf_set_extmark(0, cursorline_ns, line, 0, {
+      end_col = #leading_whitespace,
+      hl_group = "CursorLine",
+      hl_eol = false,
+      priority = 1,
+    })
   end)
 end
 

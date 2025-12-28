@@ -185,7 +185,14 @@ return {
     "brenoprata10/nvim-highlight-colors",
     event = "User BaseFile",
     cmd = { "HighlightColors" }, -- followed by 'On' / 'Off' / 'Toggle'
-    opts = { enabled_named_colors = false },
+    opts = {
+      enabled_named_colors = false,
+      render = 'virtual',
+      virtual_symbol = '■',
+ 	    ---@usage 'inline'|'eol'|'eow'
+	    virtual_symbol_position = 'inline',
+	    enable_tailwind = true,
+    },
   },
 
   --  LSP -------------------------------------------------------------------
@@ -272,7 +279,20 @@ return {
     -- This ensures diagnostics are configured before LSP attaches
     local utils = require("base.utils")
     if utils.diagnostics_enum and utils.diagnostics_enum[vim.g.diagnostics_mode] then
-      vim.diagnostic.config(utils.diagnostics_enum[vim.g.diagnostics_mode])
+      -- ADD THESE LINES to customize virtual text
+      local config = vim.tbl_deep_extend("force",
+        utils.diagnostics_enum[vim.g.diagnostics_mode],
+        {
+          virtual_text = {
+            prefix = '●',
+            -- Enable wrapping (may not work in all versions)
+            wrap = true,
+            -- Or set a max width
+            -- width = 80,
+          },
+        }
+      )
+      vim.diagnostic.config(config)
     end
 
     vim.api.nvim_create_autocmd('LspAttach', {
@@ -526,6 +546,7 @@ return {
       { "hrsh7th/cmp-buffer"} ,
       { "hrsh7th/cmp-path" },
       { "onsails/lspkind.nvim" },
+      { "brenoprata10/nvim-highlight-colors" },
     },
     event = "InsertEnter",
     opts = function()
@@ -544,10 +565,6 @@ return {
       ) or cmp.config.window
 
       -- helper
-      local function has_words_before()
-        local line, col = unpack(vim.api.nvim_win_get_cursor(0))
-        return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match "%s" == nil
-      end
 
       return {
         enabled = function() -- disable in certain cases on dap.
@@ -564,7 +581,21 @@ return {
         preselect = cmp.PreselectMode.None,
         formatting = {
           fields = { "kind", "abbr", "menu" },
-          format = (lspkind_loaded and lspkind.cmp_format(utils.get_plugin_opts("lspkind.nvim"))) or nil
+        format = function(entry, item)
+          -- First apply lspkind formatting if available
+          if lspkind_loaded then
+            item = lspkind.cmp_format(utils.get_plugin_opts("lspkind.nvim"))(entry, item)
+          end
+
+          -- Then apply nvim-highlight-colors formatting
+          local color_item = require("nvim-highlight-colors").format(entry, { kind = item.kind })
+          if color_item.abbr_hl_group then
+            item.kind_hl_group = color_item.abbr_hl_group
+            item.kind = color_item.abbr
+          end
+
+          return item
+        end
         },
         snippet = {
           expand = function(args) luasnip.lsp_expand(args.body) end,
@@ -638,15 +669,7 @@ return {
           },
           ["<CR>"] = cmp.mapping.confirm { select = false },
           ["<Tab>"] = cmp.mapping(function(fallback)
-            if cmp.visible() then
-              cmp.select_next_item()
-            elseif luasnip.expand_or_jumpable() then
-              luasnip.expand_or_jump()
-            elseif has_words_before() then
-              cmp.complete()
-            else
-              fallback()
-            end
+            fallback()
           end, { "i", "s" }),
           ["<S-Tab>"] = cmp.mapping(function(fallback)
             if cmp.visible() then
@@ -664,6 +687,7 @@ return {
           { name = "lazydev",  priority = 850 },
           { name = "luasnip",  priority = 750 },
           { name = "buffer",   priority = 500 },
+          { name = "nvim_highlight_colors", priority = 400 },
           { name = "path",     priority = 250 },
         },
       }
