@@ -1,3 +1,4 @@
+### My riced normalnvim confs and related scripts for theming (in no way my own work other than bits and pieces)
 **Important** : You need Neovim 0.11+
 
 <div align="center">
