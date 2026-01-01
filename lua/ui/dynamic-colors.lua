@@ -1,8 +1,14 @@
 -- lua/ui/dynamic-colors.lua
--- ZERO-FLASH dynamic theme loader
+-- ZERO-FLASH dynamic theme loader with FIXED file watcher
 
 local M = {}
 local transition = require("ui.material-transition")
+local subscribers = {}
+
+function M.subscribe(fn)
+  table.insert(subscribers,fn)
+end
+
 
 local state_dir = os.getenv("XDG_STATE_HOME")
   or (os.getenv("HOME") .. "/.local/state")
@@ -201,6 +207,7 @@ local function update_indent_colors(colors)
   vim.schedule(highlight_current_line_indent)
 end
 
+
 -- Add this function after your enforce_transparency function
 local function reload_heirline_colors(colors)
   -- Check if heirline is available
@@ -313,7 +320,12 @@ local function apply_highlights(colors, highlights)
 
     vim.api.nvim_set_hl(0, group, hl)
   end
+  -- notify subscribers (animations, etc.)
+  for _, fn in ipairs(subscribers) do
+    pcall(fn, colors)
+  end
 
+  -- reload_lualine_colors(colors)
   reload_heirline_colors(colors)
   update_indent_colors(colors)
 end
@@ -352,25 +364,26 @@ function M.reload()
     end
   end
 
-  transition.run(from, to, {
-    steps = 20,
-    delay = 10,
-    on_done = function()
-      enforce_transparency()
-      update_indent_colors(colors)
-      is_transitioning = false
-    end,
-  })
+  is_transitioning = false
 end
 
 function M.setup()
-  -- Check if SCSS file exists
-  local f = io.open(scss_file, "r")
+  -- FIX: Watch the THEME FILE (Lua), not the SCSS file
+  -- The theme file is what actually changes and contains the colors
+  local watch_file = theme_file
+
+  local f = io.open(watch_file, "r")
+  local animations = require("ui.animations")
+
   if not f then
-    vim.notify("Dynamic colors: SCSS file not found at " .. scss_file, vim.log.levels.WARN)
+    vim.notify("Dynamic colors: Theme file not found at " .. watch_file, vim.log.levels.WARN)
     return
   end
   f:close()
+
+  M.subscribe(function(colors)
+    animations.set_palette(colors)
+  end)
 
   -- Setup cursorline indent highlighting
   vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
@@ -412,10 +425,19 @@ function M.setup()
   debounce_timer = uv.new_timer()
 
   local ok, err = pcall(function()
-    uv.fs_event_start(fs_event, scss_file, {}, function()
+    -- FIX: Watch the theme file (Lua) instead of SCSS
+    uv.fs_event_start(fs_event, watch_file, {}, function(err, filename, events)
+      if err then
+        vim.schedule(function()
+          vim.notify("File watcher error: " .. tostring(err), vim.log.levels.ERROR)
+        end)
+        return
+      end
+
+      -- Debounce the reload
       debounce_timer:stop()
       debounce_timer:start(200, 0, vim.schedule_wrap(function()
-        vim.notify("Theme changed", vim.log.levels.INFO)
+        vim.notify("Theme changed - reloading colors", vim.log.levels.INFO)
         M.reload()
       end))
     end)

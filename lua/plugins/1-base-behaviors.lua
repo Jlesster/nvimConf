@@ -465,7 +465,18 @@ return {
           end,
         },
         window = {
-          width = 30,
+          position = "left",
+          width = 25,
+          popup = {
+            size = {
+              height = "100%",
+              width = 25,
+            },
+            position = {
+              row = 0,
+              col = 0
+            },
+          },
           mappings = {
             ["<space>"] = false,
             ["<S-CR>"] = "system_open",

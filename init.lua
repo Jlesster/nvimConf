@@ -55,9 +55,21 @@ load_sources_async({
 -- Setup dynamic colors AFTER colorscheme is loaded
 vim.defer_fn(function()
   local ok, dynamic_colors = pcall(require, "ui.dynamic-colors")
-  if ok then
-    dynamic_colors.setup()
-  else
+  if not ok then
     vim.notify("Failed to load dynamic-colors", vim.log.levels.WARN)
+    return
+  end
+
+  dynamic_colors.setup()
+
+  -- Start UI animations (mode transitions, etc.)
+  local ok2, animations = pcall(require, "ui.animations")
+  if ok2 then
+    animations.animate_lualine_mode({
+      steps = 10,
+      delay = 14,
+    })
+  else
+    vim.notify("Failed to load ui.animations", vim.log.levels.WARN)
   end
 end, 150)

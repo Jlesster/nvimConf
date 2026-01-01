@@ -27,7 +27,7 @@ local function rgb_to_hex(r, g, b)
   return string.format("#%02X%02X%02X", r, g, b)
 end
 
-local function mix_hex(a, b, t)
+function M.mix_hex(a, b, t)
   local ar, ag, ab = hex_to_rgb(a)
   local br, bg, bb = hex_to_rgb(b)
   if not ar or not br then return b end
