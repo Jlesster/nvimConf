@@ -385,3 +385,10 @@ autocmd("DirChanged", {
     end
   end,
 })
+
+vim.api.nvim_create_autocmd("InsertEnter", {
+  callback = function()
+    require('nvim-autopairs').setup({})
+  end,
+})
+

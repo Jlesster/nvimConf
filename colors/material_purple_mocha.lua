@@ -29,20 +29,20 @@ local colors = {
   subtext0 = "#AAACC8",
 
   -- Accent colors (VIBRANT)
-  rosewater = "#F0E1E8",
-  flamingo = "#E6CFE1",
-  pink = "#D6B6E3",
-  mauve = "#C5A1F2",
-  red = "#D693DF",
-  maroon = "#D4A5D5",
-  peach = "#F8AEC4",
-  yellow = "#EECDC3",
-  green = "#69D1D1",
-  teal = "#95CEF1",
-  sky = "#B7D0FF",
-  sapphire = "#A8B2F8",
-  blue = "#BAB3FF",
-  lavender = "#C8B8FB",
+  rosewater = "#F2E1E7",
+  flamingo = "#E9D0E0",
+  pink = "#D3B7E5",
+  mauve = "#B08FDE",
+  red = "#D395E3",
+  maroon = "#D5A6D6",
+  peach = "#FEAFB8",
+  yellow = "#EDCEBE",
+  green = "#6CD2C5",
+  teal = "#8ED0EB",
+  sky = "#AFD4FF",
+  sapphire = "#9AB2F4",
+  blue = "#B2A3F4",
+  lavender = "#CBB9FB",
 }
 
 local function hi(group, opts)
@@ -88,9 +88,9 @@ local function setup_highlights()
     hi("VertSplit", { fg = colors.surface0, bg = "NONE" })
     hi("WinSeparator", { fg = colors.surface0, bg = "NONE" })
 
-    hi("Search", { fg = colors.red, bg = colors.surface0 })
-    hi("IncSearch", { fg = "NONE", bg = colors.red })
-    hi("CurSearch", { fg = "NONE", bg = colors.red })
+    hi("Search", { fg = colors.red, bg = colors.mantle })
+    hi("IncSearch", { fg = "NONE", bg = colors.mantle })
+    hi("CurSearch", { fg = "NONE", bg = colors.mantle })
     hi("Visual", { bg = colors.surface1 })
     hi("VisualNOS", { bg = colors.surface1 })
 
@@ -166,16 +166,18 @@ local function setup_highlights()
     hi("@function.builtin", { fg = colors.blue, style = "italic" })
     hi("@function.macro", { fg = colors.mauve })
     hi("@function.method", { fg = colors.blue, style = "bold" })
+    hi("@function.method.call", { fg = colors.blue })
 
     hi("@constructor", { fg = colors.sapphire })
     hi("@operator", { fg = "#00ffff" })
     hi("@operator.java", { fg = "#00ffff" })
 
     hi("@keyword", { fg = colors.mauve, style = "bold" })
+    hi("@keyword.repeat.java", { fg = colors.mauve, style = "italic,bold"})
     hi("@keyword.conditional", { fg = colors.mauve, style = "bold,italic" })
     hi("@keyword.function", { fg = colors.mauve, style = "bold" })
     hi("@keyword.operator", { fg = colors.mauve })
-    hi("@keyword.return", { fg = colors.pink, style = "bold" })
+    hi("@keyword.return", { fg = colors.mauve, style = "bold" })
 
     hi("@type", { fg = colors.yellow })
     hi("@type.builtin", { fg = colors.yellow, style = "italic" })
@@ -207,21 +209,21 @@ local function setup_highlights()
     hi("@lsp.type.variable", { fg = colors.text })
     hi("@lsp.type.parameter", { fg = colors.red, style = "italic" })
     hi("@lsp.typemod.variable.readonly", { fg = colors.teal })
-    hi("@lsp.typemod.variable.declaration", { fg = colors.flamingo, style = "italic" })
+    hi("@lsp.typemod.variable.declaration", { fg = colors.maroon, style = "italic" })
     hi("@lsp.typemod.variable.static", { fg = colors.flamingo })
     hi("@lsp.typemod.variable.global", { fg = colors.flamingo })
 
     -- Properties and Fields
     hi("@lsp.type.property", { fg = colors.text })
     hi("@lsp.typemod.property.static", { fg = colors.teal, style = "italic" })
-    hi("@lsp.typemod.property.static.java", { fg = colors.green, style = "italic,bold" })
+    hi("@lsp.typemod.property.static.java", { fg = colors.teal, style = "italic,bold" })
 
     -- Functions and Methods
     hi("@lsp.type.function", { fg = colors.blue, style = "bold" })
-    hi("@lsp.type.method.java", { fg = colors.sapphire, style = "bold" })
+    hi("@lsp.type.method.java", { fg = colors.sapphire, style = "italic" })
     hi("@lsp.type.method", { fg = colors.sapphire, style = "bold" })
     hi("@lsp.typemod.function.static", { fg = colors.sky, style = "bold" })
-    hi("@lsp.typemod.method.static", { fg = colors.sapphire, style = "bold" })
+    hi("@lsp.typemod.method.static", { fg = colors.sapphire, style = "italic" })
 
     -- Types and Classes
     hi("@lsp.type.class", { fg = colors.yellow, style = "bold" })
@@ -274,9 +276,12 @@ local function setup_highlights()
     -- ============================================================================
     -- LSP REFERENCES
     -- ============================================================================
-    hi("LspReferenceText", { bg = colors.surface1 })
-    hi("LspReferenceRead", { bg = colors.surface1 })
-    hi("LspReferenceWrite", { bg = colors.surface1, style = "bold" })
+    hi("LspReferenceText", { bg = colors.mantle })
+    hi("LspReferenceRead", { bg = colors.mantle })
+    hi("LspReferenceWrite", { bg = colors.surface0, style = "bold" })
+
+    hi("MatchParen", { bg = colors.mantle })
+    hi("MatchParenCur", { bg = colors.mantle })
 
     -- ============================================================================
     -- PLUGIN: TELESCOPE
@@ -360,13 +365,13 @@ local function setup_highlights()
     -- ============================================================================
     -- PLUGIN: RAINBOW DELIMITERS
     -- ============================================================================
-    hi("RainbowDelimiterRed", { fg = colors.red })
-    hi("RainbowDelimiterOrange", { fg = colors.peach })
-    hi("RainbowDelimiterYellow", { fg = colors.yellow })
-    hi("RainbowDelimiterGreen", { fg = colors.green })
-    hi("RainbowDelimiterCyan", { fg = colors.teal })
-    hi("RainbowDelimiterBlue", { fg = colors.sky })
-    hi("RainbowDelimiterViolet", { fg = colors.mauve })
+    hi("RainbowDelimiterRed",    { fg = "#DF8BF8" })
+    hi("RainbowDelimiterOrange", { fg = "#FFAFB8" })
+    hi("RainbowDelimiterYellow", { fg = "#FACAB0" })
+    hi("RainbowDelimiterGreen",  { fg = "#1FD8C7" })
+    hi("RainbowDelimiterCyan",   { fg = "#60D4FD" })
+    hi("RainbowDelimiterBlue",   { fg = "#77BBFF" })
+    hi("RainbowDelimiterViolet", { fg = "#B988FF" })
 
     -- ============================================================================
     -- PLUGIN: RENDER-MARKDOWN
@@ -475,6 +480,61 @@ local function setup_highlights()
     -- This will make the bright red/green hex codes themselves appear in purple tones
     hi("@string.special", { fg = colors.green })  -- For color strings like "#FF0000"
     hi("@number.css", { fg = colors.peach })
+
+-- ============================================================================
+-- PLUGIN: LUALINE
+-- ============================================================================
+    -- Normal mode
+    hi("lualine_a_normal", { fg = colors.base, bg = colors.blue, style = "bold" })
+    hi("lualine_b_normal", { fg = colors.text, bg = colors.surface0 })
+    hi("lualine_c_normal", { fg = colors.subtext0, bg = "NONE" })
+    hi("lualine_x_normal", { fg = colors.subtext0, bg = "NONE" })
+    hi("lualine_y_normal", { fg = colors.text, bg = colors.surface0 })
+    hi("lualine_z_normal", { fg = colors.base, bg = colors.blue })
+
+    -- Insert mode
+    hi("lualine_a_insert", { fg = colors.base, bg = colors.teal, style = "bold" })
+    hi("lualine_b_insert", { fg = colors.text, bg = colors.surface0 })
+    hi("lualine_c_insert", { fg = colors.subtext0, bg = "NONE" })
+    hi("lualine_x_insert", { fg = colors.subtext0, bg = "NONE" })
+    hi("lualine_y_insert", { fg = colors.text, bg = colors.surface0 })
+    hi("lualine_z_insert", { fg = colors.base, bg = colors.teal })
+
+    -- Visual mode
+    hi("lualine_a_visual", { fg = colors.base, bg = colors.mauve, style = "bold" })
+    hi("lualine_b_visual", { fg = colors.text, bg = colors.surface0 })
+    hi("lualine_c_visual", { fg = colors.subtext0, bg = "NONE" })
+    hi("lualine_x_visual", { fg = colors.subtext0, bg = "NONE" })
+    hi("lualine_y_visual", { fg = colors.text, bg = colors.surface0 })
+    hi("lualine_z_visual", { fg = colors.base, bg = colors.mauve })
+
+    -- Replace mode
+    hi("lualine_a_replace", { fg = colors.base, bg = colors.red, style = "bold" })
+    hi("lualine_b_replace", { fg = colors.text, bg = colors.surface0 })
+    hi("lualine_c_replace", { fg = colors.subtext0, bg = "NONE" })
+    hi("lualine_x_replace", { fg = colors.subtext0, bg = "NONE" })
+    hi("lualine_y_replace", { fg = colors.text, bg = colors.surface0 })
+    hi("lualine_z_replace", { fg = colors.base, bg = colors.red })
+
+    -- Command mode
+    hi("lualine_a_command", { fg = colors.base, bg = colors.peach, style = "bold" })
+    hi("lualine_b_command", { fg = colors.text, bg = colors.surface0 })
+    hi("lualine_c_command", { fg = colors.subtext0, bg = "NONE" })
+    hi("lualine_x_command", { fg = colors.subtext0, bg = "NONE" })
+    hi("lualine_y_command", { fg = colors.text, bg = colors.surface0 })
+    hi("lualine_z_command", { fg = colors.base, bg = colors.peach })
+
+    -- Inactive
+    hi("lualine_a_inactive", { fg = colors.overlay0, bg = "NONE" })
+    hi("lualine_b_inactive", { fg = colors.overlay0, bg = "NONE" })
+    hi("lualine_c_inactive", { fg = colors.overlay0, bg = "NONE" })
+
+    -- Additional lualine components
+    --hi("lualine_transitional_lualine_a_normal_to_lualine_b_normal", { fg = colors.blue, bg = colors.surface0 })
+    --hi("lualine_transitional_lualine_a_insert_to_lualine_b_insert", { fg = colors.teal, bg = colors.surface0 })
+    --hi("lualine_transitional_lualine_a_visual_to_lualine_b_visual", { fg = colors.mauve, bg = colors.surface0 })
+    --hi("lualine_transitional_lualine_a_replace_to_lualine_b_replace", { fg = colors.red, bg = colors.surface0 })
+    --hi("lualine_transitional_lualine_a_command_to_lualine_b_command", { fg = colors.peach, bg = colors.surface0 })
 
 -- ============================================================================
 -- TRANSPARENCY REASSERTION (CRITICAL)

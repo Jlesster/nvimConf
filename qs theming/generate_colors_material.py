@@ -590,9 +590,9 @@ local function setup_highlights()
     hi("VertSplit", {{ fg = colors.surface0, bg = "NONE" }})
     hi("WinSeparator", {{ fg = colors.surface0, bg = "NONE" }})
 
-    hi("Search", {{ fg = colors.red, bg = colors.surface0 }})
-    hi("IncSearch", {{ fg = "NONE", bg = colors.red }})
-    hi("CurSearch", {{ fg = "NONE", bg = colors.surface0 }})
+    hi("Search", {{ fg = colors.red, bg = colors.mantle }})
+    hi("IncSearch", {{ fg = "NONE", bg = colors.mantle }})
+    hi("CurSearch", {{ fg = "NONE", bg = colors.mantle }})
     hi("Visual", {{ bg = colors.surface1 }})
     hi("VisualNOS", {{ bg = colors.surface1 }})
 
@@ -982,6 +982,61 @@ local function setup_highlights()
     -- This will make the bright red/green hex codes themselves appear in purple tones
     hi("@string.special", {{ fg = colors.green }})  -- For color strings like "#FF0000"
     hi("@number.css", {{ fg = colors.peach }})
+
+-- ============================================================================
+-- PLUGIN: LUALINE
+-- ============================================================================
+    -- Normal mode
+    hi("lualine_a_normal", {{ fg = colors.base, bg = colors.blue, style = "bold" }})
+    hi("lualine_b_normal", {{ fg = colors.text, bg = colors.surface0 }})
+    hi("lualine_c_normal", {{ fg = colors.subtext0, bg = "NONE" }})
+    hi("lualine_x_normal", {{ fg = colors.subtext0, bg = "NONE" }})
+    hi("lualine_y_normal", {{ fg = colors.text, bg = colors.surface0 }})
+    hi("lualine_z_normal", {{ fg = colors.base, bg = colors.blue }})
+
+    -- Insert mode
+    hi("lualine_a_insert", {{ fg = colors.base, bg = colors.teal, style = "bold" }})
+    hi("lualine_b_insert", {{ fg = colors.text, bg = colors.surface0 }})
+    hi("lualine_c_insert", {{ fg = colors.subtext0, bg = "NONE" }})
+    hi("lualine_x_insert", {{ fg = colors.subtext0, bg = "NONE" }})
+    hi("lualine_y_insert", {{ fg = colors.text, bg = colors.surface0 }})
+    hi("lualine_z_insert", {{ fg = colors.base, bg = colors.teal }})
+
+    -- Visual mode
+    hi("lualine_a_visual", {{ fg = colors.base, bg = colors.mauve, style = "bold" }})
+    hi("lualine_b_visual", {{ fg = colors.text, bg = colors.surface0 }})
+    hi("lualine_c_visual", {{ fg = colors.subtext0, bg = "NONE" }})
+    hi("lualine_x_visual", {{ fg = colors.subtext0, bg = "NONE" }})
+    hi("lualine_y_visual", {{ fg = colors.text, bg = colors.surface0 }})
+    hi("lualine_z_visual", {{ fg = colors.base, bg = colors.mauve }})
+
+    -- Replace mode
+    hi("lualine_a_replace", {{ fg = colors.base, bg = colors.red, style = "bold" }})
+    hi("lualine_b_replace", {{ fg = colors.text, bg = colors.surface0 }})
+    hi("lualine_c_replace", {{ fg = colors.subtext0, bg = "NONE" }})
+    hi("lualine_x_replace", {{ fg = colors.subtext0, bg = "NONE" }})
+    hi("lualine_y_replace", {{ fg = colors.text, bg = colors.surface0 }})
+    hi("lualine_z_replace", {{ fg = colors.base, bg = colors.red }})
+
+    -- Command mode
+    hi("lualine_a_command", {{ fg = colors.base, bg = colors.peach, style = "bold" }})
+    hi("lualine_b_command", {{ fg = colors.text, bg = colors.surface0 }})
+    hi("lualine_c_command", {{ fg = colors.subtext0, bg = "NONE" }})
+    hi("lualine_x_command", {{ fg = colors.subtext0, bg = "NONE" }})
+    hi("lualine_y_command", {{ fg = colors.text, bg = colors.surface0 }})
+    hi("lualine_z_command", {{ fg = colors.base, bg = colors.peach }})
+
+    -- Inactive
+    hi("lualine_a_inactive", {{ fg = colors.overlay0, bg = "NONE" }})
+    hi("lualine_b_inactive", {{ fg = colors.overlay0, bg = "NONE" }})
+    hi("lualine_c_inactive", {{ fg = colors.overlay0, bg = "NONE" }})
+
+    -- Additional lualine components
+    --hi("lualine_transitional_lualine_a_normal_to_lualine_b_normal", {{ fg = colors.blue, bg = colors.surface0 }})
+    --hi("lualine_transitional_lualine_a_insert_to_lualine_b_insert", {{ fg = colors.teal, bg = colors.surface0 }})
+    --hi("lualine_transitional_lualine_a_visual_to_lualine_b_visual", {{ fg = colors.mauve, bg = colors.surface0 }})
+    --hi("lualine_transitional_lualine_a_replace_to_lualine_b_replace", {{ fg = colors.red, bg = colors.surface0 }})
+    --hi("lualine_transitional_lualine_a_command_to_lualine_b_command", {{ fg = colors.peach, bg = colors.surface0 }})
 
 -- ============================================================================
 -- TRANSPARENCY REASSERTION (CRITICAL)

@@ -439,22 +439,6 @@ return {
         lib.component.numbercolumn(),
         lib.component.signcolumn(),
       } or nil,
-      statusline = {
-        hl = { fg = "fg", bg = "bg" },
-        lib.component.mode(),
-        lib.component.git_branch(),
-        lib.component.file_info(),
-        lib.component.git_diff(),
-        lib.component.diagnostics(),
-        lib.component.fill(),
-        lib.component.cmd_info(),
-        lib.component.fill(),
-        lib.component.lsp(),
-        lib.component.compiler_state(),
-        lib.component.virtual_env(),
-        lib.component.nav(),
-        lib.component.mode { surround = { separator = "right" } },
-      },
     }
   end,
   config = function(_, opts)
@@ -479,6 +463,11 @@ return {
     colors.buffer_fg = theme_colors.overlay0 or colors.buffer_fg
     colors.buffer_visible_fg = theme_colors.text or colors.buffer_visible_fg
     colors.buffer_active_fg = theme_colors.mauve or colors.buffer_active_fg
+    colors.mode_normal = "#C5A1F2"    -- mauve
+    colors.mode_insert = "#69D1D1"    -- green
+    colors.mode_visual = "#D693DF"    -- red/purple
+    colors.mode_replace = "#F8AEC4"   -- peach
+    colors.mode_command = "#EECDC3"   -- yellow
 
     heirline.load_colors(colors)
     heirline.setup(opts)
