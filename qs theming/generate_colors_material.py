@@ -566,7 +566,7 @@ end
 local function setup_highlights()
     hi("Normal", {{ fg = colors.text, bg = "NONE" }})
     hi("NormalFloat", {{ fg = colors.text, bg = colors.mantle }})
-    hi("FloatBorder", {{ fg = "NONE", bg = colors.lavender }})
+    hi("FloatBorder", {{ fg = colors.lavender, bg = "NONE"}})
     hi("FloatTitle", {{ fg = colors.mauve, bg = "NONE", style = "bold,italic" }})
     hi("Folded", {{ fg = "NONE", bg = "NONE" }})
     hi("FoldColumn", {{ fg = colors.red }})

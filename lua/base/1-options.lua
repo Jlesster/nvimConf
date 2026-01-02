@@ -88,3 +88,7 @@ vim.opt.termsync = false
 vim.opt.ttyfast = true
 vim.o.winwidth = 1
 vim.o.winheight = 1
+
+vim.g.java_highlight_functions = 1
+vim.g.java_highlight_all = 1
+

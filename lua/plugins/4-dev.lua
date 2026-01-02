@@ -81,6 +81,65 @@ return {
     end,
   },
 
+  {
+  "rafamadriz/friendly-snippets",
+  config = function()
+    require("luasnip.loaders.from_vscode").lazy_load()
+
+    -- Add custom Java snippets
+    local ls = require("luasnip")
+    local s = ls.snippet
+    local t = ls.text_node
+    local i = ls.insert_node
+
+    ls.add_snippets("java", {
+      -- Main method
+      s("psvm", {
+        t("public static void main(String[] args) {"),
+        t({"", "\t"}),
+        i(0),
+        t({"", "}"}),
+      }),
+
+      -- System.out.println
+      s("sout", {
+        t("System.out.println("),
+        i(1),
+        t(");"),
+      }),
+
+      -- For-each loop
+      s("foreach", {
+        t("for ("),
+        i(1, "Type"),
+        t(" "),
+        i(2, "item"),
+        t(" : "),
+        i(3, "collection"),
+        t(") {"),
+        t({"", "\t"}),
+        i(0),
+        t({"", "}"}),
+      }),
+
+      -- Try-catch
+      s("tryc", {
+        t("try {"),
+        t({"", "\t"}),
+        i(1),
+        t({"", "} catch ("}),
+        i(2, "Exception"),
+        t(" "),
+        i(3, "e"),
+        t(") {"),
+        t({"", "\t"}),
+        i(0),
+        t({"", "}"}),
+      }),
+    })
+  end,
+},
+
   --  GIT ---------------------------------------------------------------------
   --  Git signs [git hunks]
   --  https://github.com/lewis6991/gitsigns.nvim
