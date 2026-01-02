@@ -218,7 +218,7 @@ return {
         enable = false,
       },
       jdk = {
-        auto_install = false,
+        auto_install = true,
       },
       notifications = {
         dap = false,  -- Enable to see what's happening
@@ -238,7 +238,218 @@ return {
         duplicate_setup_calls = false,
       },
     })
-    require('lspconfig').jdtls.setup({})
+    require('lspconfig').jdtls.setup({
+        handlers = {
+          ["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
+            border = "rounded",
+          }),
+          ["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
+            border = "rounded",
+          }),
+        },
+        settings = {
+          java = {
+            eclipse = {
+              downloadSources = true,
+            },
+            maven = {
+              downloadSources = true,
+              updateSnapshots = true,
+            },
+            implementationCodeLens = {
+              enabled = true,
+            },
+            referencesCodeLens = {
+              enabled = true,
+            },
+            format = {
+              enabled = true,
+              settings = {
+                url = vim.fn.stdpath("config") .. "/lang-servers/intellij-java-google-style.xml",
+                profile = "GoogleStyle",
+              },
+            },
+            signatureHelp = {
+              enabled = true,
+              description = {
+                enabled = true,
+              },
+            },
+            contentProvider = { preferred = 'fernflower' },
+            sources = {
+              organizeImports = {
+                starThreshold = 3,
+                staticStarThreshold = 3,
+              },
+            },
+            completion = {
+              favoriteStaticMembers = {
+                -- Standard Java
+                "org.junit.jupiter.api.Assertions.*",
+                "org.junit.Assert.*",
+                "org.junit.Assume.*",
+                "org.mockito.Mockito.*",
+                "org.mockito.ArgumentMatchers.*",
+                "java.util.Objects.requireNonNull",
+                "java.util.Objects.requireNonNullElse",
+                -- LWJGL (OpenGL/Vulkan)
+                "org.lwjgl.glfw.GLFW.*",
+                "org.lwjgl.opengl.GL11.*",
+                "org.lwjgl.opengl.GL20.*",
+                "org.lwjgl.opengl.GL30.*",
+                "org.lwjgl.opengl.GL33.*",
+                "org.lwjgl.opengl.GL45.*",
+                "org.lwjgl.vulkan.VK10.*",
+                "org.lwjgl.system.MemoryUtil.*",
+                "org.lwjgl.system.MemoryStack.*",
+                -- ImGui
+                "imgui.ImGui.*",
+                "imgui.flag.ImGuiWindowFlags.*",
+                "imgui.flag.ImGuiCol.*",
+                "imgui.type.ImBoolean.*",
+                "imgui.type.ImInt.*",
+                "imgui.type.ImFloat.*",
+              },
+              filteredTypes = {
+                "com.sun.*",
+                "io.micrometer.shaded.*",
+                "java.awt.*",
+                "sun.*",
+                "jdk.*",
+              },
+              importOrder = {
+                "java",
+                "javax",
+                "org.lwjgl",
+                "imgui",
+                "org",
+                "com",
+              },
+            },
+            configuration = {
+              detectJdksAtStart = true,
+              runtimes = {
+                {
+                  name = "JavaSE-1.8",
+                  path = vim.fn.expand("~/.sdkman/candidates/java/8.0.432-tem"),
+                  default = false,
+                },
+                {
+                  name = "JavaSE-11",
+                  path = vim.fn.expand("~/.sdkman/candidates/java/11.0.25-tem"),
+                  default = false,
+                },
+                {
+                  name = "JavaSE-17",
+                  path = vim.fn.expand("~/.sdkman/candidates/java/17.0.13-tem"),
+                  default = false,
+                },
+                {
+                  name = "JavaSE-21",
+                  path = vim.fn.expand("~/.sdkman/candidates/java/21.0.5-tem"),
+                  default = true, -- Set your preferred default
+                },
+              },
+              updateBuildConfiguration = "automatic",
+            },
+            inlayHints = {
+              parameterNames = {
+                enabled = "all",
+              },
+            },
+            referenceCodeLens = {
+              enabled = true,
+            },
+            saveActions = {
+              organizeImports = true,
+            },
+            server = {
+              launchMode = "Standard",
+            },
+            autobuild = {
+              enabled = true,
+            },
+            project = {
+              referencedLibraries = {
+                "lib/**/*.jar",
+                "${env:HOME}/.m2/repository/org/lwjgl/**/*.jar",
+                "${env:HOME}/.m2/repository/io/github/spair/**/*.jar",
+                "libs/joml/**/*.jar",  -- Java OpenGL Math Library
+                --lwjgl in here and maybe imgui
+              },
+            },
+            templates = {
+              fileHeader = {
+                "/**",
+                " * ${file_name}",
+                " *",
+                " * @author ${user}",
+                " * @date ${date}",
+                " */",
+              },
+              typeComment = {},
+            },
+            trace = {
+              server = "off",
+            },
+            import = {
+              gradle = {
+                enabled = true,
+                wrapper = {
+                  enabled = true,
+                },
+                version = nil,
+                home = nil,
+                java = {
+                  home = nil,
+                },
+                offline = {
+                  enabled = false,
+                },
+                arguments = nil,
+                jvmArguments = nil,
+                user = {
+                  home = nil,
+                },
+              },
+              maven = {
+                enabled = true,
+                downloadSources = true,
+                updateSnapshots = true,
+              },
+              exclusions = {
+                "**/node_modules/**",
+                "**/.metadata/**",
+                "**/archetype-resources/**",
+                "**/META-INF/maven/**",
+              },
+            },
+            lombok = {
+              enabled = false,
+            },
+          },
+        },
+        init_options = {
+          extendedClientCapabilities = {
+            progressReportProvider = true,
+            classFileContentsSupport = true,
+            generateToStringPromptSupport = true,
+            hashCodeEqualsPromptSupport = true,
+            advancedExtractRefactoringSupport = true,
+            advancedOrganizeImportsSupport = true,
+            generateConstructorsPromptSupport = true,
+            generateDelegateMethodsPromptSupport = true,
+            moveRefactoringSupport = true,
+            overrideMethodsPromptSupport = true,
+            inferSelectionSupport = { "extractMethod", "extractVariable", "extractConstant" },
+          },
+        },
+        capabilities = require('cmp_nvim_lsp').default_capabilities(),
+        flags = {
+          debounce_text_changes = 150,
+          allow_incremental_sync = true,
+        },
+      })
   end
 },
   --  nvim-lspconfig [lsp default configs]
@@ -258,7 +469,7 @@ return {
 
 {
   "mason-org/mason-lspconfig.nvim",
-  dependencies = { "neovim/nvim-lspconfig", "nvim-java/nvim-java" },
+  dependencies = { "neovim/nvim-lspconfig", "nvim-java/nvim-java", "mfussenegger/nvim-jdtls" },
   event = "User BaseFile",
   config = function()
     require("mason-lspconfig").setup({
@@ -272,23 +483,16 @@ return {
       },
     })
 
-    -- This sets up the diagnostic enum and creates the UIEnter autocmd
     require("base.utils").apply_lsp_diagnostic_defaults()
 
-    -- IMMEDIATELY apply the diagnostic config for the current mode
-    -- This ensures diagnostics are configured before LSP attaches
     local utils = require("base.utils")
     if utils.diagnostics_enum and utils.diagnostics_enum[vim.g.diagnostics_mode] then
-      -- ADD THESE LINES to customize virtual text
       local config = vim.tbl_deep_extend("force",
         utils.diagnostics_enum[vim.g.diagnostics_mode],
         {
           virtual_text = {
-            prefix = '●',
-            -- Enable wrapping (may not work in all versions)
+            prefix = '◆',
             wrap = true,
-            -- Or set a max width
-            -- width = 80,
           },
         }
       )
@@ -301,7 +505,68 @@ return {
         local bufnr = args.buf
 
         if client and client.name then
+          -- Apply standard LSP mappings
           require("base.utils").apply_user_lsp_mappings(client.name, bufnr)
+
+          -- Apply Java-specific mappings directly here
+          if client.name == "jdtls" then
+            local has_jdtls, jdtls = pcall(require, 'jdtls')
+            if not has_jdtls then
+              vim.notify("nvim-jdtls not avaliable", vim.log.levels.WARN)
+              return
+            end
+
+            local opts = { buffer = bufnr, silent = true }
+
+            -- Organize imports
+            vim.keymap.set('n', '<leader>jo', function()
+              require('jdtls').organize_imports()
+            end, vim.tbl_extend('force', opts, { desc = "Organize imports" }))
+
+            -- Extract variable
+            vim.keymap.set('n', '<leader>jv', function()
+              require('jdtls').extract_variable()
+            end, vim.tbl_extend('force', opts, { desc = "Extract variable" }))
+
+            vim.keymap.set('x', '<leader>jv', function()
+              require('jdtls').extract_variable(true)
+            end, vim.tbl_extend('force', opts, { desc = "Extract variable" }))
+
+            -- Extract constant
+            vim.keymap.set('n', '<leader>jc', function()
+              require('jdtls').extract_constant()
+            end, vim.tbl_extend('force', opts, { desc = "Extract constant" }))
+
+            vim.keymap.set('x', '<leader>jc', function()
+              require('jdtls').extract_constant(true)
+            end, vim.tbl_extend('force', opts, { desc = "Extract constant" }))
+
+            -- Extract method
+            vim.keymap.set('x', '<leader>jm', function()
+              require('jdtls').extract_method(true)
+            end, vim.tbl_extend('force', opts, { desc = "Extract method" }))
+
+            -- Update project config
+            vim.keymap.set('n', '<leader>ju', function()
+              require('jdtls').update_project_config()
+            end, vim.tbl_extend('force', opts, { desc = "Update project config" }))
+
+            -- JShell
+            vim.keymap.set('n', '<leader>js', function()
+              require('jdtls').jshell()
+            end, vim.tbl_extend('force', opts, { desc = "Open JShell" }))
+
+            -- Test nearest method
+            vim.keymap.set('n', '<leader>jt', function()
+              require('jdtls').test_nearest_method()
+            end, vim.tbl_extend('force', opts, { desc = "Test nearest method" }))
+
+            -- Test class
+            vim.keymap.set('n', '<leader>jT', function()
+              require('jdtls').test_class()
+            end, vim.tbl_extend('force', opts, { desc = "Test class" }))
+
+          end
         end
       end,
     })

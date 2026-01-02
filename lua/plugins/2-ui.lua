@@ -796,6 +796,9 @@ return {
     config = function(_, opts)
       require("which-key").setup(opts)
       require("base.utils").which_key_register()
+      require("which-key").add({
+        { "<leader>j",  group = "Java" },
+      })
     end,
   },
 

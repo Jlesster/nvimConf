@@ -1559,6 +1559,12 @@ lsp_mappings.n["<leader>lL"] = {
     end,
     desc = "Hover help",
   }
+  lsp_mappings.n["K"] = {
+    function()
+      vim.lsp.buf.hover(hover_opts)
+    end,
+    desc = "Hover help",
+  }
   lsp_mappings.n["gH"] = {
     function() vim.lsp.buf.signature_help(hover_opts) end,
     desc = "Signature help",

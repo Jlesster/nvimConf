@@ -297,11 +297,11 @@ return {
       opts = {
         -- Default configuration
         keymaps = {
-          java_new = "<leader>jn",
+          java_new = "<leader>jN",
         },
         options = {
           auto_open = true,  -- Open file after creation
-          java_version = 17  -- Minimum Java version
+          java_version = 21  -- Minimum Java version
         },
         default_imports = {
           record = {"java.util.*;"}
