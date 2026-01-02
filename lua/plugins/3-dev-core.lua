@@ -211,6 +211,7 @@ return {
     "MunifTanjim/nui.nvim",
     "neovim/nvim-lspconfig",
     "mfussenegger/nvim-dap",
+    "mfussenegger/nvim-jdtls",
   },
   config = function()
     require('java').setup({
@@ -220,6 +221,7 @@ return {
       jdk = {
         auto_install = true,
       },
+      java_home = vim.fn.expand('~/.sdkman/candidates/java/current'),
       notifications = {
         dap = false,  -- Enable to see what's happening
       },
@@ -439,6 +441,7 @@ return {
             advancedOrganizeImportsSupport = true,
             generateConstructorsPromptSupport = true,
             generateDelegateMethodsPromptSupport = true,
+            resolveAdditionalTextEditsSupport = true;
             moveRefactoringSupport = true,
             overrideMethodsPromptSupport = true,
             inferSelectionSupport = { "extractMethod", "extractVariable", "extractConstant" },

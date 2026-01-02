@@ -1561,6 +1561,14 @@ lsp_mappings.n["<leader>lL"] = {
   }
   lsp_mappings.n["K"] = {
     function()
+      if vim.bo.filetype == "java" then
+        local ok, java_help = pcall(require, "lsp.java-keyword-hover-help")
+        if ok and type(java_help) == "table" and java_help.try_show_keyword then
+          if java_help.try_show_keyword() then
+          return
+          end
+        end
+      end
       vim.lsp.buf.hover(hover_opts)
     end,
     desc = "Hover help",
