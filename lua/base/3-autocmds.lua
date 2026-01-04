@@ -385,10 +385,17 @@ autocmd("DirChanged", {
     end
   end,
 })
-
 vim.api.nvim_create_autocmd("InsertEnter", {
   callback = function()
     require('nvim-autopairs').setup({})
+    vim.opt.virtualedit = "" -- Force it back after autopairs resets it
   end,
 })
-
+vim.api.nvim_create_autocmd("ModeChanged", {
+  pattern = "*:*",
+  callback = function()
+    if vim.bo.filetype == "java" then
+      vim.opt_local.virtualedit = ""
+    end
+  end,
+})

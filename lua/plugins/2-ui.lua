@@ -746,8 +746,9 @@ return {
           },
         },
         cursor = {
-          enable = false, -- We don't want cursor ghosting
+          enable = true, -- We don't want cursor ghosting
           timing = animate.gen_timing.linear { duration = 26, unit = "total" },
+          path = animate.gen_path.line(),  -- or try: angle(), walls()
         },
       }
     end,
