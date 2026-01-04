@@ -513,6 +513,9 @@ return {
 
           -- Apply Java-specific mappings directly here
           if client.name == "jdtls" then
+            vim.api.nvim_buf_call(bufnr, function()
+              vim.opt_local.virtualedit = ""
+            end)
             local has_jdtls, jdtls = pcall(require, 'jdtls')
             if not has_jdtls then
               vim.notify("nvim-jdtls not avaliable", vim.log.levels.WARN)

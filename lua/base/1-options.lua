@@ -43,7 +43,7 @@ vim.opt.shell = "fish"
 vim.opt.termguicolors = true -- Enable 24-bit RGB color in the TUI.
 vim.opt.undofile = true -- Enable persistent undo between session and reboots.
 vim.opt.updatetime = 30 -- Length of time to wait before triggering the plugin.
-vim.opt.virtualedit = "" -- Allow going past end of line in visual block mode.
+vim.opt.virtualedit = "none" -- Allow going past end of line in visual block mode.
 vim.opt.writebackup = false -- Disable making a backup before overwriting a file.
 vim.opt.shada = "!,'1000,<50,s10,h" -- Remember the last 1000 opened files
 vim.opt.history = 1000 -- Number of commands to remember in a history table (per buffer).
@@ -83,11 +83,17 @@ vim.g.lsp_round_borders_enabled = true -- Enable round borders for lsp hover and
 vim.g.lsp_signature_enabled = true -- Enable automatically showing lsp help as you write function parameters.
 vim.g.notifications_enabled = true -- Enable notifications.
 vim.g.url_hl_enabled = true -- Highlight URLs with an underline effect.
-vim.g.kitty_graphics_protocol = 0
-vim.opt.termsync = false
+vim.g.kitty_graphics_protocol = 1
+vim.opt.termsync = true
 vim.opt.ttyfast = true
 vim.o.winwidth = 1
 vim.o.winheight = 1
+vim.opt.ambiwidth = "single"
+vim.opt.eventignore = ""
+
+-- Set JAVA_HOME for Maven/Java tasks
+vim.env.JAVA_HOME = "/usr/lib/jvm/java-21-openjdk"
+vim.env.PATH = vim.env.JAVA_HOME .. "/bin:" .. vim.env.PATH
 
 vim.g.java_highlight_functions = 1
 vim.g.java_highlight_all = 1

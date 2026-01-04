@@ -24,25 +24,25 @@ local colors = {
   overlay2 = "#9598B2",
 
   -- Text colors
-  text = "#D1D5F4",
-  subtext1 = "#BEC1DE",
-  subtext0 = "#AAACC8",
+  text = "#D6D3F4",
+  subtext1 = "#C2C0DE",
+  subtext0 = "#ADABC8",
 
   -- Accent colors (VIBRANT)
-  rosewater = "#F2E1E7",
-  flamingo = "#E9D0E0",
+  rosewater = "#F3E2E8",
+  flamingo = "#EAD1E1",
   pink = "#D3B7E5",
   mauve = "#B08FDE",
-  red = "#D395E3",
-  maroon = "#D5A6D6",
-  peach = "#FEAFB8",
+  red = "#D496E4",
+  maroon = "#D6A7D7",
+  peach = "#FEB0B9",
   yellow = "#EDCEBE",
   green = "#6CD2C5",
   teal = "#8ED0EB",
-  sky = "#AFD4FF",
-  sapphire = "#9AB2F4",
-  blue = "#B2A3F4",
-  lavender = "#CBB9FB",
+  sky = "#89AFD7",
+  sapphire = "#9CB5F6",
+  blue = "#C0B1FF",
+  lavender = "#CCBAFC",
 }
 
 local function hi(group, opts)
@@ -220,7 +220,7 @@ local function setup_highlights()
 
     -- Functions and Methods
     hi("@lsp.type.function", { fg = colors.blue, style = "bold" })
-    hi("@lsp.type.method.java", { fg = colors.sapphire, style = "italic" })
+    hi("@lsp.type.method.java", { fg = colors.sky, style = "italic" })
     hi("@lsp.type.method", { fg = colors.sapphire, style = "bold" })
     hi("@lsp.typemod.function.static", { fg = colors.sky, style = "bold" })
     hi("@lsp.typemod.method.static", { fg = colors.sapphire, style = "italic" })
@@ -365,12 +365,12 @@ local function setup_highlights()
     -- ============================================================================
     -- PLUGIN: RAINBOW DELIMITERS
     -- ============================================================================
-    hi("RainbowDelimiterRed",    { fg = "#DF8BF8" })
-    hi("RainbowDelimiterOrange", { fg = "#FFAFB8" })
+    hi("RainbowDelimiterRed",    { fg = "#E08CF9" })
+    hi("RainbowDelimiterOrange", { fg = "#FFB0B9" })
     hi("RainbowDelimiterYellow", { fg = "#FACAB0" })
     hi("RainbowDelimiterGreen",  { fg = "#1FD8C7" })
     hi("RainbowDelimiterCyan",   { fg = "#60D4FD" })
-    hi("RainbowDelimiterBlue",   { fg = "#77BBFF" })
+    hi("RainbowDelimiterBlue",   { fg = "#73BCFF" })
     hi("RainbowDelimiterViolet", { fg = "#B988FF" })
 
     -- ============================================================================
