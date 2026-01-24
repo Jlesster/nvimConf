@@ -602,11 +602,10 @@ return {
     event = "InsertEnter",
     dependencies = "windwp/nvim-ts-autotag",
     opts = {
-      check_ts = true,
-      ts_config = { java = false },
+      check_ts = false,
       fast_wrap = {
         map = "<M-e>",
-        chars = { "{", "[", "(", '"', "'" },
+        chars = { "{", "[", "(", '"', "'", "<" },
         pattern = string.gsub([[ [%'%"%)%>%]%)%}%,] ]], "%s+", ""),
         offset = 0,
         end_key = "$",

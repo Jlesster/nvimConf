@@ -191,7 +191,6 @@ else:
     material_colors['successContainer'] = '#D1E8D5'
     material_colors['onSuccessContainer'] = '#0C1F13'
 
-# Terminal Colors - PURPLE MONOCHROMATIC SCHEME
 # Terminal Colors - Harmonized with wallpaper accent
 if args.termscheme is not None:
     with open(args.termscheme, 'r') as f:
@@ -387,7 +386,7 @@ if args.termscheme is not None:
     BG_THRESH = 05.0
     UI_THRESH = 10.0
     SYNTAX_THRESH = 40.55 #less is more contr
-    TEXT_THRESH = 8.0
+    TEXT_THRESH = 50.0
 
     # Background / surfaces (keep Mocha depth)
     neovim_colors["base"] = (
@@ -413,10 +412,10 @@ if args.termscheme is not None:
         "yellow": (SYNTAX_HARMONY, SYNTAX_THRESH, 75),     # High chroma
         "green": (SYNTAX_HARMONY, SYNTAX_THRESH, 70),
         "teal": (SYNTAX_HARMONY, SYNTAX_THRESH, 72),       # High chroma
-        "sky": (SYNTAX_HARMONY, SYNTAX_THRESH, 68),
+        "sky": (SYNTAX_HARMONY, SYNTAX_THRESH, 75),
         "sapphire": (SYNTAX_HARMONY, SYNTAX_THRESH, 80),
-        "blue": (SYNTAX_HARMONY, SYNTAX_THRESH, 78),
-        "lavender": (SYNTAX_HARMONY, SYNTAX_THRESH, 75),
+        "blue": (SYNTAX_HARMONY, SYNTAX_THRESH, 76),
+        "lavender": (SYNTAX_HARMONY, SYNTAX_THRESH, 80),
     }
 
     for k, (harmony, thresh, max_chroma) in syntax_colors.items():
@@ -428,7 +427,7 @@ if args.termscheme is not None:
     # ------------------------------------------------
     # FINAL SYNTAX BRIGHTNESS LIFT (NO SATURATION CHANGE)
     # ------------------------------------------------
-    SYNTAX_TONE_LIFT = 0.5  # try 4–8 range
+    SYNTAX_TONE_LIFT = 0.6  # try 4–8 range
 
     for k in syntax_colors.keys():
         neovim_colors[k] = argb_to_hex(
@@ -438,12 +437,13 @@ if args.termscheme is not None:
     # Force specific tones for better contrast and vibrancy
     TONE_MAP = {
         "mauve": 65,      # Brighter
-        "blue": 71,       # Brighter
+        "blue": 76,       # Brighter
+        "sky": 70,
         "green": 78,      # Brighter
         "teal": 80,       # Very bright
         "yellow": 85,     # Very bright
         "pink": 78,       # Brighter
-        "sapphire": 73,   # Medium-bright
+        "sapphire": 74,   # Medium-bright
     }
 
     for k, tone in TONE_MAP.items():
@@ -694,7 +694,7 @@ local function setup_highlights()
     hi("@punctuation.special", {{ fg = colors.sky }})
 
     hi("@comment", {{ fg = colors.pink, style = "italic" }})
-    hi("@comment.todo", {{ fg = colors.yellow, bg = colors.surface0, style = "bold" }})
+    hi("@comment.todo", {{ fg = colors.yellow, bg = "NONE", style = "bold" }})
     hi("@comment.note", {{ fg = colors.blue, bg = colors.surface0, style = "bold" }})
     hi("@comment.warning", {{ fg = colors.peach, bg = colors.surface0, style = "bold" }})
     hi("@comment.error", {{ fg = colors.red, bg = colors.surface0, style = "bold" }})
@@ -722,7 +722,7 @@ local function setup_highlights()
 
     -- Functions and Methods
     hi("@lsp.type.function", {{ fg = colors.blue, style = "bold" }})
-    hi("@lsp.type.method.java", {{ fg = colors.sapphire, style = "italic" }})
+    hi("@lsp.type.method.java", {{ fg = colors.sky, style = "italic" }})
     hi("@lsp.type.method", {{ fg = colors.sapphire, style = "bold" }})
     hi("@lsp.typemod.function.static", {{ fg = colors.sky, style = "bold" }})
     hi("@lsp.typemod.method.static", {{ fg = colors.sapphire, style = "italic" }})

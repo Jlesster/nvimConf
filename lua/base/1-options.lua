@@ -88,8 +88,6 @@ vim.opt.termsync = true
 vim.opt.ttyfast = true
 vim.o.winwidth = 1
 vim.o.winheight = 1
-vim.opt.ambiwidth = "single"
-vim.opt.eventignore = ""
 
 -- Set JAVA_HOME for Maven/Java tasks
 vim.env.JAVA_HOME = "/usr/lib/jvm/java-21-openjdk"

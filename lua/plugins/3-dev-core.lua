@@ -202,7 +202,7 @@ return {
   -- Reliable jdtls support. Must go before lsp-config and mason-lspconfig.
 {
   "nvim-java/nvim-java",
-    ft = { "java" },
+  ft = { "java" },
   dependencies = {
     "nvim-java/lua-async-await",
     "nvim-java/nvim-java-core",
@@ -223,7 +223,7 @@ return {
       },
       java_home = vim.fn.expand('~/.sdkman/candidates/java/current'),
       notifications = {
-        dap = false,  -- Enable to see what's happening
+        dap = false,
       },
       root_markers = {
         'settings.gradle',
@@ -240,219 +240,219 @@ return {
         duplicate_setup_calls = false,
       },
     })
-    require('lspconfig').jdtls.setup({
-        handlers = {
-          ["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
-            border = "rounded",
-          }),
-          ["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
-            border = "rounded",
-          }),
-        },
-        settings = {
-          java = {
-            eclipse = {
-              downloadSources = true,
+
+    -- NOW setup lspconfig with all your settings
+    local jdtls_setup = {
+      handlers = {
+        ["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
+          border = "rounded",
+        }),
+        ["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
+          border = "rounded",
+        }),
+      },
+      settings = {
+        java = {
+          eclipse = {
+            downloadSources = true,
+          },
+          maven = {
+            downloadSources = true,
+            updateSnapshots = true,
+          },
+          implementationCodeLens = {
+            enabled = true,
+          },
+          referencesCodeLens = {
+            enabled = true,
+          },
+          format = {
+            enabled = true,
+            settings = {
+              url = vim.fn.stdpath("config") .. "/lang-servers/intellij-java-google-style.xml",
+              profile = "GoogleStyle",
+            },
+          },
+          signatureHelp = {
+            enabled = true,
+            description = {
+              enabled = true,
+            },
+          },
+          contentProvider = { preferred = 'fernflower' },
+          sources = {
+            organizeImports = {
+              starThreshold = 1,
+              staticStarThreshold = 1,
+            },
+          },
+          completion = {
+            favoriteStaticMembers = {
+              "org.junit.jupiter.api.Assertions.*",
+              "org.junit.Assert.*",
+              "org.junit.Assume.*",
+              "org.mockito.Mockito.*",
+              "org.mockito.ArgumentMatchers.*",
+              "java.util.Objects.requireNonNull",
+              "java.util.Objects.requireNonNullElse",
+              "org.lwjgl.glfw.GLFW.*",
+              "org.lwjgl.opengl.GL11.*",
+              "org.lwjgl.opengl.GL20.*",
+              "org.lwjgl.opengl.GL30.*",
+              "org.lwjgl.opengl.GL33.*",
+              "org.lwjgl.opengl.GL45.*",
+              "org.lwjgl.vulkan.VK10.*",
+              "org.lwjgl.system.MemoryUtil.*",
+              "org.lwjgl.system.MemoryStack.*",
+              "imgui.ImGui.*",
+              "imgui.flag.ImGuiWindowFlags.*",
+              "imgui.flag.ImGuiCol.*",
+              "imgui.type.ImBoolean.*",
+              "imgui.type.ImInt.*",
+              "imgui.type.ImFloat.*",
+            },
+            filteredTypes = {
+              "com.sun.*",
+              "io.micrometer.shaded.*",
+              "java.awt.*",
+              "sun.*",
+              "jdk.*",
+            },
+            importOrder = {
+              "java",
+              "javax",
+              "org.lwjgl",
+              "imgui",
+              "org",
+              "com",
+            },
+          },
+          configuration = {
+            detectJdksAtStart = true,
+            runtimes = {
+              {
+                name = "JavaSE-1.8",
+                path = vim.fn.expand("~/.sdkman/candidates/java/8.0.432-tem"),
+                default = false,
+              },
+              {
+                name = "JavaSE-11",
+                path = vim.fn.expand("~/.sdkman/candidates/java/11.0.25-tem"),
+                default = false,
+              },
+              {
+                name = "JavaSE-17",
+                path = vim.fn.expand("~/.sdkman/candidates/java/17.0.13-tem"),
+                default = false,
+              },
+              {
+                name = "JavaSE-21",
+                path = vim.fn.expand("~/.sdkman/candidates/java/21.0.5-tem"),
+                default = true,
+              },
+            },
+            updateBuildConfiguration = "automatic",
+          },
+          inlayHints = {
+            parameterNames = {
+              enabled = "all",
+            },
+          },
+          referenceCodeLens = {
+            enabled = true,
+          },
+          saveActions = {
+            organizeImports = true,
+          },
+          server = {
+            launchMode = "Standard",
+          },
+          autobuild = {
+            enabled = true,
+          },
+          project = {
+            referencedLibraries = {
+              "lib/**/*.jar",
+              "${env:HOME}/.m2/repository/org/lwjgl/**/*.jar",
+              "${env:HOME}/.m2/repository/io/github/spair/**/*.jar",
+              "libs/joml/**/*.jar",
+            },
+          },
+          templates = {
+            fileHeader = {
+              "/**",
+              " * ${file_name}",
+              " *",
+              " * @author ${user}",
+              " * @date ${date}",
+              " */",
+            },
+            typeComment = {},
+          },
+          trace = {
+            server = "off",
+          },
+          import = {
+            gradle = {
+              enabled = true,
+              wrapper = {
+                enabled = true,
+              },
+              version = nil,
+              home = nil,
+              java = {
+                home = nil,
+              },
+              offline = {
+                enabled = false,
+              },
+              arguments = nil,
+              jvmArguments = nil,
+              user = {
+                home = nil,
+              },
             },
             maven = {
+              enabled = true,
               downloadSources = true,
               updateSnapshots = true,
             },
-            implementationCodeLens = {
-              enabled = true,
-            },
-            referencesCodeLens = {
-              enabled = true,
-            },
-            format = {
-              enabled = true,
-              settings = {
-                url = vim.fn.stdpath("config") .. "/lang-servers/intellij-java-google-style.xml",
-                profile = "GoogleStyle",
-              },
-            },
-            signatureHelp = {
-              enabled = true,
-              description = {
-                enabled = true,
-              },
-            },
-            contentProvider = { preferred = 'fernflower' },
-            sources = {
-              organizeImports = {
-                starThreshold = 3,
-                staticStarThreshold = 3,
-              },
-            },
-            completion = {
-              favoriteStaticMembers = {
-                -- Standard Java
-                "org.junit.jupiter.api.Assertions.*",
-                "org.junit.Assert.*",
-                "org.junit.Assume.*",
-                "org.mockito.Mockito.*",
-                "org.mockito.ArgumentMatchers.*",
-                "java.util.Objects.requireNonNull",
-                "java.util.Objects.requireNonNullElse",
-                -- LWJGL (OpenGL/Vulkan)
-                "org.lwjgl.glfw.GLFW.*",
-                "org.lwjgl.opengl.GL11.*",
-                "org.lwjgl.opengl.GL20.*",
-                "org.lwjgl.opengl.GL30.*",
-                "org.lwjgl.opengl.GL33.*",
-                "org.lwjgl.opengl.GL45.*",
-                "org.lwjgl.vulkan.VK10.*",
-                "org.lwjgl.system.MemoryUtil.*",
-                "org.lwjgl.system.MemoryStack.*",
-                -- ImGui
-                "imgui.ImGui.*",
-                "imgui.flag.ImGuiWindowFlags.*",
-                "imgui.flag.ImGuiCol.*",
-                "imgui.type.ImBoolean.*",
-                "imgui.type.ImInt.*",
-                "imgui.type.ImFloat.*",
-              },
-              filteredTypes = {
-                "com.sun.*",
-                "io.micrometer.shaded.*",
-                "java.awt.*",
-                "sun.*",
-                "jdk.*",
-              },
-              importOrder = {
-                "java",
-                "javax",
-                "org.lwjgl",
-                "imgui",
-                "org",
-                "com",
-              },
-            },
-            configuration = {
-              detectJdksAtStart = true,
-              runtimes = {
-                {
-                  name = "JavaSE-1.8",
-                  path = vim.fn.expand("~/.sdkman/candidates/java/8.0.432-tem"),
-                  default = false,
-                },
-                {
-                  name = "JavaSE-11",
-                  path = vim.fn.expand("~/.sdkman/candidates/java/11.0.25-tem"),
-                  default = false,
-                },
-                {
-                  name = "JavaSE-17",
-                  path = vim.fn.expand("~/.sdkman/candidates/java/17.0.13-tem"),
-                  default = false,
-                },
-                {
-                  name = "JavaSE-21",
-                  path = vim.fn.expand("~/.sdkman/candidates/java/21.0.5-tem"),
-                  default = true, -- Set your preferred default
-                },
-              },
-              updateBuildConfiguration = "automatic",
-            },
-            inlayHints = {
-              parameterNames = {
-                enabled = "all",
-              },
-            },
-            referenceCodeLens = {
-              enabled = true,
-            },
-            saveActions = {
-              organizeImports = true,
-            },
-            server = {
-              launchMode = "Standard",
-            },
-            autobuild = {
-              enabled = true,
-            },
-            project = {
-              referencedLibraries = {
-                "lib/**/*.jar",
-                "${env:HOME}/.m2/repository/org/lwjgl/**/*.jar",
-                "${env:HOME}/.m2/repository/io/github/spair/**/*.jar",
-                "libs/joml/**/*.jar",  -- Java OpenGL Math Library
-                --lwjgl in here and maybe imgui
-              },
-            },
-            templates = {
-              fileHeader = {
-                "/**",
-                " * ${file_name}",
-                " *",
-                " * @author ${user}",
-                " * @date ${date}",
-                " */",
-              },
-              typeComment = {},
-            },
-            trace = {
-              server = "off",
-            },
-            import = {
-              gradle = {
-                enabled = true,
-                wrapper = {
-                  enabled = true,
-                },
-                version = nil,
-                home = nil,
-                java = {
-                  home = nil,
-                },
-                offline = {
-                  enabled = false,
-                },
-                arguments = nil,
-                jvmArguments = nil,
-                user = {
-                  home = nil,
-                },
-              },
-              maven = {
-                enabled = true,
-                downloadSources = true,
-                updateSnapshots = true,
-              },
-              exclusions = {
-                "**/node_modules/**",
-                "**/.metadata/**",
-                "**/archetype-resources/**",
-                "**/META-INF/maven/**",
-              },
-            },
-            lombok = {
-              enabled = false,
+            exclusions = {
+              "**/node_modules/**",
+              "**/.metadata/**",
+              "**/archetype-resources/**",
+              "**/META-INF/maven/**",
             },
           },
-        },
-        init_options = {
-          extendedClientCapabilities = {
-            progressReportProvider = true,
-            classFileContentsSupport = true,
-            generateToStringPromptSupport = true,
-            hashCodeEqualsPromptSupport = true,
-            advancedExtractRefactoringSupport = true,
-            advancedOrganizeImportsSupport = true,
-            generateConstructorsPromptSupport = true,
-            generateDelegateMethodsPromptSupport = true,
-            resolveAdditionalTextEditsSupport = true;
-            moveRefactoringSupport = true,
-            overrideMethodsPromptSupport = true,
-            inferSelectionSupport = { "extractMethod", "extractVariable", "extractConstant" },
+          lombok = {
+            enabled = false,
           },
         },
-        capabilities = require('cmp_nvim_lsp').default_capabilities(),
-        flags = {
-          debounce_text_changes = 150,
-          allow_incremental_sync = true,
+      },
+      init_options = {
+        extendedClientCapabilities = {
+          progressReportProvider = true,
+          classFileContentsSupport = true,
+          generateToStringPromptSupport = true,
+          hashCodeEqualsPromptSupport = true,
+          advancedExtractRefactoringSupport = true,
+          advancedOrganizeImportsSupport = true,
+          generateConstructorsPromptSupport = true,
+          generateDelegateMethodsPromptSupport = true,
+          resolveAdditionalTextEditsSupport = true,
+          moveRefactoringSupport = true,
+          overrideMethodsPromptSupport = true,
+          inferSelectionSupport = { "extractMethod", "extractVariable", "extractConstant" },
         },
-      })
+      },
+      capabilities = require('cmp_nvim_lsp').default_capabilities(),
+      flags = {
+        debounce_text_changes = 150,
+        allow_incremental_sync = true,
+      },
+    }
+
+    require('lspconfig').jdtls.setup(jdtls_setup)
   end
 },
   --  nvim-lspconfig [lsp default configs]
@@ -849,25 +849,79 @@ return {
             return vim.g.cmp_enabled
           end
         end,
-        preselect = cmp.PreselectMode.None,
-        formatting = {
-          fields = { "kind", "abbr", "menu" },
-        format = function(entry, item)
-          -- First apply lspkind formatting if available
-          if lspkind_loaded then
-            item = lspkind.cmp_format(utils.get_plugin_opts("lspkind.nvim"))(entry, item)
-          end
-
-          -- Then apply nvim-highlight-colors formatting
-          local color_item = require("nvim-highlight-colors").format(entry, { kind = item.kind })
-          if color_item.abbr_hl_group then
-            item.kind_hl_group = color_item.abbr_hl_group
-            item.kind = color_item.abbr
-          end
-
-          return item
-        end
+        window = {
+          completion = {
+            scrolloff = 0,
+            col_offset = -3,
+            side_padding = 1,
+            max_height = math.floor(vim.o.lines * 9.3),
+            relative = 'cursor',
+            anchor = 'SW';
+          },
         },
+        preselect = cmp.PreselectMode.None,
+        completion = {
+          completeopt = 'menu,menuone,noinsert,noselect',
+        },
+        experimental = {
+          ghost_text = false,
+        },
+        performance = {
+          debounce = 150,
+          throttle = 150,
+          fetching_timeout = 200,
+          confirm_resolve_timeout = 80,
+          async_budget = 1,
+          max_view_entries = 50,
+        },
+        view = {
+          entries = { name = 'custom', selection_order = 'near_cursor' }
+        },
+formatting = {
+  -- Custom view is weird about columns. This is the most reliable:
+  -- We show icons by injecting them into abbr.
+  fields = { "abbr", "menu" },
+
+  format = function(entry, item)
+    item.menu = ({
+      nvim_lsp = "[LSP]",
+      luasnip  = "[Snip]",
+      buffer   = "[Buf]",
+      path     = "[Path]",
+      lazydev  = "[Lazy]",
+    })[entry.source.name]
+
+local ok_lspkind, lspkind = pcall(require, "lspkind")
+if ok_lspkind then
+  local symbol = lspkind.symbolic(item.kind, { mode = "symbol" }) or ""
+  if symbol ~= "" then
+    item.abbr = string.format("%s %s", symbol, item.abbr)
+  end
+end
+
+-- IMPORTANT: with custom view, color must be applied to abbr
+if not item.abbr_hl_group then
+  item.abbr_hl_group = "CmpKind" .. item.kind
+end
+
+    local ok_hc, hc = pcall(require, "nvim-highlight-colors")
+    if ok_hc then
+      local hc_item = hc.format(entry, { kind = item.kind })
+
+      if hc_item and hc_item.abbr_hl_group then
+        item.abbr_hl_group = hc_item.abbr_hl_group
+
+        if hc_item.abbr and hc_item.abbr ~= "" then
+          if not item.abbr:find(hc_item.abbr, 1, true) then
+            item.abbr = string.format("%s %s", hc_item.abbr, item.abbr)
+          end
+        end
+      end
+    end
+
+    return item
+  end,
+},
         snippet = {
           expand = function(args) luasnip.lsp_expand(args.body) end,
         },
@@ -918,20 +972,6 @@ return {
           ["<Down>"] = cmp.mapping.select_next_item {
             behavior = cmp.SelectBehavior.Select,
           },
-          ["<C-p>"] = cmp.mapping.select_prev_item {
-            behavior = cmp.SelectBehavior.Insert,
-          },
-          ["<C-n>"] = cmp.mapping.select_next_item {
-            behavior = cmp.SelectBehavior.Insert,
-          },
-          ["<C-k>"] = cmp.mapping.select_prev_item {
-            behavior = cmp.SelectBehavior.Insert,
-          },
-          ["<C-j>"] = cmp.mapping.select_next_item {
-            behavior = cmp.SelectBehavior.Insert,
-          },
-          ["<C-u>"] = cmp.mapping(cmp.mapping.scroll_docs(-4), { "i", "c" }),
-          ["<C-d>"] = cmp.mapping(cmp.mapping.scroll_docs(4), { "i", "c" }),
           ["<C-Space>"] = cmp.mapping(cmp.mapping.complete(), { "i", "c" }),
           ["<C-y>"] = cmp.config.disable,
           ["<C-e>"] = cmp.mapping {

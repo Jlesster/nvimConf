@@ -44,6 +44,8 @@ return {
   --  Vim Snippets engine  [snippet engine] + [snippet templates]
   --  https://github.com/L3MON4D3/LuaSnip
   --  https://github.com/rafamadriz/friendly-snippets
+
+
   {
     "L3MON4D3/LuaSnip",
     build = not is_windows and "make install_jsregexp" or nil,
@@ -54,17 +56,39 @@ return {
     },
     event = "User BaseFile",
     opts = {
-      history = true,
+      history = false,
       delete_check_events = "TextChanged",
-      region_check_events = "CursorMoved",
+      update_events = "TextChanged,TextChangedI",
+      enable_autosnippets = false,
+      store_selection_keys = nil,
+      -- IMPORTANT: Don't set store_selection_keys - it conflicts with Tab
     },
     config = function(_, opts)
-      if opts then require("luasnip").config.setup(opts) end
+      local ls = require("luasnip")
+
+      -- Apply options
+      if opts then ls.config.setup(opts) end
+
+      -- Completely disable automatic expansion
+      ls.config.set_config({
+        history = false,
+        enable_autosnippets = false,
+        -- Don't auto-expand on any key
+        store_selection_keys = nil,
+      })
+
+      -- Load snippet sources ONCE
       vim.tbl_map(
         function(type) require("luasnip.loaders.from_" .. type).lazy_load() end,
         { "vscode", "snipmate", "lua" }
       )
-      -- friendly-snippets - enable standardized comments snippets
+
+      -- Load custom snippets from ~/.config/nvim/snippets/
+      require("luasnip.loaders.from_lua").lazy_load({
+        paths = { vim.fn.stdpath("config") .. "/snippets" }
+      })
+
+      -- Enable standardized comments snippets
       require("luasnip").filetype_extend("typescript", { "tsdoc" })
       require("luasnip").filetype_extend("javascript", { "jsdoc" })
       require("luasnip").filetype_extend("lua", { "luadoc" })
@@ -80,65 +104,6 @@ return {
       require("luasnip").filetype_extend("sh", { "shelldoc" })
     end,
   },
-
-  {
-  "rafamadriz/friendly-snippets",
-  config = function()
-    require("luasnip.loaders.from_vscode").lazy_load()
-
-    -- Add custom Java snippets
-    local ls = require("luasnip")
-    local s = ls.snippet
-    local t = ls.text_node
-    local i = ls.insert_node
-
-    ls.add_snippets("java", {
-      -- Main method
-      s("psvm", {
-        t("public static void main(String[] args) {"),
-        t({"", "\t"}),
-        i(0),
-        t({"", "}"}),
-      }),
-
-      -- System.out.println
-      s("sout", {
-        t("System.out.println("),
-        i(1),
-        t(");"),
-      }),
-
-      -- For-each loop
-      s("foreach", {
-        t("for ("),
-        i(1, "Type"),
-        t(" "),
-        i(2, "item"),
-        t(" : "),
-        i(3, "collection"),
-        t(") {"),
-        t({"", "\t"}),
-        i(0),
-        t({"", "}"}),
-      }),
-
-      -- Try-catch
-      s("tryc", {
-        t("try {"),
-        t({"", "\t"}),
-        i(1),
-        t({"", "} catch ("}),
-        i(2, "Exception"),
-        t(" "),
-        i(3, "e"),
-        t(") {"),
-        t({"", "\t"}),
-        i(0),
-        t({"", "}"}),
-      }),
-    })
-  end,
-},
 
   --  GIT ---------------------------------------------------------------------
   --  Git signs [git hunks]
@@ -209,6 +174,9 @@ return {
     "stevearc/aerial.nvim",
     event = "User BaseFile",
     opts = {
+      icons = {
+        icons = "ascii",
+      },
       filter_kind = { -- Symbols that will appear on the tree
         -- "Class",
         "Constructor",
@@ -220,7 +188,6 @@ return {
         -- "Struct",
       },
       open_automatic = false, -- Open if the buffer is compatible
-      nerd_font = (vim.g.fallback_icons_enabled and false) or true,
       autojump = true,
       link_folds_to_tree = false,
       link_tree_to_folds = false,
@@ -254,17 +221,17 @@ return {
     config = function(_, opts)
       require("aerial").setup(opts)
       -- HACK: The first time you open aerial on a session, close all folds.
-      vim.api.nvim_create_autocmd({"FileType", "BufEnter"}, {
-        desc = "Aerial: When aerial is opened, close all its folds.",
-        callback = function()
-          local is_aerial = vim.bo.filetype == "aerial"
-          local is_ufo_available = require("base.utils").is_available("nvim-ufo")
-          if is_ufo_available and is_aerial and vim.b.new_aerial_session == nil then
-            vim.b.new_aerial_session = false
-            require("aerial").tree_set_collapse_level(0, 0)
-          end
-        end,
-      })
+      -- vim.api.nvim_create_autocmd({"FileType", "BufEnter"}, {
+      --   desc = "Aerial: When aerial is opened, close all its folds.",
+      --   callback = function()
+      --     local is_aerial = vim.bo.filetype == "aerial"
+      --     local is_ufo_available = require("base.utils").is_available("nvim-ufo")
+      --     if is_ufo_available and is_aerial and vim.b.new_aerial_session == nil then
+      --       vim.b.new_aerial_session = false
+      --       require("aerial").tree_set_collapse_level(0, 0)
+      --     end
+      --   end,
+      -- })
     end
   },
 
