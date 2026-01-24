@@ -51,7 +51,6 @@ load_colorscheme(vim.g.default_colorscheme)
 load_sources_async({
   "base.4-mappings",
 })
-
 -- Setup dynamic colors AFTER colorscheme is loaded
 vim.defer_fn(function()
   local ok, dynamic_colors = pcall(require, "ui.dynamic-colors")
@@ -61,6 +60,7 @@ vim.defer_fn(function()
   end
 
   dynamic_colors.setup()
+
 
   -- Start UI animations (mode transitions, etc.)
   local ok2, animations = pcall(require, "ui.animations")

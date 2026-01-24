@@ -370,6 +370,9 @@ return {
       -- opts
       return {
         icons = get_icons(),
+        aerial = {
+          enabled = false,
+        },
       }
     end
   },
@@ -420,7 +423,6 @@ return {
             lib.component.compiler_play(),
             lib.component.fill(),
             lib.component.compiler_redo(),
-            lib.component.aerial(),
           },
         },
         {
@@ -430,7 +432,6 @@ return {
           lib.component.breadcrumbs(),
           lib.component.fill(),
           lib.component.compiler_redo(),
-          lib.component.aerial(),
         }
       },
       statuscolumn = {
@@ -659,7 +660,7 @@ return {
     "onsails/lspkind.nvim",
     enabled = not vim.g.fallback_icons_enabled,
     opts = {
-      mode = "symbol",
+      mode = "symbol_text",
       symbol_map = {
         Array = "󰅪",
         Boolean = "⊨",

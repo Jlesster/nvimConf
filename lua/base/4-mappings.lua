@@ -105,7 +105,31 @@ maps.i["<C-BS>"] = { "<C-W>", desc = "Enable CTRL+backsace to delete." }
 maps.n["0"] =
 { "^", desc = "Go to the fist character of the line (aliases 0 to ^)" }
 maps.n["<leader>Mm"] = {":Maven<cr>", desc = "Maven Management"}
-maps.n["<leader>Mc"] = {":TermExec cmd='mvn archetype:generate -DarchetypeArtifactId=bubuwu -DarchetypeVersion=1.5 -DinteractiveMode=true'<CR>", desc = "Generate Maven Project"}
+maps.n["<leader>Mc"] = {
+  function()
+    vim.ui.input({ prompt = "Group ID: " }, function(groupId)
+      if not groupId then return end
+
+      vim.ui.input({ prompt = "Artifact ID: " }, function(artifactId)
+        if not artifactId then return end
+
+        local cmd = string.format(
+          "mvn archetype:generate " ..
+          "-DarchetypeGroupId=com.jless " ..
+          "-DarchetypeArtifactId=my-custom-archetype " ..
+          "-DarchetypeVersion=1.0 " ..
+          "-DgroupId=%s " ..
+          "-DartifactId=%s " ..
+          "-DinteractiveMode=false",
+          groupId, artifactId
+        )
+
+        vim.cmd("1TermExec cmd='" .. cmd .. "'")
+      end)
+    end)
+  end,
+  desc = "Generate Maven Project (Custom Archetype)"
+}
 maps.n["<leader>q"] = { "<cmd>confirm q<cr>", desc = "Quit" }
 maps.n["<leader>q"] = {
   function()
@@ -117,13 +141,6 @@ maps.n["<leader>q"] = {
     end
   end,
   desc = "Quit",
-}
-maps.i["<Tab>"] = {
-  "<Tab>",
-  noremap = true,
-  silent = true,
-  expr = false,
-  desc = "FIX: Prevent TAB from behaving like <C-i>, as they share the same internal code",
 }
 
 -- clipboard ---------------------------------------------------------------
@@ -211,8 +228,6 @@ maps.n["<ESC>"] = {
 }
 
 -- Improved tabulation ------------------------------------------------------
-maps.n["<S-Tab>"] = { ":bprevious<CR>", desc = "Previous Buffer" }
-maps.n["<Tab>"] = { ":bnext<CR>", desc = "Next Buffer" }
 maps.x["<"] = { "<gv", desc = "unindent line" }
 maps.x[">"] = { ">gv", desc = "indent line" }
 
@@ -414,13 +429,13 @@ maps.n["<leader>b|"] = {
 }
 
 -- quick buffer switching
-maps.n["<C-k>"] = {
+maps.n["<S-l>"] = {
   function()
     require("heirline-components.buffer").nav(vim.v.count > 0 and vim.v.count or 1)
   end,
   desc = "Next buffer",
 }
-maps.n["<C-j>"] = {
+maps.n["<S-h>"] = {
   function()
     require("heirline-components.buffer").nav(-(vim.v.count > 0 and vim.v.count or 1))
   end,
@@ -471,6 +486,78 @@ end
 if is_available("mini.animate") then
   maps.n["<leader>uA"] = { ui.toggle_animations, desc = "Animations [g]" }
 end
+
+-- Add this in the "ui toggles [ui]" section, around line 365 where your other ui toggles are
+
+maps.n["<leader>uB"] = {
+  function()
+    -- Toggle transparency state
+    vim.g.transparency_enabled = not vim.g.transparency_enabled
+
+    if vim.g.transparency_enabled then
+      -- Apply transparency - set backgrounds to NONE
+      local transparent_groups = {
+        -- Core editor / windows
+        "Normal", "NormalFloat", "FloatBorder", "SignColumn", "EndOfBuffer",
+        "VertSplit", "WinSeparator", "WinBar", "WinBarNC", "Title",
+        -- Cursor / columns
+        "CursorLine", "CursorColumn", "ColorColumn",
+        -- Status / tabline
+        "StatusLine", "StatusLineNC", "TabLine", "TabLineFill", "TabLineSel",
+        -- Popup / completion
+        "Pmenu", "PmenuSbar", "PmenuThumb", "PmenuBorder",
+        "TelescopePromptBorder", "TelescopeResultsBorder", "TelescopePreviewBorder",
+        -- Completion items
+        "CmpItemKindVariable", "CmpItemKindFunction", "CmpItemKindMethod",
+        "CmpItemKindConstructor", "CmpItemKindClass", "CmpItemKindInterface",
+        "CmpItemKindStruct", "CmpItemKindEnum", "CmpItemKindEnumMember",
+        "CmpItemKindModule", "CmpItemKindProperty", "CmpItemKindField",
+        "CmpItemKindTypeParameter", "CmpItemKindConstant", "CmpItemKindKeyword",
+        "CmpItemKindSnippet", "CmpItemKindText", "CmpItemKindFile",
+        "CmpItemKindFolder", "CmpItemKindColor", "CmpItemKindReference",
+        "CmpItemKindOperator", "CmpItemKindUnit", "CmpItemKindValue",
+        "CmpItemAbbr", "CmpItemAbbrDeprecated", "CmpItemAbbrMatch",
+        "CmpItemAbbrMatchFuzzy", "CmpItemMenu",
+        -- Which-key
+        "WhichKey", "WhichKeyFloat", "WhichKeyTitle",
+        -- Neo-tree
+        "NeoTreeTabActive", "NeoTreeTabInactive", "NeoTreeTabSeparatorActive",
+        "NeoTreeTabSeparatorInactive",
+        -- Bufferline
+        "BufferLineFill", "BufferLineBackground", "BufferLineBuffer",
+        "BufferLineBufferVisible", "BufferLineBufferSelected", "BufferLineTab",
+        "BufferLineTabSelected", "BufferLineSeparator", "BufferLineSeparatorVisible",
+        "BufferLineSeparatorSelected", "BufferCurrent", "BufferCurrentIndex",
+        "BufferCurrentMod", "BufferCurrentSign", "BufferCurrentTarget",
+        "BufferVisible", "BufferVisibleIndex", "BufferVisibleMod",
+        "BufferVisibleSign", "BufferVisibleTarget", "BufferInactive",
+        "BufferInactiveIndex", "BufferInactiveMod", "BufferInactiveSign",
+        "BufferInactiveTarget", "BufferTabpages", "BufferTabpageFill",
+        "BufferLineDevIconLua", "BufferLineDevIconDefault",
+        -- Other
+        "RenderMarkdownCode", "OverseerTask", "OverseerTaskBorder",
+        "OverseerRunning", "OverseerSuccess", "OverseerCanceled",
+        "OverseerFailure", "OverseerBorder",
+      }
+
+      for _, group in ipairs(transparent_groups) do
+        local ok, hl = pcall(vim.api.nvim_get_hl, 0, { name = group })
+        if ok then
+          hl.bg = "NONE"
+          hl.ctermbg = nil
+          vim.api.nvim_set_hl(0, group, hl)
+        end
+      end
+
+      utils.notify("Transparency enabled", vim.log.levels.INFO)
+    else
+      -- Restore backgrounds - reload colorscheme
+      vim.cmd("colorscheme material_purple_mocha")
+      utils.notify("Transparency disabled", vim.log.levels.INFO)
+    end
+  end,
+  desc = "Background transparency [g]"
+}
 
 -- shifted movement keys ----------------------------------------------------
 maps.n["<S-Down>"] = {
@@ -638,7 +725,7 @@ if vim.fn.executable "lazygit" == 1 then -- if lazygit exists, show it
     function()
       local git_dir = vim.fn.finddir(".git", vim.fn.getcwd() .. ";")
       if git_dir ~= "" then
-        vim.cmd("TermExec cmd='lazygit && exit'")
+        vim.cmd("3TermExec cmd='lazygit && exit'")
       else
         utils.notify("Not a git repository", vim.log.levels.WARN)
       end
@@ -652,9 +739,9 @@ if vim.fn.executable "gitui" == 1 then -- if gitui exists, show it
       local git_dir = vim.fn.finddir(".git", vim.fn.getcwd() .. ";")
       if git_dir ~= "" then
         if vim.fn.executable "keychain" == 1 then
-          vim.cmd('TermExec cmd="eval `keychain --eval ~/.ssh/github.key` && gitui && exit"')
+          vim.cmd('3TermExec cmd="eval `keychain --eval ~/.ssh/github.key` && gitui && exit"')
         else
-          vim.cmd("TermExec cmd='gitui && exit'")
+          vim.cmd("3TermExec cmd='gitui && exit'")
         end
       else
         utils.notify("Not a git repository", vim.log.levels.WARN)
@@ -1060,7 +1147,42 @@ if is_available("toggleterm.nvim") then
     "<cmd>ToggleTerm size=80 direction=vertical<cr>",
     desc = "Toggleterm vertical split",
   }
-  maps.n["<F7>"] = { "<cmd>ToggleTerm<cr>", desc = "terminal" }
+  maps.n["<leader>to"] = {
+    function()
+      local Terminal = require("toggleterm.terminal").Terminal
+      local opencode_term = Terminal:new({
+        id = 2,
+        cmd = "opencode",
+        direction = "float",
+        float_opts = {
+        width = function() return math.floor(vim.o.columns * 0.9) end,
+        height = function() return math.floor(vim.o.lines * 0.9) end,
+        },
+      })
+      opencode_term:toggle()
+    end,
+    desc = "Toggleterm opencode",
+  }
+
+  -- Add this for quick access
+  maps.n["<C-;>"] = {
+    function()
+      local Terminal = require("toggleterm.terminal").Terminal
+      local opencode_term = Terminal:new({
+        id = 2,
+        cmd = "opencode",
+        direction = "float",
+        float_opts = {
+        width = function() return math.floor(vim.o.columns * 0.9) end,
+        height = function() return math.floor(vim.o.lines * 0.9) end,
+        },
+      })
+      opencode_term:toggle()
+    end,
+    desc = "Toggle opencode terminal",
+  }
+  maps.t["<C-;>"] = maps.n["<C-;>"]
+  maps.n["<F7>"] = { "<cmd>1ToggleTerm<cr>", desc = "terminal" }
   maps.t["<F7>"] = maps.n["<F7>"]
   maps.n["<C-'>"] = maps.n["<F7>"] -- requires terminal that supports binding <C-'>
   maps.t["<C-'>"] = maps.n["<F7>"] -- requires terminal that supports binding <C-'>

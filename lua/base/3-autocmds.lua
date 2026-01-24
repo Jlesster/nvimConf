@@ -285,7 +285,6 @@ end, { desc = "Dismiss all notifications" })
 
 -- ## PROJECT ROOT MANAGEMENT -----------------------------------------------
 
--- Change to project root or buffer's directory on buffer enter
 autocmd("BufEnter", {
   desc = "Change directory to project root or current buffer's directory",
   callback = function(args)
@@ -304,98 +303,129 @@ autocmd("BufEnter", {
     end
 
     local old_cwd = vim.fn.getcwd()
-    local new_cwd = old_cwd
+    local new_cwd = nil
     local found_project_root = false
 
-    -- Try to find project root using project.nvim
-    if is_available("project.nvim") then
-      local ok, project = pcall(require, "project_nvim.project")
-      if ok then
-        local project_root = project.get_project_root(bufname)
+    -- 🔥 NEW: Manually search for project root markers
+    local function find_project_root(path)
+      local markers = { "pom.xml", ".git", "build.gradle", "package.json" }
+      local current = path
 
-        if project_root then
-          -- Additional validation: make sure the file is actually under this project root
-          local file_dir = vim.fn.fnamemodify(bufname, ":h")
-
-          -- Check if the file's directory starts with the project root path
-          if file_dir:sub(1, #project_root) == project_root then
-            found_project_root = true
-            -- Change to project root if we're not already there
-            if project_root ~= old_cwd then
-              vim.cmd("cd " .. vim.fn.fnameescape(project_root))
-              new_cwd = vim.fn.getcwd()
-            else
-              -- We're already at project root, so set new_cwd to prevent fallback
-              new_cwd = project_root
-            end
+      while current ~= "/" do
+        for _, marker in ipairs(markers) do
+          local marker_path = current .. "/" .. marker
+          if vim.fn.filereadable(marker_path) == 1 or vim.fn.isdirectory(marker_path) == 1 then
+            return current
           end
         end
+        current = vim.fn.fnamemodify(current, ":h")
       end
+
+      return nil
     end
 
-    -- Only fallback to file's directory if NO project root was found
-    if not found_project_root then
-      local file_dir = vim.fn.fnamemodify(bufname, ":h")
-      if vim.fn.isdirectory(file_dir) == 1 and file_dir ~= old_cwd then
-        vim.cmd("cd " .. vim.fn.fnameescape(file_dir))
-        new_cwd = vim.fn.getcwd()
-      end
+    -- Start from the file's directory
+    local file_dir = vim.fn.fnamemodify(bufname, ":h")
+    local project_root = find_project_root(file_dir)
+
+    if project_root and vim.fn.isdirectory(project_root) == 1 then
+      found_project_root = true
+      new_cwd = project_root
+    else
+      -- Fallback to file directory
+      new_cwd = file_dir
     end
 
-    -- Refresh Neo-tree if directory actually changed (works for both project root and file dir)
-    if new_cwd ~= old_cwd and is_available("neo-tree.nvim") then
-      vim.schedule(function()
-        pcall(function()
-          local manager = require("neo-tree.sources.manager")
-          local state = manager.get_state("filesystem")
-
-          if state then
-            -- Set the new path directly
-            state.path = new_cwd
-
-            -- Refresh to show the new directory
-            manager.refresh("filesystem")
-          end
-        end)
+    -- Only change directory if we found a valid new directory and it's different
+    if new_cwd and new_cwd ~= old_cwd then
+      local ok = pcall(function()
+        vim.cmd("cd " .. vim.fn.fnameescape(new_cwd))
       end)
+
+      if not ok then
+        return
+      end
+
+      -- Refresh Neo-tree if directory actually changed
+      if is_available("neo-tree.nvim") then
+        vim.schedule(function()
+          pcall(function()
+            local manager = require("neo-tree.sources.manager")
+            local state = manager.get_state("filesystem")
+
+            if state then
+              state.path = new_cwd
+              manager.refresh("filesystem")
+            end
+          end)
+        end)
+      end
     end
   end,
 })
 
--- Also update Neo-tree when changing directories manually
-autocmd("DirChanged", {
-  desc = "Update Neo-tree when directory changes",
-  callback = function()
-    if is_available("neo-tree.nvim") then
-      vim.schedule(function()
-        pcall(function()
-          local manager = require("neo-tree.sources.manager")
-          local state = manager.get_state("filesystem")
-          local new_cwd = vim.fn.getcwd()
+local diag_virtual_text_normal = {
+  spacing = 2,
+  prefix = "● ",
+}
 
-          if state then
-            -- Set the new path directly
-            state.path = new_cwd
-
-            -- Refresh to show the new directory
-            manager.refresh("filesystem")
-          end
-        end)
-      end)
-    end
-  end,
-})
 vim.api.nvim_create_autocmd("InsertEnter", {
+  desc = "Disable diagnostic virtual text while typing",
   callback = function()
-    require('nvim-autopairs').setup({})
-    vim.opt.virtualedit = "" -- Force it back after autopairs resets it
+    vim.diagnostic.config({ virtual_text = false }) -- ✅ GLOBAL
   end,
 })
-vim.api.nvim_create_autocmd("ModeChanged", {
-  pattern = "*:*",
+
+vim.api.nvim_create_autocmd("InsertLeave", {
+  desc = "Re-enable diagnostic virtual text after typing",
   callback = function()
-    if vim.bo.filetype == "java" then
-      vim.opt_local.virtualedit = ""
+    vim.diagnostic.config({ virtual_text = diag_virtual_text_normal }) -- ✅ GLOBAL
+  end,
+})
+
+autocmd("FileType", {
+  pattern = "java",
+  desc = "Set Java indentation to 2 spaces",
+  callback = function()
+    vim.opt_local.shiftwidth = 2
+    vim.opt_local.tabstop = 2
+    vim.opt_local.softtabstop = 2
+    vim.opt_local.expandtab = true
+  end,
+})
+
+-- Disable inlay hints in insert mode
+autocmd("InsertEnter", {
+  desc = "Disable inlay hints while typing",
+  callback = function()
+    vim.lsp.inlay_hint.enable(false, { bufnr = 0 })
+  end,
+})
+
+-- Better approach: Wait for jdtls to be fully ready
+autocmd("LspAttach", {
+  desc = "Setup jdtls project import after full initialization",
+  callback = function(args)
+    local client = vim.lsp.get_client_by_id(args.data.client_id)
+    if client and client.name == "jdtls" then
+      -- Wait longer for jdtls to fully initialize
+      vim.defer_fn(function()
+        -- Use jdtls directly instead of lsp command
+        local ok, jdtls = pcall(require, 'jdtls')
+        if ok then
+          jdtls.update_project_config()
+        end
+      end, 5000) -- 5 second delay to ensure jdtls is ready
     end
   end,
 })
+
+autocmd("InsertLeave", {
+  desc = "Re-enable inlay hints after typing",
+  callback = function()
+    if vim.b.inlay_hints_enabled or vim.g.inlay_hints_enabled then
+      vim.lsp.inlay_hint.enable(true, { bufnr = 0 })
+    end
+  end,
+})
+
