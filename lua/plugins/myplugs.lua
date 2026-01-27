@@ -358,49 +358,32 @@ return {
   {
     "NickvanDyke/opencode.nvim",
     dependencies = {
-      "HiPhish/rainbow-delimiters.nvim",  -- Ensure rainbow loads first
+      "HiPhish/rainbow-delimiters.nvim",
       {
         "folke/snacks.nvim",
         priority = 1000,
         lazy = false,
         opts = {
-          -- For opencode
           input = { enabled = true },
           picker = { enabled = true },
           terminal = { enabled = true },
-
-          -- Replacements
-          notifier = { enabled = true },    -- replaces nvim-notify
-          bigfile = { enabled = true },     -- bonus feature
-          indent = {
-            enabled = true,
-          },
+          notifier = { enabled = true },
+          bigfile = { enabled = true },
+          indent = { enabled = true },
           scope = {
             enabled = true,
             cursor = false,
-            treesitter = {
-              enabled = true,
-            },
+            treesitter = { enabled = true },
           },
-          scroll = {                        -- replaces mini.animate
-            enabled = false,
-            animate = {
-              duration = { step = 15, total = 250 },
-              easing = "linear",
-            },
-          },
-
-          -- Bonus features you might like:
-          statuscolumn = { enabled = true }, -- prettier line numbers
-          words = { enabled = true },        -- highlight word under cursor
-          zen = { enabled = true },          -- zen mode
+          scroll = { enabled = false },
+          statuscolumn = { enabled = true },
+          words = { enabled = true },
+          zen = { enabled = true },
         },
         config = function(_, opts)
           require("snacks").setup(opts)
 
-          -- Sync scope colors with rainbow delimiters dynamically based on indent level
           local function sync_scope_colors()
-            -- Rainbow delimiter colors in order
             local rainbow_hls = {
               'RainbowDelimiterRed',
               'RainbowDelimiterYellow',
@@ -411,11 +394,9 @@ return {
               'RainbowDelimiterCyan',
             }
 
-            -- Create highlight groups for each indent level
             for i, hl_name in ipairs(rainbow_hls) do
               local hl = vim.api.nvim_get_hl(0, { name = hl_name, link = false })
               if hl.fg then
-                -- Create numbered scope highlights that snacks will cycle through
                 vim.api.nvim_set_hl(0, 'SnacksIndentScope' .. i, {
                   fg = hl.fg,
                   bold = true
@@ -423,7 +404,6 @@ return {
               end
             end
 
-            -- Also set the base SnacksIndentScope (fallback)
             local first_hl = vim.api.nvim_get_hl(0, { name = rainbow_hls[1], link = false })
             if first_hl.fg then
               vim.api.nvim_set_hl(0, 'SnacksIndentScope', {
@@ -433,90 +413,129 @@ return {
             end
           end
 
-          -- Function to find the opening bracket line and read its color
+          -- FINAL: Only use current line's brace if it opens a real scope (not {})
           local function update_scope_color()
             local cursor_line = vim.fn.line('.')
-            local current_indent = vim.fn.indent(cursor_line)
+            local cursor_col = vim.fn.col('.')
+            local bufnr = vim.api.nvim_get_current_buf()
 
-            -- First check if the CURRENT line has an opening bracket
-            -- If so, use that bracket's color (we're on the line that starts the scope)
+            -- First check: is there an opening brace on the current line that isn't immediately closed?
             local current_line_text = vim.fn.getline(cursor_line)
-            for col = #current_line_text, 1, -1 do
-              local char = current_line_text:sub(col, col)
-              if char:match("[%{%[%(]") then
-                -- Found a bracket on current line!
-                local synID = vim.fn.synID(cursor_line, col, 1)
-                local hl_name = vim.fn.synIDattr(synID, "name")
+            local current_line_brace_col = nil
+            local current_line_brace_hl = nil
+            local has_immediate_close = false
 
-                if hl_name and hl_name:match("^RainbowDelimiter") then
-                  local hl = vim.api.nvim_get_hl(0, { name = hl_name, link = false })
-                  if hl.fg then
-                    vim.api.nvim_set_hl(0, 'SnacksIndentScope', {
-                      fg = hl.fg,
-                      bold = true
-                    })
-                    return
+            for col = 1, #current_line_text do
+              if current_line_text:sub(col, col) == '{' then
+                -- Found opening brace
+                current_line_brace_col = col
+
+                -- Check if there's a closing } after it on the same line
+                for check_col = col + 1, #current_line_text do
+                  if current_line_text:sub(check_col, check_col) == '}' then
+                    has_immediate_close = true
+                    break
                   end
                 end
+
+                -- Only get highlight if it's not immediately closed
+                if not has_immediate_close then
+                  local extmarks = vim.api.nvim_buf_get_extmarks(
+                    bufnr,
+                    -1,
+                    {cursor_line - 1, col - 1},
+                    {cursor_line - 1, col - 1},
+                    {details = true}
+                  )
+
+                  for _, extmark in ipairs(extmarks) do
+                    local details = extmark[4]
+                    if details and details.hl_group and details.hl_group:match("^RainbowDelimiter") then
+                      current_line_brace_hl = details.hl_group
+                      break
+                    end
+                  end
+                end
+                break  -- Use the first brace on the line
               end
             end
 
-            -- If no bracket on current line, find the immediate parent line
-            local parent_indent = nil
-            local parent_line = nil
+            -- If there's a brace on current line that opens a real scope, use its color
+            if current_line_brace_hl and not has_immediate_close then
+              local hl = vim.api.nvim_get_hl(0, { name = current_line_brace_hl, link = false })
+              if hl.fg then
+                vim.api.nvim_set_hl(0, 'SnacksIndentScope', {
+                  fg = hl.fg,
+                  bold = true
+                })
+                return
+              end
+            end
 
-            for line_num = cursor_line - 1, math.max(1, cursor_line - 100), -1 do
+            -- Otherwise, find the parent scope
+            local brace_stack = {}
+
+            for line_num = 1, cursor_line - 1 do  -- Only scan BEFORE current line
               local line = vim.fn.getline(line_num)
 
-              -- Skip empty lines
-              if line:match("%S") then
-                local line_indent = vim.fn.indent(line_num)
+              for col = 1, #line do
+                local char = line:sub(col, col)
 
-                -- Found first line with less indentation
-                if line_indent < current_indent then
-                  parent_indent = line_indent
-                  parent_line = line_num
+                if char == '{' then
+                  local hl_name = nil
 
-                  -- Look for the LAST opening bracket on this line
-                  local last_bracket_col = nil
+                  local extmarks = vim.api.nvim_buf_get_extmarks(
+                    bufnr,
+                    -1,
+                    {line_num - 1, col - 1},
+                    {line_num - 1, col - 1},
+                    {details = true}
+                  )
 
-                  for col = #line, 1, -1 do
-                    local char = line:sub(col, col)
-                    if char:match("[%{%[%(]") then
-                      last_bracket_col = col
+                  for _, extmark in ipairs(extmarks) do
+                    local details = extmark[4]
+                    if details and details.hl_group and details.hl_group:match("^RainbowDelimiter") then
+                      hl_name = details.hl_group
                       break
                     end
                   end
 
-                  -- If we found a bracket, read its color
-                  if last_bracket_col then
-                    local synID = vim.fn.synID(line_num, last_bracket_col, 1)
-                    local hl_name = vim.fn.synIDattr(synID, "name")
+                  table.insert(brace_stack, {
+                    line = line_num,
+                    col = col,
+                    hl = hl_name
+                  })
 
-                    if hl_name and hl_name:match("^RainbowDelimiter") then
-                      -- Found a rainbow delimiter! Use its color
-                      local hl = vim.api.nvim_get_hl(0, { name = hl_name, link = false })
-                      if hl.fg then
-                        vim.api.nvim_set_hl(0, 'SnacksIndentScope', {
-                          fg = hl.fg,
-                          bold = true
-                        })
-                        return
-                      end
-                    end
+                elseif char == '}' then
+                  if #brace_stack > 0 then
+                    table.remove(brace_stack)
                   end
-
-                  -- Found parent line, stop searching
-                  break
                 end
               end
             end
 
-            -- Fallback: use indent-based coloring
+            -- Use the parent scope
+            if #brace_stack > 0 then
+              local top = brace_stack[#brace_stack]
+
+              if top.hl and top.hl:match("^RainbowDelimiter") then
+                local hl = vim.api.nvim_get_hl(0, { name = top.hl, link = false })
+                if hl.fg then
+                  vim.api.nvim_set_hl(0, 'SnacksIndentScope', {
+                    fg = hl.fg,
+                    bold = true
+                  })
+                  return
+                end
+              end
+            end
+
+            -- Fallback: indent-based coloring
+            local current_indent = vim.fn.indent('.')
             local shiftwidth = vim.bo.shiftwidth
             if shiftwidth == 0 then shiftwidth = 2 end
 
-            local indent_level = parent_indent and math.floor(parent_indent / shiftwidth) or 0
+            local indent_level = math.floor(current_indent / shiftwidth)
             local color_index = (indent_level % 7) + 1
             local target_hl = 'SnacksIndentScope' .. color_index
 
@@ -529,40 +548,31 @@ return {
             end
           end
 
-          -- Run on ColorScheme change and on startup with multiple retries
           vim.api.nvim_create_autocmd({"ColorScheme"}, {
             callback = function()
               vim.defer_fn(sync_scope_colors, 50)
             end
           })
 
-          -- Update on cursor move with minimal debouncing
           local timer = nil
           vim.api.nvim_create_autocmd({"CursorMoved", "CursorMovedI", "BufEnter"}, {
             callback = function()
               if timer then
                 vim.fn.timer_stop(timer)
               end
-              timer = vim.fn.timer_start(5, function()
-                update_scope_color()
+              timer = vim.fn.timer_start(1, function()
+                pcall(update_scope_color)
                 timer = nil
               end)
             end
           })
 
-          -- Try multiple times on startup since plugins load asynchronously
-          vim.defer_fn(function()
-            sync_scope_colors()
-            update_scope_color()
-          end, 100)
-          vim.defer_fn(function()
-            sync_scope_colors()
-            update_scope_color()
-          end, 300)
-          vim.defer_fn(function()
-            sync_scope_colors()
-            update_scope_color()
-          end, 500)
+          for _, delay in ipairs({100, 300, 500, 1000}) do
+            vim.defer_fn(function()
+              pcall(sync_scope_colors)
+              pcall(update_scope_color)
+            end, delay)
+          end
         end
       }
     },
@@ -573,15 +583,11 @@ return {
           snacks = {
             auto_close = true,
             win = {
-              position = "left",  -- or "left", "right", "top"
-              width = 0.3,         -- 30% of screen height
-              enter = false,        -- Stay in editor after opening
-              wo = {
-                winbar = "",
-              },
-              bo = {
-                filetype = "opencode_terminal",
-              },
+              position = "left",
+              width = 0.3,
+              enter = false,
+              wo = { winbar = "" },
+              bo = { filetype = "opencode_terminal" },
             },
           },
         }
