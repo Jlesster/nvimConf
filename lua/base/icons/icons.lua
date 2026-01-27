@@ -102,6 +102,12 @@ return {
   GitUnstaged = "",
   GitUntracked = "",
 
+  --AI
+  AI = "",
+
+  --Java
+  Java = "",
+
   -- DAP
   DapBreakpoint = "",
   DapBreakpointCondition = "",

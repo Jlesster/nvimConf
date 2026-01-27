@@ -518,7 +518,7 @@ return {
             end)
             local has_jdtls, jdtls = pcall(require, 'jdtls')
             if not has_jdtls then
-              vim.notify("nvim-jdtls not avaliable", vim.log.levels.WARN)
+              Snacks.notify("nvim-jdtls not avaliable", vim.log.levels.WARN)
               return
             end
 
@@ -722,18 +722,14 @@ return {
         { path = "tokyonight.nvim", mods = { "tokyonight" } },
         { path = "astrotheme", mods = { "astrotheme" } },
         { path = "alpha-nvim", mods = { "alpha" } },
-        { path = "nvim-notify", mods = { "notify" } },
-        { path = "mini.indentscope", mods = { "mini.indentscope" } },
         { path = "heirline-components.nvim", mods = { "heirline-components" } },
         { path = "telescope.nvim", mods = { "telescope" } },
         { path = "telescope-undo.nvim", mods = { "telescope", "telescope-undo" } },
         { path = "telescope-fzf-native.nvim", mods = { "telescope", "fzf_lib"  } },
-        { path = "dressing.nvim", mods = { "dressing" } },
         { path = "noice.nvim", mods = { "noice", "telescope" } },
         { path = "nvim-web-devicons", mods = { "nvim-web-devicons" } },
         { path = "lspkind.nvim", mods = { "lspkind" } },
         { path = "nvim-scrollbar", mods = { "scrollbar" } },
-        { path = "mini.animate", mods = { "mini.animate" } },
         { path = "highlight-undo.nvim", mods = { "highlight-undo" } },
         { path = "which-key.nvim", mods = { "which-key" } },
 

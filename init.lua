@@ -55,7 +55,7 @@ load_sources_async({
 vim.defer_fn(function()
   local ok, dynamic_colors = pcall(require, "ui.dynamic-colors")
   if not ok then
-    vim.notify("Failed to load dynamic-colors", vim.log.levels.WARN)
+    Snacks.notify("Failed to load dynamic-colors", vim.log.levels.WARN)
     return
   end
 

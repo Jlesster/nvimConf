@@ -26,20 +26,9 @@ local function highlight_current_line_indent()
   -- Highlight each indent position where ibl would show a character
   local shiftwidth = vim.bo.shiftwidth
   if shiftwidth == 0 then shiftwidth = vim.bo.tabstop end
-
-  for col = shiftwidth - 1, indent_len - 1, shiftwidth do
-    vim.api.nvim_buf_set_extmark(0, ns, line, col, {
-      virt_text = { { "│", "IblScopeCursorLine" } },
-      virt_text_pos = "overlay",
-      priority = 200,
-    })
-  end
 end
 
 function M.setup()
-  -- Create highlight group for current line indent
-  vim.api.nvim_set_hl(0, "IblScopeCursorLine", { link = "CursorLineNr" })
-
   -- Update on cursor move
   vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
     callback = highlight_current_line_indent,

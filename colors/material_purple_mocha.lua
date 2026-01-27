@@ -11,7 +11,7 @@ local colors = {
   -- Base colors
   base = "#1F1E2E",
   mantle = "#191825",
-  crust = "#12111B",
+  crust = "#11111B",
 
   -- Surface colors
   surface0 = "#323244",
@@ -19,30 +19,30 @@ local colors = {
   surface2 = "#595B70",
 
   -- Overlay colors
-  overlay0 = "#6E7086",
-  overlay1 = "#81839C",
+  overlay0 = "#6D7086",
+  overlay1 = "#81849C",
   overlay2 = "#9598B2",
 
   -- Text colors
-  text = "#D6D3F4",
-  subtext1 = "#C2C0DE",
-  subtext0 = "#ADABC8",
+  text = "#D1D5F4",
+  subtext1 = "#BEC1DE",
+  subtext0 = "#AAACC8",
 
   -- Accent colors (VIBRANT)
-  rosewater = "#F3E2E8",
-  flamingo = "#EAD1E1",
-  pink = "#D3B7E5",
-  mauve = "#B08FDE",
-  red = "#D496E4",
-  maroon = "#D6A7D7",
-  peach = "#FEB0B9",
+  rosewater = "#F2E1E7",
+  flamingo = "#E9D0E0",
+  pink = "#D1B7E6",
+  mauve = "#AC90E0",
+  red = "#D395E3",
+  maroon = "#D5A6D6",
+  peach = "#FEAFB8",
   yellow = "#EDCEBE",
   green = "#6CD2C5",
   teal = "#8ED0EB",
-  sky = "#89AFD7",
-  sapphire = "#9CB5F6",
-  blue = "#C0B1FF",
-  lavender = "#CCBAFC",
+  sky = "#AFD4FF",
+  sapphire = "#9AB2F4",
+  blue = "#ADA4F6",
+  lavender = "#C8BAFD",
 }
 
 local function hi(group, opts)
@@ -64,7 +64,7 @@ end
 local function setup_highlights()
     hi("Normal", { fg = colors.text, bg = "NONE" })
     hi("NormalFloat", { fg = colors.text, bg = colors.mantle })
-    hi("FloatBorder", { fg = colors.lavender, bg = "NONE"})
+    hi("FloatBorder", { fg = "NONE", bg = colors.lavender })
     hi("FloatTitle", { fg = colors.mauve, bg = "NONE", style = "bold,italic" })
     hi("Folded", { fg = "NONE", bg = "NONE" })
     hi("FoldColumn", { fg = colors.red })
@@ -192,7 +192,7 @@ local function setup_highlights()
     hi("@punctuation.special", { fg = colors.sky })
 
     hi("@comment", { fg = colors.pink, style = "italic" })
-    hi("@comment.todo", { fg = colors.yellow, bg = "NONE", style = "bold" })
+    hi("@comment.todo", { fg = colors.yellow, bg = colors.surface0, style = "bold" })
     hi("@comment.note", { fg = colors.blue, bg = colors.surface0, style = "bold" })
     hi("@comment.warning", { fg = colors.peach, bg = colors.surface0, style = "bold" })
     hi("@comment.error", { fg = colors.red, bg = colors.surface0, style = "bold" })
@@ -200,60 +200,6 @@ local function setup_highlights()
     hi("@tag", { fg = colors.mauve })
     hi("@tag.attribute", { fg = colors.teal, style = "italic" })
     hi("@tag.delimiter", { fg = colors.overlay2 })
-
-   -- Completion menu kind highlights (nvim-cmp) - using CmpKind prefix
-    hi("CmpItemKindVariable", { fg = colors.text, bg = "NONE" })
-    hi("CmpItemKindFunction", { fg = colors.blue, bg = "NONE" })
-    hi("CmpItemKindMethod", { fg = colors.blue, bg = "NONE" })
-    hi("CmpItemKindConstructor", { fg = colors.sapphire, bg = "NONE" })
-    hi("CmpItemKindClass", { fg = colors.yellow, bg = "NONE" })
-    hi("CmpItemKindInterface", { fg = colors.yellow, bg = "NONE" })
-    hi("CmpItemKindStruct", { fg = colors.yellow, bg = "NONE" })
-    hi("CmpItemKindEnum", { fg = colors.peach, bg = "NONE" })
-    hi("CmpItemKindEnumMember", { fg = colors.teal, bg = "NONE" })
-    hi("CmpItemKindModule", { fg = colors.sapphire, bg = "NONE" })
-    hi("CmpItemKindProperty", { fg = colors.teal, bg = "NONE" })
-    hi("CmpItemKindField", { fg = colors.teal, bg = "NONE" })
-    hi("CmpItemKindTypeParameter", { fg = colors.flamingo, bg = "NONE" })
-    hi("CmpItemKindConstant", { fg = colors.teal, bg = "NONE" })
-    hi("CmpItemKindKeyword", { fg = colors.mauve, bg = "NONE" })
-    hi("CmpItemKindSnippet", { fg = colors.pink, bg = "NONE" })
-    hi("CmpItemKindText", { fg = colors.green, bg = "NONE" })
-    hi("CmpItemKindFile", { fg = colors.blue, bg = "NONE" })
-    hi("CmpItemKindFolder", { fg = colors.blue, bg = "NONE" })
-    hi("CmpItemKindColor", { fg = colors.peach, bg = "NONE" })
-    hi("CmpItemKindReference", { fg = colors.peach, bg = "NONE" })
-    hi("CmpItemKindOperator", { fg = colors.sky, bg = "NONE" })
-    hi("CmpItemKindUnit", { fg = colors.peach, bg = "NONE" })
-    hi("CmpItemKindValue", { fg = colors.peach, bg = "NONE" })
-    hi("CmpItemKindEvent", { fg = colors.maroon, bg = "NONE" })
-
-    -- Alternative CmpKind groups (some plugins use these) - using direct colors for dynamic-colors.lua parser
-    hi("CmpKindVariable", { fg = colors.text, bg = "NONE" })
-    hi("CmpKindFunction", { fg = colors.blue, bg = "NONE" })
-    hi("CmpKindMethod", { fg = colors.blue, bg = "NONE" })
-    hi("CmpKindConstructor", { fg = colors.sapphire, bg = "NONE" })
-    hi("CmpKindClass", { fg = colors.yellow, bg = "NONE" })
-    hi("CmpKindInterface", { fg = colors.yellow, bg = "NONE" })
-    hi("CmpKindStruct", { fg = colors.yellow, bg = "NONE" })
-    hi("CmpKindEnum", { fg = colors.peach, bg = "NONE" })
-    hi("CmpKindEnumMember", { fg = colors.teal, bg = "NONE" })
-    hi("CmpKindModule", { fg = colors.sapphire, bg = "NONE" })
-    hi("CmpKindProperty", { fg = colors.teal, bg = "NONE" })
-    hi("CmpKindField", { fg = colors.teal, bg = "NONE" })
-    hi("CmpKindTypeParameter", { fg = colors.flamingo, bg = "NONE" })
-    hi("CmpKindConstant", { fg = colors.teal, bg = "NONE" })
-    hi("CmpKindKeyword", { fg = colors.mauve, bg = "NONE" })
-    hi("CmpKindSnippet", { fg = colors.pink, bg = "NONE" })
-    hi("CmpKindText", { fg = colors.green, bg = "NONE" })
-    hi("CmpKindFile", { fg = colors.blue, bg = "NONE" })
-    hi("CmpKindFolder", { fg = colors.blue, bg = "NONE" })
-    hi("CmpKindColor", { fg = colors.peach, bg = "NONE" })
-    hi("CmpKindReference", { fg = colors.peach, bg = "NONE" })
-    hi("CmpKindOperator", { fg = colors.sky, bg = "NONE" })
-    hi("CmpKindUnit", { fg = colors.peach, bg = "NONE" })
-    hi("CmpKindValue", { fg = colors.peach, bg = "NONE" })
-    hi("CmpKindEvent", { fg = colors.maroon, bg = "NONE" })
 
     -- ============================================================================
     -- LSP SEMANTIC TOKENS (Primary highlighting - overrides Treesitter)
@@ -274,7 +220,7 @@ local function setup_highlights()
 
     -- Functions and Methods
     hi("@lsp.type.function", { fg = colors.blue, style = "bold" })
-    hi("@lsp.type.method.java", { fg = colors.sky, style = "italic" })
+    hi("@lsp.type.method.java", { fg = colors.sapphire, style = "italic" })
     hi("@lsp.type.method", { fg = colors.sapphire, style = "bold" })
     hi("@lsp.typemod.function.static", { fg = colors.sky, style = "bold" })
     hi("@lsp.typemod.method.static", { fg = colors.sapphire, style = "italic" })
@@ -380,10 +326,8 @@ local function setup_highlights()
     -- ============================================================================
     -- PLUGIN: INDENT-BLANKLINE
     -- ============================================================================
-    hi("IblIndent", { fg = colors.red })
-    hi("IblScope", { fg = colors.mauve })
-    hi("MiniIndentscopeSymbol", { fg = colors.lavender } )
-    hi("MiniIndentscopeSymbolOff", { fg = colors.overlay0 } )
+    hi("SnacksIndentScope", { fg = colors.mauve } )
+    hi("SnacksIndent", { fg = colors.overlay0 } )
 
     -- ============================================================================
     -- PLUGIN: WHICH-KEY
@@ -419,13 +363,13 @@ local function setup_highlights()
     -- ============================================================================
     -- PLUGIN: RAINBOW DELIMITERS
     -- ============================================================================
-    hi("RainbowDelimiterRed",    { fg = "#E08CF9" })
-    hi("RainbowDelimiterOrange", { fg = "#FFB0B9" })
+    hi("RainbowDelimiterRed",    { fg = "#DF8BF8" })
+    hi("RainbowDelimiterOrange", { fg = "#FFAFB8" })
     hi("RainbowDelimiterYellow", { fg = "#FACAB0" })
     hi("RainbowDelimiterGreen",  { fg = "#1FD8C7" })
     hi("RainbowDelimiterCyan",   { fg = "#60D4FD" })
-    hi("RainbowDelimiterBlue",   { fg = "#73BCFF" })
-    hi("RainbowDelimiterViolet", { fg = "#B988FF" })
+    hi("RainbowDelimiterBlue",   { fg = "#77BBFF" })
+    hi("RainbowDelimiterViolet", { fg = "#B38BFF" })
 
     -- ============================================================================
     -- PLUGIN: RENDER-MARKDOWN

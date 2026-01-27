@@ -451,7 +451,7 @@ return {
             vim.api.nvim_echo(messages, false, {})
             local result = results[vim.fn.getcharstr()]
             if result and result.val and result.val ~= "" then
-              vim.notify("Copied: " .. result.val)
+              Snacks.notify("Copied: " .. result.val)
               vim.fn.setreg("+", result.val)
             end
           end,
@@ -465,8 +465,8 @@ return {
           end,
         },
         window = {
-          position = "left",
-          width = 25,
+          position = "right",
+          width = 40,
           popup = {
             size = {
               height = "100%",

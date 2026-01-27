@@ -258,100 +258,6 @@ return {
     end,
   },
 
-  --  [notifications]
-  --  https://github.com/rcarriga/nvim-notify
-  {
-    "rcarriga/nvim-notify",
-    event = "User BaseDefered",
-    opts = function()
-      local fps
-      if is_android then fps = 30 else fps = 244 end
-
-      return {
-        timeout = 2500,
-        fps = fps,
-        max_height = function() return math.floor(vim.o.lines * 0.75) end,
-        max_width = function() return math.floor(vim.o.columns * 0.75) end,
-        on_open = function(win)
-          -- enable markdown support on notifications
-          vim.api.nvim_win_set_config(win, { zindex = 175 })
-          if not vim.g.notifications_enabled then
-            vim.api.nvim_win_close(win, true)
-          end
-          if not package.loaded["nvim-treesitter"] then
-            pcall(require, "nvim-treesitter")
-          end
-          vim.wo[win].conceallevel = 3
-          local buf = vim.api.nvim_win_get_buf(win)
-          if not pcall(vim.treesitter.start, buf, "markdown") then
-            vim.bo[buf].syntax = "markdown"
-          end
-          vim.wo[win].spell = false
-        end,
-      }
-    end,
-    config = function(_, opts)
-      local notify = require("notify")
-      notify.setup(opts)
-      vim.notify = notify
-    end,
-  },
-
-  --  mini.indentscope [guides]
-  --  https://github.com/nvim-mini/mini.indentscope
-  {
-    "nvim-mini/mini.indentscope",
-    event = { "BufReadPre", "BufNewFile" },
-    opts = {
-      draw = {
-        animation = require("mini.indentscope").gen_animation.cubic({
-          unit = "total",
-          easing = "out",
-          duration = 115,
-        }),
-        priority = 999,
-        delay = 35,
-      },
-      options = {
-        border = "top",
-        indent_at_cursor = true,
-        try_as_border = true,
-      },
-      symbol = "┃",
-    },
-    config = function(_, opts)
-      require("mini.indentscope").setup(opts)
-
-      -- Disable for certain filetypes
-      vim.api.nvim_create_autocmd({ "FileType" }, {
-        desc = "Disable indentscope for certain filetypes",
-        callback = function()
-          local ignored_filetypes = {
-            "aerial",
-            "alpha",
-            "dashboard",
-            "help",
-            "lazy",
-            "leetcode.nvim",
-            "mason",
-            "neo-tree",
-            "NvimTree",
-            "neogitstatus",
-            "notify",
-            "startify",
-            "toggleterm",
-            "Trouble",
-            "calltree",
-            "coverage",
-          }
-          if vim.tbl_contains(ignored_filetypes, vim.bo.filetype) then
-            vim.b.miniindentscope_disable = true
-          end
-        end,
-      })
-    end
-  },
-
   -- heirline-components.nvim [ui components]
   -- https://github.com/zeioth/heirline-components.nvim
   -- Collection of components to use on your heirline config.
@@ -586,17 +492,6 @@ return {
     end,
   },
 
-  --  [better ui elements]
-  --  https://github.com/stevearc/dressing.nvim
-  {
-    "stevearc/dressing.nvim",
-    event = "User BaseDefered",
-    opts = {
-      input = { default_prompt = "➤ " },
-      select = { backend = { "telescope", "builtin" } },
-    }
-  },
-
   --  Noice.nvim [better cmd/search line]
   --  https://github.com/folke/noice.nvim
   --  We use it for:
@@ -798,8 +693,10 @@ return {
     config = function(_, opts)
       require("which-key").setup(opts)
       require("base.utils").which_key_register()
+      local get_icon = require("base.utils").get_icon
       require("which-key").add({
-        { "<leader>j",  group = "Java" },
+        { "<leader>j", group = get_icon("Java", true) .. " Java" },
+        { "<leader>o", group = get_icon("AI", true) .. " OpenCode" },
       })
     end,
   },

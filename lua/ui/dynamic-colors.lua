@@ -85,21 +85,6 @@ local function enforce_transparency()
   end
 end
 
--- Helper function to dim a hex color
-local function dim_color(hex, factor)
-  if not hex or hex == "NONE" then return hex end
-
-  local r = tonumber(hex:sub(2, 3), 16)
-  local g = tonumber(hex:sub(4, 5), 16)
-  local b = tonumber(hex:sub(6, 7), 16)
-
-  r = math.floor(r * factor)
-  g = math.floor(g * factor)
-  b = math.floor(b * factor)
-
-  return string.format("#%02x%02x%02x", r, g, b)
-end
-
 -- Check if current buffer should be excluded
 local function should_exclude_buffer()
   local ft = vim.bo.filetype
@@ -110,103 +95,6 @@ local function should_exclude_buffer()
   end
   return false
 end
-
--- Cursorline indent functions
-local function highlight_current_line_indent()
-  -- Skip if excluded filetype
-  if should_exclude_buffer() then
-    return
-  end
-
-  pcall(function()
-    vim.api.nvim_buf_clear_namespace(0, cursorline_ns, 0, -1)
-
-    local line = vim.fn.line(".") - 1
-    local text = vim.api.nvim_buf_get_lines(0, line, line + 1, false)[1]
-
-    if not text then return end
-
-    -- Count leading whitespace
-    local leading_whitespace = text:match("^%s*")
-    if not leading_whitespace or #leading_whitespace == 0 then return end
-
-    -- Get indentation settings
-    local tabstop = vim.bo.tabstop
-    local shiftwidth = vim.bo.shiftwidth
-    if shiftwidth == 0 then shiftwidth = tabstop end
-    if shiftwidth == 0 then shiftwidth = 2 end
-
-    -- Calculate visual column position for each character
-    local col = 0
-    for i = 1, #leading_whitespace do
-      local char = leading_whitespace:sub(i, i)
-
-      -- Place marker at indent levels (matching ibl's logic)
-      if col % shiftwidth == 0 then
-        vim.api.nvim_buf_set_extmark(0, cursorline_ns, line, i - 1, {
-          virt_text = { { "•", "IblScopeCursorLine" } },
-          virt_text_pos = "overlay",
-          priority = 2,
-          hl_mode = "combine",
-        })
-      end
-
-      -- Advance column position
-      if char == "\t" then
-        col = col + tabstop - (col % tabstop)
-      else
-        col = col + 1
-      end
-    end
-
-    -- Add a full-line background highlight for CursorLine
-    vim.api.nvim_buf_set_extmark(0, cursorline_ns, line, 0, {
-      end_col = #leading_whitespace,
-      hl_group = "CursorLine",
-      hl_eol = false,
-      priority = 1,
-    })
-  end)
-end
-
-local function update_indent_colors(colors)
-  -- Dim the regular indent guides
-  local dimmed = dim_color(colors.lavender, 0.3)
-
-  -- For indent-blankline.nvim (ibl) - regular indent guides
-  pcall(function()
-    vim.api.nvim_set_hl(0, "IblIndent", { fg = dimmed })
-    vim.api.nvim_set_hl(0, "IblScope", { fg = colors.mauve })
-    vim.api.nvim_set_hl(0, "IblWhitespace", { fg = colors.surface0 })
-    -- Highlight for current line (used by extmarks)
-    vim.api.nvim_set_hl(0, "IblScopeCursorLine", { fg = colors.mauve, bold = true })
-  end)
-
-  -- For mini.indentscope (the animated scope line)
-  pcall(function()
-    vim.api.nvim_set_hl(0, "MiniIndentscopeSymbol", { fg = colors.lavender })
-    vim.api.nvim_set_hl(0, "MiniIndentscopeSymbolOff", { fg = colors.overlay0 })
-  end)
-
-  -- For older indent-blankline versions
-  pcall(function()
-    vim.api.nvim_set_hl(0, "IndentBlanklineChar", { fg = dimmed })
-    vim.api.nvim_set_hl(0, "IndentBlanklineContextChar", { fg = colors.mauve })
-  end)
-
-  -- Force refresh indent-blankline if it's loaded
-  local ok, ibl = pcall(require, "ibl")
-  if ok then
-    vim.schedule(function()
-      vim.cmd("IBLDisable")
-      vim.cmd("IBLEnable")
-    end)
-  end
-
-  -- Refresh current line highlight
-  vim.schedule(highlight_current_line_indent)
-end
-
 
 -- Add this function after your enforce_transparency function
 local function reload_heirline_colors(colors)
@@ -327,7 +215,6 @@ local function apply_highlights(colors, highlights)
 
   -- reload_lualine_colors(colors)
   reload_heirline_colors(colors)
-  update_indent_colors(colors)
 end
 
 -- Reload (NO :colorscheme)
@@ -384,17 +271,6 @@ function M.setup()
   M.subscribe(function(colors)
     animations.set_palette(colors)
   end)
-
-  -- Setup cursorline indent highlighting
-  vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
-    callback = highlight_current_line_indent,
-  })
-
-  vim.api.nvim_create_autocmd("BufEnter", {
-    callback = function()
-      vim.defer_fn(highlight_current_line_indent, 10)
-    end,
-  })
 
   -- Clear highlights when leaving buffer
   vim.api.nvim_create_autocmd("BufLeave", {

@@ -234,7 +234,7 @@ autocmd("FileType", {
 autocmd("BufWritePre", {
   desc = "Close all notifications on BufWritePre",
   callback = function()
-    require("notify").dismiss({ pending = true, silent = true })
+    Snacks.notifier.hide();
   end,
 })
 

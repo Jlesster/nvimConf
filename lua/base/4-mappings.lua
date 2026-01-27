@@ -979,9 +979,9 @@ if is_available("telescope.nvim") then
     function() require("telescope.builtin").man_pages() end,
     desc = "Find man",
   }
-  if is_available("nvim-notify") then
+  if is_available("snacks.nvim") then
     maps.n["<leader>fn"] = {
-      function() require("telescope").extensions.notify.notify() end,
+      function() Snacks.notifier.show_history() end,
       desc = "Find notifications",
     }
   end
@@ -1147,6 +1147,8 @@ if is_available("toggleterm.nvim") then
     "<cmd>ToggleTerm size=80 direction=vertical<cr>",
     desc = "Toggleterm vertical split",
   }
+
+  -- opencode mappings ------------------------------------------------------
   maps.n["<leader>to"] = {
     function()
       local Terminal = require("toggleterm.terminal").Terminal
@@ -1186,6 +1188,134 @@ if is_available("toggleterm.nvim") then
   maps.t["<F7>"] = maps.n["<F7>"]
   maps.n["<C-'>"] = maps.n["<F7>"] -- requires terminal that supports binding <C-'>
   maps.t["<C-'>"] = maps.n["<F7>"] -- requires terminal that supports binding <C-'>
+end
+
+-- opencode.nvim [AI assistant] ---------------------------------------------
+if is_available("opencode.nvim") then
+  -- Quick ask with @this context (visual selection or cursor position)
+  maps.n["<leader>oa"] = {
+    function() require("opencode").ask("@this: ", { submit = true }) end,
+    desc = "Ask opencode about this"
+  }
+  maps.x["<leader>oa"] = {
+    function() require("opencode").ask("@this: ", { submit = true }) end,
+    desc = "Ask opencode about selection"
+  }
+
+  -- Free-form ask (opens input)
+  maps.n["<leader>oA"] = {
+    function() require("opencode").ask() end,
+    desc = "Ask opencode (free-form)"
+  }
+
+  -- Select action/prompt menu
+  maps.n["<leader>os"] = {
+    function() require("opencode").select() end,
+    desc = "Select opencode action"
+  }
+  maps.x["<leader>os"] = {
+    function() require("opencode").select() end,
+    desc = "Select opencode action"
+  }
+
+  -- Quick prompts for common tasks
+  maps.n["<leader>oe"] = {
+    function() require("opencode").prompt("explain @this") end,
+    desc = "Explain this code"
+  }
+  maps.x["<leader>oe"] = {
+    function() require("opencode").prompt("explain @this") end,
+    desc = "Explain selection"
+  }
+
+  maps.n["<leader>or"] = {
+    function() require("opencode").prompt("review @this") end,
+    desc = "Review this code"
+  }
+  maps.x["<leader>or"] = {
+    function() require("opencode").prompt("review @this") end,
+    desc = "Review selection"
+  }
+
+  maps.n["<leader>of"] = {
+    function() require("opencode").prompt("fix @diagnostics") end,
+    desc = "Fix diagnostics"
+  }
+
+  maps.n["<leader>od"] = {
+    function() require("opencode").prompt("document @this") end,
+    desc = "Document this code"
+  }
+  maps.x["<leader>od"] = {
+    function() require("opencode").prompt("document @this") end,
+    desc = "Document selection"
+  }
+
+  maps.n["<leader>ot"] = {
+    function() require("opencode").prompt("test @this") end,
+    desc = "Generate tests"
+  }
+  maps.x["<leader>ot"] = {
+    function() require("opencode").prompt("test @this") end,
+    desc = "Generate tests for selection"
+  }
+
+  maps.n["<leader>op"] = {
+    function() require("opencode").prompt("optimize @this") end,
+    desc = "Optimize this code"
+  }
+  maps.x["<leader>op"] = {
+    function() require("opencode").prompt("optimize @this") end,
+    desc = "Optimize selection"
+  }
+
+  -- Add context without asking
+  maps.n["<leader>oc"] = {
+    function() require("opencode").prompt("@this") end,
+    desc = "Add context to opencode"
+  }
+  maps.x["<leader>oc"] = {
+    function() require("opencode").prompt("@this") end,
+    desc = "Add selection to opencode"
+  }
+
+  -- Toggle opencode terminal
+  maps.n["<leader>oo"] = {
+    function() require("opencode").toggle() end,
+    desc = "Toggle opencode"
+  }
+  maps.t["<leader>oo"] = {
+    function() require("opencode").toggle() end,
+    desc = "Toggle opencode"
+  }
+
+  -- opencode session controls
+  maps.n["<leader>on"] = {
+    function() require("opencode").command("session.new") end,
+    desc = "New opencode session"
+  }
+
+  maps.n["<leader>ol"] = {
+    function() require("opencode").command("session.list") end,
+    desc = "List opencode sessions"
+  }
+
+  maps.n["<leader>oi"] = {
+    function() require("opencode").command("session.interrupt") end,
+    desc = "Interrupt opencode"
+  }
+
+  -- Scroll opencode output
+  maps.n["<leader>oJ"] = {
+    function() require("opencode").command("session.page.down") end,
+    desc = "Scroll opencode down"
+  }
+
+  maps.n["<leader>oK"] = {
+    function() require("opencode").command("session.page.up") end,
+    desc = "Scroll opencode up"
+  }
+
 end
 
 -- extra - improved terminal navigation
