@@ -822,6 +822,47 @@ return {
       local luasnip = require("luasnip")
       local lspkind_loaded, lspkind = pcall(require, "lspkind")
 
+    -- Setup colorful CmpKind highlights
+    local function setup_cmp_kind_highlights()
+      local kind_colors = {
+        Text          = "#A6E3A1",  -- Green
+        Method        = "#F5C2E7",  -- Pink
+        Function      = "#CBA6F7",  -- Purple/Lavender
+        Constructor   = "#F9E2AF",  -- Yellow
+        Field         = "#89DCEB",  -- Sky blue
+        Variable      = "#F38BA8",  -- Red
+        Class         = "#FAB387",  -- Peach/Orange
+        Interface     = "#94E2D5",  -- Teal
+        Module        = "#B4BEFE",  -- Lavender
+        Property      = "#89DCEB",  -- Sky blue
+        Unit          = "#A6E3A1",  -- Green
+        Value         = "#FAB387",  -- Peach
+        Enum          = "#F9E2AF",  -- Yellow
+        Keyword       = "#F5C2E7",  -- Pink
+        Snippet       = "#94E2D5",  -- Teal
+        Color         = "#F38BA8",  -- Red
+        File          = "#89B4FA",  -- Blue
+        Reference     = "#F5C2E7",  -- Pink
+        Folder        = "#89B4FA",  -- Blue
+        EnumMember    = "#A6E3A1",  -- Green
+        Constant      = "#FAB387",  -- Peach
+        Struct        = "#CBA6F7",  -- Purple
+        Event         = "#F38BA8",  -- Red
+        Operator      = "#89DCEB",  -- Sky blue
+        TypeParameter = "#F9E2AF",  -- Yellow
+      }
+
+      for kind, color in pairs(kind_colors) do
+        vim.api.nvim_set_hl(0, "CmpKind" .. kind, { fg = color })
+      end
+    end
+
+    setup_cmp_kind_highlights()
+
+    vim.api.nvim_create_autocmd("ColorScheme", {
+      callback = setup_cmp_kind_highlights,
+    })
+
       -- border opts
       local border_opts = {
         border = "rounded",
@@ -897,7 +938,7 @@ end
 
 -- IMPORTANT: with custom view, color must be applied to abbr
 if not item.abbr_hl_group then
-  item.abbr_hl_group = "CmpKind" .. item.kind
+  item.abbr_hl_group = "CmpItemKind" .. item.kind
 end
 
     local ok_hc, hc = pcall(require, "nvim-highlight-colors")
