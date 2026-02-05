@@ -29,20 +29,20 @@ local colors = {
   subtext0 = "#AAACC8",
 
   -- Accent colors (VIBRANT)
-  rosewater = "#FFD9FA",
-  flamingo = "#EEC8FF",
-  pink = "#B9A1D7",
-  mauve = "#B497ED",
-  red = "#BD85F1",
-  maroon = "#D29FFF",
-  peach = "#EB97C0",
-  yellow = "#E0BFB9",
-  green = "#00BDCC",
-  teal = "#8BB5DB",
-  sky = "#BFCEFF",
-  sapphire = "#B0ABF5",
-  blue = "#B6A4FD",
-  lavender = "#C9B7FF",
+  rosewater = "#F2E1E7",
+  flamingo = "#E9D0E0",
+  pink = "#D1B7E6",
+  mauve = "#AC90E0",
+  red = "#D395E3",
+  maroon = "#D5A6D6",
+  peach = "#FEAFB8",
+  yellow = "#EDCEBE",
+  green = "#6CD2C5",
+  teal = "#8ED0EB",
+  sky = "#AFD4FF",
+  sapphire = "#9AB2F4",
+  blue = "#ADA4F6",
+  lavender = "#C8BAFD",
 }
 
 local function hi(group, opts)
@@ -64,7 +64,7 @@ end
 local function setup_highlights()
     hi("Normal", { fg = colors.text, bg = "NONE" })
     hi("NormalFloat", { fg = colors.text, bg = colors.mantle })
-    hi("FloatBorder", { fg = colors.lavender, bg = "NONE"})
+    hi("FloatBorder", { fg = "NONE", bg = colors.lavender })
     hi("FloatTitle", { fg = colors.mauve, bg = "NONE", style = "bold,italic" })
     hi("Folded", { fg = "NONE", bg = "NONE" })
     hi("FoldColumn", { fg = colors.red })
@@ -192,7 +192,7 @@ local function setup_highlights()
     hi("@punctuation.special", { fg = colors.sky })
 
     hi("@comment", { fg = colors.pink, style = "italic" })
-    hi("@comment.todo", { fg = colors.yellow, bg = "NONE", style = "bold" })
+    hi("@comment.todo", { fg = colors.yellow, bg = colors.surface0, style = "bold" })
     hi("@comment.note", { fg = colors.blue, bg = colors.surface0, style = "bold" })
     hi("@comment.warning", { fg = colors.peach, bg = colors.surface0, style = "bold" })
     hi("@comment.error", { fg = colors.red, bg = colors.surface0, style = "bold" })
@@ -220,7 +220,7 @@ local function setup_highlights()
 
     -- Functions and Methods
     hi("@lsp.type.function", { fg = colors.blue, style = "bold" })
-    hi("@lsp.type.method.java", { fg = colors.sky, style = "italic" })
+    hi("@lsp.type.method.java", { fg = colors.sapphire, style = "italic" })
     hi("@lsp.type.method", { fg = colors.sapphire, style = "bold" })
     hi("@lsp.typemod.function.static", { fg = colors.sky, style = "bold" })
     hi("@lsp.typemod.method.static", { fg = colors.sapphire, style = "italic" })
@@ -326,7 +326,9 @@ local function setup_highlights()
     -- ============================================================================
     -- PLUGIN: INDENT-BLANKLINE
     -- ============================================================================
-    hi("SnacksIndent", { fg = colors.overlay0 })
+    hi("SnacksIndentScope", { fg = colors.mauve } )
+    hi("SnacksIndent", { fg = colors.overlay0 } )
+
     -- ============================================================================
     -- PLUGIN: WHICH-KEY
     -- ============================================================================
@@ -361,13 +363,13 @@ local function setup_highlights()
     -- ============================================================================
     -- PLUGIN: RAINBOW DELIMITERS
     -- ============================================================================
-    hi("RainbowDelimiterRed",    { fg = "#C78BFF" })
-    hi("RainbowDelimiterOrange", { fg = "#FF8AC7" })
-    hi("RainbowDelimiterYellow", { fg = "#F4C0B6" })
-    hi("RainbowDelimiterGreen",  { fg = "#00C9D9" })
-    hi("RainbowDelimiterCyan",   { fg = "#7BC2FC" })
-    hi("RainbowDelimiterBlue",   { fg = "#9AB4FF" })
-    hi("RainbowDelimiterViolet", { fg = "#B28BFF" })
+    hi("RainbowDelimiterRed",    { fg = "#DF8BF8" })
+    hi("RainbowDelimiterOrange", { fg = "#FFAFB8" })
+    hi("RainbowDelimiterYellow", { fg = "#FACAB0" })
+    hi("RainbowDelimiterGreen",  { fg = "#1FD8C7" })
+    hi("RainbowDelimiterCyan",   { fg = "#60D4FD" })
+    hi("RainbowDelimiterBlue",   { fg = "#77BBFF" })
+    hi("RainbowDelimiterViolet", { fg = "#B38BFF" })
 
     -- ============================================================================
     -- PLUGIN: RENDER-MARKDOWN
