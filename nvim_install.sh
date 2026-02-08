@@ -171,7 +171,7 @@ fi
 
 # Python
 echo -e "${BLUE}[INFO]${NC} Installing Python LSP and tools..."
-pip install --user python-lsp-server pylint black isort
+sudo pacman -S python-lsp-server python-pylint python-black python-isort
 
 # Bash (already installed from deps.txt if present)
 if ! pacman -Qi bash-language-server &>/dev/null; then
