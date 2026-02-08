@@ -18,6 +18,7 @@ vim.g.maplocalleader = " "
 -- Basic Neovim settings
 require("config.options")
 require("config.keymaps")
+require("config.smart-docs")
 
 -- Bootstrap lazy.nvim plugin manager
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
