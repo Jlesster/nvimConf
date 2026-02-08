@@ -1,4 +1,16 @@
 -- NVIM INIT
+-- Add necessary paths without replacing entire PATH
+local paths_to_add = {
+  vim.fn.expand('$HOME') .. '/go/bin',
+  vim.fn.expand('$HOME') .. '/.local/bin',
+}
+
+for _, path in ipairs(paths_to_add) do
+  if vim.fn.isdirectory(path) == 1 then
+    vim.env.PATH = vim.env.PATH .. ':' .. path
+  end
+end
+
 -- Set leader key before lazy
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "

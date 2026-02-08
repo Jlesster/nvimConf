@@ -5,7 +5,12 @@ return {
     lazy = false,
     opts = {
       input = { enabled = true },
-      picker = { enabled = true },
+      picker = {
+        enabled = true,
+        win = {
+          border = "rounded",
+        },
+      },
       terminal = { enabled = true },
       notifier = { enabled = true },
       bigfile = { enabled = true },
@@ -417,12 +422,31 @@ return {
         end
       })
 
-      for _, delay in ipairs({100, 300, 500, 1000}) do
-        vim.defer_fn(function()
+      vim.defer_fn(function()
+        local colorscheme = vim.g.colors_name
+        if colorscheme then
+          vim.cmd('colorscheme ' .. colorscheme)
+        end
+      end, 1500)
+
+      local function ensure_rainbow_loaded(callback)
+        local function check_rainbow()
+          local hl = vim.api.nvim_get_hl(0, { name = 'RainbowDelimiterRed', link = false })
+          if hl.fg then
+            callback()
+          else
+            vim.defer_fn(check_rainbow, 100)
+          end
+        end
+        check_rainbow()
+      end
+
+      vim.defer_fn(function()
+        ensure_rainbow_loaded(function()
           pcall(sync_scope_colors)
           pcall(update_scope_color)
-        end, delay)
-      end
+        end)
+      end, 100)
     end
   },
   --hack to only show scope lines for curr scope

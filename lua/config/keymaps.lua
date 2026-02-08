@@ -5,17 +5,34 @@ local keymap = vim.keymap.set
 keymap("i", "jk", "<ESC>", { desc = "Exit insert mode" })
 keymap("i", "<C-BS>", "<C-W>", { desc = "Enable CTRL+backspace to delete" })
 
--- Save and quit
+-- Save and quit WITH SNACKS MENU
 keymap("n", "<C-s>", ":w!<CR>", { desc = "Force write" })
 keymap("n", "<leader>q", function()
-  local choice = vim.fn.confirm("Do you really want to exit nvim?", "&Yes\n&No", 2)
-  if choice == 1 then
-    vim.cmd('confirm quit')
-  end
+  vim.ui.select(
+    { "Save and Quit", "Quit without Saving", "Cancel" },
+    { prompt = "Quit Options:" },
+    function(choice)
+      if choice == "Save and Quit" then
+        vim.cmd("wq")
+      elseif choice == "Quit without Saving" then
+        vim.cmd("q!")
+      end
+    end
+  )
 end, { desc = "Quit" })
 keymap("n", "<leader>w", ":w<CR>", { desc = "Save" })
 keymap("n", "<leader>n", ":enew<CR>", { desc = "New file" })
-keymap("n", "<leader>W", function() vim.cmd("SudaWrite") end, { desc = "Save as Sudo" })
+keymap("n", "<leader>W", function()
+  vim.ui.input(
+    { prompt = "Sudo Password: ", default = "" },
+    function(password)
+      if password and password ~= "" then
+        vim.env.SUDO_ASKPASS = "echo " .. vim.fn.shellescape(password)
+        vim.cmd("SudaWrite")
+      end
+    end
+  )
+end, { desc = "Save as Sudo" })
 
 -- Window navigation
 keymap("n", "<C-h>", "<C-w>h", { desc = "Move to left window" })
@@ -32,13 +49,43 @@ keymap("n", "<C-Right>", ":vertical resize +2<CR>", { desc = "Resize split right
 -- Splits
 keymap("n", "|", ":vsplit<CR>", { desc = "Vertical Split" })
 keymap("n", "\\", ":split<CR>", { desc = "Horizontal Split" })
+keymap("n", "<leader>s", function()
+  vim.ui.select(
+    { "Vertical Split", "Horizontal Split", "Cancel" },
+    { prompt = "Create Split:" },
+    function(choice)
+      if choice == "Vertical Split" then
+        vim.cmd("vsplit")
+      elseif choice == "Horizontal Split" then
+        vim.cmd("split")
+      end
+    end
+  )
+end, { desc = "Split menu" })
 
 -- Buffer navigation
 keymap("n", "<S-l>", ":bnext<CR>", { desc = "Next buffer" })
 keymap("n", "<S-h>", ":bprevious<CR>", { desc = "Previous buffer" })
 keymap("n", "]b", ":bnext<CR>", { desc = "Next buffer" })
 keymap("n", "[b", ":bprevious<CR>", { desc = "Previous buffer" })
-keymap("n", "<leader>bd", ":bdelete<CR>", { desc = "Delete buffer" })
+keymap("n", "<leader>bd", function()
+  vim.ui.select(
+    { "Delete Current Buffer", "Delete All Other Buffers", "Cancel" },
+    { prompt = "Buffer Delete:" },
+    function(choice)
+      if choice == "Delete Current Buffer" then
+        vim.cmd("bdelete")
+      elseif choice == "Delete All Other Buffers" then
+        local current = vim.api.nvim_get_current_buf()
+        for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+          if buf ~= current and vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_buf_get_option(buf, 'buflisted') then
+            vim.cmd("bdelete " .. buf)
+          end
+        end
+      end
+    end
+  )
+end, { desc = "Delete buffer menu" })
 keymap("n", "<leader>ba", ":wa<CR>", { desc = "Write all changed buffers" })
 keymap("n", "<leader>c", '<cmd>Bdelete<CR>', { desc = "Close buffer" })
 keymap("n", "<leader>bw", function() vim.cmd("silent! close") end, { desc = "Close window" })
@@ -217,7 +264,21 @@ end, { desc = "LazyGit/GitUI" })
 keymap("n", "<leader>r", ":Yazi<CR>", { desc = "File browser" })
 
 -- Terminal (ToggleTerm)
-keymap("n", "<leader>tt", ":ToggleTerm direction=float<CR>", { desc = "Toggle terminal float" })
+keymap("n", "<leader>tt", function()
+  vim.ui.select(
+    { "Float Terminal", "Horizontal Terminal", "Vertical Terminal", "Cancel" },
+    { prompt = "Terminal Type:" },
+    function(choice)
+      if choice == "Float Terminal" then
+        vim.cmd("ToggleTerm direction=float")
+      elseif choice == "Horizontal Terminal" then
+        vim.cmd("ToggleTerm size=10 direction=horizontal")
+      elseif choice == "Vertical Terminal" then
+        vim.cmd("ToggleTerm size=80 direction=vertical")
+      end
+    end
+  )
+end, { desc = "Toggle terminal menu" })
 keymap("n", "<leader>th", ":ToggleTerm size=10 direction=horizontal<CR>", { desc = "Toggle terminal horizontal" })
 keymap("n", "<leader>tv", ":ToggleTerm size=80 direction=vertical<CR>", { desc = "Toggle terminal vertical" })
 keymap("n", "<F7>", ":1ToggleTerm dorection=float<CR>", { desc = "Toggle terminal" })
@@ -268,6 +329,27 @@ keymap("n", "<leader>dQ", function() require("dap").terminate() end, { desc = "T
 keymap("n", "<leader>dr", function() require("dap").restart_frame() end, { desc = "Restart" })
 keymap("n", "<leader>dp", function() require("dap").pause() end, { desc = "Pause" })
 keymap("n", "<leader>dR", function() require("dap").repl.toggle() end, { desc = "REPL" })
+keymap("n", "<leader>dm", function()
+  vim.ui.select(
+    { "Continue/Start", "Pause", "Stop", "Restart", "Toggle Breakpoint", "Clear Breakpoints", "Cancel" },
+    { prompt = "Debug Actions:" },
+    function(choice)
+      if choice == "Continue/Start" then
+        require("dap").continue()
+      elseif choice == "Pause" then
+        require("dap").pause()
+      elseif choice == "Stop" then
+        require("dap").terminate()
+      elseif choice == "Restart" then
+        require("dap").restart_frame()
+      elseif choice == "Toggle Breakpoint" then
+        require("dap").toggle_breakpoint()
+      elseif choice == "Clear Breakpoints" then
+        require("dap").clear_breakpoints()
+      end
+    end
+  )
+end, { desc = "Debug menu" })
 
 -- DAP UI
 keymap("n", "<leader>du", function() require("dapui").toggle() end, { desc = "Toggle DAP UI" })
@@ -294,6 +376,33 @@ keymap("n", "<leader>gs", function() require("gitsigns").stage_hunk() end, { des
 keymap("n", "<leader>gS", function() require("gitsigns").stage_buffer() end, { desc = "Stage Git buffer" })
 keymap("n", "<leader>gu", function() require("gitsigns").undo_stage_hunk() end, { desc = "Unstage Git hunk" })
 keymap("n", "<leader>gd", function() require("gitsigns").diffthis() end, { desc = "View Git diff" })
+keymap("n", "<leader>gm", function()
+  vim.ui.select(
+    { "Blame Line", "Blame (Full)", "Preview Hunk", "Reset Hunk", "Reset Buffer", "Stage Hunk", "Stage Buffer", "Unstage Hunk", "Diff", "Cancel" },
+    { prompt = "Git Actions:" },
+    function(choice)
+      if choice == "Blame Line" then
+        require("gitsigns").blame_line()
+      elseif choice == "Blame (Full)" then
+        require("gitsigns").blame_line({ full = true })
+      elseif choice == "Preview Hunk" then
+        require("gitsigns").preview_hunk()
+      elseif choice == "Reset Hunk" then
+        require("gitsigns").reset_hunk()
+      elseif choice == "Reset Buffer" then
+        require("gitsigns").reset_buffer()
+      elseif choice == "Stage Hunk" then
+        require("gitsigns").stage_hunk()
+      elseif choice == "Stage Buffer" then
+        require("gitsigns").stage_buffer()
+      elseif choice == "Unstage Hunk" then
+        require("gitsigns").undo_stage_hunk()
+      elseif choice == "Diff" then
+        require("gitsigns").diffthis()
+      end
+    end
+  )
+end, { desc = "Git menu" })
 
 -- Code Folding (nvim-ufo)
 keymap("n", "zR", function() require("ufo").openAllFolds() end, { desc = "Open all folds" })
@@ -390,7 +499,6 @@ keymap("n", "]d", function() vim.diagnostic.jump({ count = 1 }) end, { desc = "N
 keymap("n", "<leader>lD", ":Telescope diagnostics<CR>", { desc = "Telescope diagnostics" })
 
 -- LSP keymaps (only work when LSP is attached)
--- These are typically set up in your LSP config, but here are the basic ones:
 keymap("n", "gd", vim.lsp.buf.definition, { desc = "Go to definition" })
 keymap("n", "gD", vim.lsp.buf.declaration, { desc = "Go to declaration" })
 keymap("n", "gI", vim.lsp.buf.implementation, { desc = "Go to implementation" })
@@ -410,3 +518,26 @@ keymap("n", "<leader>ls", ":Telescope lsp_document_symbols<CR>", { desc = "Docum
 keymap("n", "gs", ":Telescope lsp_document_symbols<CR>", { desc = "Document symbols" })
 keymap("n", "<leader>lS", ":Telescope lsp_workspace_symbols<CR>", { desc = "Workspace symbols" })
 keymap("n", "gS", ":Telescope lsp_workspace_symbols<CR>", { desc = "Workspace symbols" })
+keymap("n", "<leader>lm", function()
+  vim.ui.select(
+    { "Code Actions", "Rename", "Format", "LSP Info", "Restart LSP", "Document Symbols", "Workspace Symbols", "Cancel" },
+    { prompt = "LSP Actions:" },
+    function(choice)
+      if choice == "Code Actions" then
+        vim.lsp.buf.code_action()
+      elseif choice == "Rename" then
+        vim.lsp.buf.rename()
+      elseif choice == "Format" then
+        vim.lsp.buf.format({ async = true })
+      elseif choice == "LSP Info" then
+        vim.cmd("LspInfo")
+      elseif choice == "Restart LSP" then
+        vim.cmd("LspRestart")
+      elseif choice == "Document Symbols" then
+        vim.cmd("Telescope lsp_document_symbols")
+      elseif choice == "Workspace Symbols" then
+        vim.cmd("Telescope lsp_workspace_symbols")
+      end
+    end
+  )
+end, { desc = "LSP menu" })

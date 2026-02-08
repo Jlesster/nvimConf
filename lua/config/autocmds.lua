@@ -2,6 +2,12 @@
 local autocmd = vim.api.nvim_create_autocmd
 local augroup = vim.api.nvim_create_augroup
 
+-- Helper function to check if a plugin is available
+local function is_available(plugin)
+  local lazy_config_avail, lazy_config = pcall(require, "lazy.core.config")
+  return lazy_config_avail and lazy_config.plugins[plugin] ~= nil
+end
+
 -- Highlight on yank
 autocmd("TextYankPost", {
   group = augroup("YankHighlight", { clear = true }),
@@ -34,9 +40,9 @@ autocmd("FileType", {
   group = augroup("JavaSettings", { clear = true }),
   pattern = "java",
   callback = function()
-    vim.opt_local.shiftwidth = 4
-    vim.opt_local.tabstop = 4
-    vim.opt_local.colorcolumn = "120"
+    vim.opt_local.shiftwidth = 2
+    vim.opt_local.tabstop = 2
+    vim.opt_local.colorcolumn = "920"
 
     -- Start Java LSP
     require("lsp.java").setup()
@@ -129,6 +135,16 @@ autocmd("BufEnter", {
           end)
         end)
       end
+    end
+  end,
+})
+
+-- Enable semantic token highlighting globally
+vim.api.nvim_create_autocmd("LspAttach", {
+  callback = function(args)
+    local client = vim.lsp.get_client_by_id(args.data.client_id)
+    if client and client.server_capabilities.semanticTokensProvider then
+      vim.lsp.semantic_tokens.start(args.buf, client.id)
     end
   end,
 })
