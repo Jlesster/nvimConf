@@ -498,37 +498,116 @@ keymap("n", "[d", function() vim.diagnostic.jump({ count = -1 }) end, { desc = "
 keymap("n", "]d", function() vim.diagnostic.jump({ count = 1 }) end, { desc = "Next diagnostic" })
 keymap("n", "<leader>lD", ":Telescope diagnostics<CR>", { desc = "Telescope diagnostics" })
 
--- LSP keymaps (only work when LSP is attached)
-keymap("n", "gd", vim.lsp.buf.definition, { desc = "Go to definition" })
+-- ============================================================================
+-- LSP KEYMAPS (Buffer-specific, only work when LSP is attached)
+-- ============================================================================
+
+-- Note: These are fallback keymaps. The actual LSP keymaps are set in lsp.lua
+-- via the on_attach function. These will work as global fallbacks.
+
+-- Diagnostics (using lspsaga for better UI)
+keymap("n", "gl", "<cmd>Lspsaga show_line_diagnostics<CR>", { desc = "Line diagnostics" })
+keymap("n", "[d", "<cmd>Lspsaga diagnostic_jump_prev<CR>", { desc = "Previous diagnostic" })
+keymap("n", "]d", "<cmd>Lspsaga diagnostic_jump_next<CR>", { desc = "Next diagnostic" })
+keymap("n", "<leader>ld", "<cmd>Lspsaga show_cursor_diagnostics<CR>", { desc = "Cursor diagnostics" })
+keymap("n", "<leader>lD", ":Telescope diagnostics<CR>", { desc = "Telescope diagnostics" })
+
+-- Core LSP Navigation (using lspsaga for peek functionality)
+keymap("n", "gd", "<cmd>Lspsaga goto_definition<CR>", { desc = "Go to definition" })
+keymap("n", "gp", "<cmd>Lspsaga peek_definition<CR>", { desc = "Peek definition" })
 keymap("n", "gD", vim.lsp.buf.declaration, { desc = "Go to declaration" })
-keymap("n", "gI", vim.lsp.buf.implementation, { desc = "Go to implementation" })
-keymap("n", "gT", vim.lsp.buf.type_definition, { desc = "Go to type definition" })
-keymap("n", "gr", vim.lsp.buf.references, { desc = "Go to references" })
-keymap("n", "K", vim.lsp.buf.hover, { desc = "Hover documentation" })
-keymap("n", "gh", vim.lsp.buf.hover, { desc = "Hover help" })
+keymap("n", "gI", "<cmd>Lspsaga finder imp<CR>", { desc = "Go to implementation" })
+keymap("n", "gT", "<cmd>Lspsaga goto_type_definition<CR>", { desc = "Go to type definition" })
+keymap("n", "gT", "<cmd>Lspsaga peek_type_definition<CR>", { desc = "Peek type definition" })
+keymap("n", "gr", "<cmd>Lspsaga finder<CR>", { desc = "Find references" })
+
+-- Hover and Help (using lspsaga)
+keymap("n", "K", "<cmd>Lspsaga hover_doc<CR>", { desc = "Hover documentation" })
+keymap("n", "gh", "<cmd>Lspsaga hover_doc<CR>", { desc = "Hover help" })
 keymap("n", "gH", vim.lsp.buf.signature_help, { desc = "Signature help" })
-keymap("n", "<leader>la", vim.lsp.buf.code_action, { desc = "Code actions" })
-keymap("v", "<leader>la", vim.lsp.buf.code_action, { desc = "Code actions" })
-keymap("n", "<leader>lr", vim.lsp.buf.rename, { desc = "Rename symbol" })
-keymap("n", "<leader>lf", function() vim.lsp.buf.format({ async = true }) end, { desc = "Format buffer" })
-keymap("v", "<leader>lf", function() vim.lsp.buf.format({ async = true }) end, { desc = "Format selection" })
+keymap("n", "<C-k>", vim.lsp.buf.signature_help, { desc = "Signature help" })
+
+-- Code Actions (using lspsaga)
+keymap("n", "<leader>la", "<cmd>Lspsaga code_action<CR>", { desc = "Code actions" })
+keymap("v", "<leader>la", "<cmd>Lspsaga code_action<CR>", { desc = "Code actions" })
+
+-- Rename (using lspsaga)
+keymap("n", "<leader>lr", "<cmd>Lspsaga rename<CR>", { desc = "Rename symbol" })
+keymap("n", "<leader>lR", "<cmd>Lspsaga rename ++project<CR>", { desc = "Rename in project" })
+
+-- Format (native LSP)
+keymap("n", "<leader>lf", function()
+  vim.lsp.buf.format({ async = true })
+end, { desc = "Format buffer" })
+keymap("v", "<leader>lf", function()
+  vim.lsp.buf.format({ async = true })
+end, { desc = "Format selection" })
+keymap("n", "<leader>f", function()
+  vim.lsp.buf.format({ async = true })
+end, { desc = "Format buffer" })
+
+-- LSP Info and Control
 keymap("n", "<leader>li", ":LspInfo<CR>", { desc = "LSP info" })
 keymap("n", "<leader>lL", ":LspRestart<CR>", { desc = "LSP restart" })
+
+-- Symbols (using lspsaga outline + telescope)
+keymap("n", "<leader>lo", "<cmd>Lspsaga outline<CR>", { desc = "Toggle outline" })
 keymap("n", "<leader>ls", ":Telescope lsp_document_symbols<CR>", { desc = "Document symbols" })
 keymap("n", "gs", ":Telescope lsp_document_symbols<CR>", { desc = "Document symbols" })
 keymap("n", "<leader>lS", ":Telescope lsp_workspace_symbols<CR>", { desc = "Workspace symbols" })
 keymap("n", "gS", ":Telescope lsp_workspace_symbols<CR>", { desc = "Workspace symbols" })
+
+-- Workspace Management
+keymap("n", "<leader>La", vim.lsp.buf.add_workspace_folder, { desc = "Add workspace folder" })
+keymap("n", "<leader>Lr", vim.lsp.buf.remove_workspace_folder, { desc = "Remove workspace folder" })
+keymap("n", "<leader>Ll", function()
+  print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
+end, { desc = "List workspace folders" })
+
+-- Inlay Hints Toggle
+keymap("n", "<leader>lh", function()
+  if vim.lsp.inlay_hint then
+    vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
+  else
+    vim.notify("Inlay hints not supported", vim.log.levels.WARN)
+  end
+end, { desc = "Toggle inlay hints" })
+
+-- Incoming/Outgoing Calls (lspsaga)
+keymap("n", "<leader>lci", "<cmd>Lspsaga incoming_calls<CR>", { desc = "Incoming calls" })
+keymap("n", "<leader>lco", "<cmd>Lspsaga outgoing_calls<CR>", { desc = "Outgoing calls" })
+
+-- LSP Menu
 keymap("n", "<leader>lm", function()
   vim.ui.select(
-    { "Code Actions", "Rename", "Format", "LSP Info", "Restart LSP", "Document Symbols", "Workspace Symbols", "Cancel" },
+    {
+      "Code Actions",
+      "Rename",
+      "Rename (Project)",
+      "Format",
+      "Hover Doc",
+      "Outline",
+      "LSP Info",
+      "Restart LSP",
+      "Document Symbols",
+      "Workspace Symbols",
+      "Toggle Inlay Hints",
+      "Cancel"
+    },
     { prompt = "LSP Actions:" },
     function(choice)
       if choice == "Code Actions" then
-        vim.lsp.buf.code_action()
+        vim.cmd("Lspsaga code_action")
       elseif choice == "Rename" then
-        vim.lsp.buf.rename()
+        vim.cmd("Lspsaga rename")
+      elseif choice == "Rename (Project)" then
+        vim.cmd("Lspsaga rename ++project")
       elseif choice == "Format" then
         vim.lsp.buf.format({ async = true })
+      elseif choice == "Hover Doc" then
+        vim.cmd("Lspsaga hover_doc")
+      elseif choice == "Outline" then
+        vim.cmd("Lspsaga outline")
       elseif choice == "LSP Info" then
         vim.cmd("LspInfo")
       elseif choice == "Restart LSP" then
@@ -537,7 +616,46 @@ keymap("n", "<leader>lm", function()
         vim.cmd("Telescope lsp_document_symbols")
       elseif choice == "Workspace Symbols" then
         vim.cmd("Telescope lsp_workspace_symbols")
+      elseif choice == "Toggle Inlay Hints" then
+        if vim.lsp.inlay_hint then
+          vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
+        end
       end
     end
   )
 end, { desc = "LSP menu" })
+
+-- Codeium chat and commands
+keymap("n", "<leader>ac", function()
+  vim.cmd("Codeium Chat")
+end, { desc = "Open Codeium Chat" })
+
+keymap("n", "<leader>ae", function()
+  vim.cmd("Codeium Enable")
+end, { desc = "Enable Codeium" })
+
+keymap("n", "<leader>ad", function()
+  vim.cmd("Codeium Disable")
+end, { desc = "Disable Codeium" })
+
+keymap("n", "<leader>at", function()
+  vim.cmd("Codeium Toggle")
+end, { desc = "Toggle Codeium" })
+
+keymap("n", "<leader>am", function()
+  vim.ui.select(
+    { "Open Chat", "Enable", "Disable", "Toggle", "Cancel" },
+    { prompt = "Codeium Actions:" },
+    function(choice)
+      if choice == "Open Chat" then
+        vim.cmd("Codeium Chat")
+      elseif choice == "Enable" then
+        vim.cmd("Codeium Enable")
+      elseif choice == "Disable" then
+        vim.cmd("Codeium Disable")
+      elseif choice == "Toggle" then
+        vim.cmd("Codeium Toggle")
+      end
+    end
+  )
+end, { desc = "Codeium menu" })

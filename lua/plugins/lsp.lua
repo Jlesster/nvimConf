@@ -7,7 +7,7 @@ return {
     build = ":MasonUpdate",
     opts = {
       ui = {
-        border = "rounded",
+        border = "double",
         width = 0.8,
         height = 0.8,
         icons = {
@@ -34,40 +34,6 @@ return {
       -- LSP keymaps (applied on attach)
       local on_attach = function(client, bufnr)
         local opts = { buffer = bufnr, silent = true }
-
-        -- Set keybindings
-        local keymap = vim.keymap.set
-
-        keymap("n", "gD", vim.lsp.buf.declaration, vim.tbl_extend("force", opts, { desc = "Go to declaration" }))
-        keymap("n", "gd", vim.lsp.buf.definition, vim.tbl_extend("force", opts, { desc = "Go to definition" }))
-        keymap("n", "K", vim.lsp.buf.hover, vim.tbl_extend("force", opts, { desc = "Hover documentation" }))
-        keymap("n", "gi", vim.lsp.buf.implementation, vim.tbl_extend("force", opts, { desc = "Go to implementation" }))
-        keymap("n", "<C-k>", vim.lsp.buf.signature_help, vim.tbl_extend("force", opts, { desc = "Signature help" }))
-        keymap("n", "<leader>wa", vim.lsp.buf.add_workspace_folder, vim.tbl_extend("force", opts, { desc = "Add workspace folder" }))
-        keymap("n", "<leader>wr", vim.lsp.buf.remove_workspace_folder, vim.tbl_extend("force", opts, { desc = "Remove workspace folder" }))
-        keymap("n", "<leader>wl", function()
-          print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
-        end, vim.tbl_extend("force", opts, { desc = "List workspace folders" }))
-        keymap("n", "<leader>D", vim.lsp.buf.type_definition, vim.tbl_extend("force", opts, { desc = "Type definition" }))
-        keymap("n", "<leader>rn", vim.lsp.buf.rename, vim.tbl_extend("force", opts, { desc = "Rename symbol" }))
-        keymap({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, vim.tbl_extend("force", opts, { desc = "Code action" }))
-        keymap("n", "gr", vim.lsp.buf.references, vim.tbl_extend("force", opts, { desc = "Show references" }))
-        keymap("n", "<leader>f", function()
-          vim.lsp.buf.format({ async = true })
-        end, vim.tbl_extend("force", opts, { desc = "Format buffer" }))
-
-        -- Diagnostic keymaps
-        keymap("n", "[d", vim.diagnostic.goto_prev, vim.tbl_extend("force", opts, { desc = "Previous diagnostic" }))
-        keymap("n", "]d", vim.diagnostic.goto_next, vim.tbl_extend("force", opts, { desc = "Next diagnostic" }))
-        keymap("n", "<leader>d", vim.diagnostic.open_float, vim.tbl_extend("force", opts, { desc = "Show diagnostic" }))
-        keymap("n", "<leader>q", vim.diagnostic.setloclist, vim.tbl_extend("force", opts, { desc = "Diagnostic list" }))
-
-        -- Enable inlay hints if available
-        if client.server_capabilities.inlayHintProvider and vim.lsp.inlay_hint then
-          keymap("n", "<leader>th", function()
-            vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
-          end, vim.tbl_extend("force", opts, { desc = "Toggle inlay hints" }))
-        end
 
         -- Enable semantic tokens if available
         if client.server_capabilities.semanticTokensProvider then
@@ -104,7 +70,7 @@ return {
         update_in_insert = false,
         severity_sort = true,
         float = {
-          border = "rounded",
+          border = "single",
           source = "always",
           header = "",
           prefix = "",
@@ -118,14 +84,24 @@ return {
         vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = "" })
       end
 
-      -- Hover window border
-      vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
-        border = "rounded",
-      })
+    -- AGGRESSIVELY FORCE BORDERS ON ALL LSP HANDLERS
+    local orig_util_open_floating_preview = vim.lsp.util.open_floating_preview
+    function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
+      opts = opts or {}
+      opts.border = opts.border or "single"
+      return orig_util_open_floating_preview(contents, syntax, opts, ...)
+    end
 
-      vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
-        border = "rounded",
-      })
+    -- Also set handlers explicitly
+    vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(
+      vim.lsp.handlers.hover,
+      { border = "single" }
+    )
+
+    vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(
+      vim.lsp.handlers.signature_help,
+      { border = "single" }
+    )
 
       -- Store config globally for mason-lspconfig to use
       _G.lsp_on_attach = on_attach
@@ -355,6 +331,7 @@ return {
   },
 
   -- Autocompletion
+-- Autocompletion
   {
     "hrsh7th/nvim-cmp",
     event = "InsertEnter",
@@ -373,7 +350,6 @@ return {
       local luasnip = require("luasnip")
       local lspkind = require("lspkind")
 
-      -- Load VSCode-style snippets
       require("luasnip.loaders.from_vscode").lazy_load()
 
       cmp.setup({
@@ -387,7 +363,9 @@ return {
           ["<C-f>"] = cmp.mapping.scroll_docs(4),
           ["<C-Space>"] = cmp.mapping.complete(),
           ["<C-e>"] = cmp.mapping.abort(),
-          ["<CR>"] = cmp.mapping.confirm({ select = true }),
+
+          -- Better completion acceptance
+          ["<S-CR>"] = cmp.mapping.confirm({ select = true }),
           ["<Tab>"] = cmp.mapping(function(fallback)
             if cmp.visible() then
               cmp.select_next_item()
@@ -407,29 +385,61 @@ return {
             end
           end, { "i", "s" }),
         }),
+
+        -- Prioritize sources for multi-language workflow
         sources = cmp.config.sources({
-          { name = "nvim_lsp" },
-          { name = "luasnip" },
-          { name = "path" },
+          { name = "nvim_lsp", priority = 900 },  -- LSP second
+          { name = "luasnip", priority = 750 },   -- Snippets third
+          { name = "path", priority = 500 },      -- File paths
         }, {
-          { name = "buffer", keyword_length = 3 },
+          { name = "buffer", keyword_length = 3, priority = 250 },  -- Buffer last
         }),
+
         formatting = {
           format = lspkind.cmp_format({
             mode = "symbol_text",
             maxwidth = 50,
             ellipsis_char = "...",
+            symbol_map = {
+            },
             before = function(entry, vim_item)
+              -- Add source name for debugging
+              vim_item.menu = ({
+                nvim_lsp = "[LSP]",
+                luasnip = "[Snip]",
+                buffer = "[Buf]",
+                path = "[Path]",
+              })[entry.source.name]
               return vim_item
             end,
           }),
         },
+
         window = {
-          completion = cmp.config.window.bordered(),
-          documentation = cmp.config.window.bordered(),
+          completion = cmp.config.window.bordered({
+            border = "single",
+            winhighlight = "Normal:Normal,FloatBorder:FloatBorder,CursorLine:Visual,Search:None",
+          }),
+          documentation = cmp.config.window.bordered({
+            border = "single",
+            winhighlight = "Normal:Normal,FloatBorder:FloatBorder,CursorLine:Visual,Search:None",
+          }),
         },
+
         experimental = {
-          ghost_text = true,
+          ghost_text = {
+            hl_group = "CmpGhostText",
+          },
+        },
+
+        -- Performance tuning for TUI
+        performance = {
+          debounce = 60,
+          throttle = 30,
+          fetching_timeout = 500,
+          confirm_resolve_timeout = 80,
+          async_budget = 1,
+          max_view_entries = 200,
         },
       })
 
@@ -464,34 +474,136 @@ return {
   {
     "nvimdev/lspsaga.nvim",
     event = "LspAttach",
-    opts = {
-      ui = {
-        border = "rounded",
-        code_action = "",
-      },
-      lightbulb = {
-        enable = false,
-      },
-      symbol_in_winbar = {
-        enable = true,
-      },
-    },
+    config = function()
+      require("lspsaga").setup({
+        ui = {
+          border = "single",
+          title = true,
+          winblend = 0,
+          expand = "",
+          collapse = "",
+          code_action = "",
+          incoming = " ",
+          outgoing = " ",
+          hover = " ",
+          kind = {},
+        },
+        hover = {
+          max_width = 0.6,
+          max_height = 0.8,
+          open_link = "gx",
+          open_cmd = "!chrome",
+        },
+        diagnostic = {
+          show_code_action = true,
+          show_source = true,
+          jump_num_shortcut = true,
+          max_width = 0.7,
+          max_height = 0.6,
+          max_show_width = 0.9,
+          max_show_height = 0.6,
+          text_hl_follow = false,
+          border_follow = true,
+          extend_relatedInformation = false,
+          keys = {
+            exec_action = "o",
+            quit = "q",
+            expand_or_jump = "<CR>",
+            quit_in_show = { "q", "<ESC>" },
+          },
+        },
+        definition = {
+          edit = "<C-c>o",
+          vsplit = "<C-c>v",
+          split = "<C-c>i",
+          tabe = "<C-c>t",
+          quit = "q",
+        },
+        code_action = {
+          num_shortcut = true,
+          show_server_name = false,
+          extend_gitsigns = true,
+          keys = {
+            quit = "q, <ESC>",
+            exec = "<CR>",
+          },
+        },
+        lightbulb = {
+          enable = false,
+        },
+        beacon = {
+          enable = true,
+          frequency = 7,
+        },
+        scroll_preview = {
+          scroll_down = "<C-f>",
+          scroll_up = "<C-b>",
+        },
+        request_timeout = 2000,
+        finder = {
+          max_height = 0.5,
+          force_max_height = false,
+          keys = {
+            jump_to = "p",
+            expand_or_jump = "o",
+            vsplit = "s",
+            split = "i",
+            tabe = "t",
+            tabnew = "r",
+            quit = { "q", "<ESC>" },
+            close_in_preview = "<ESC>",
+          },
+        },
+        symbol_in_winbar = {
+          enable = true,
+          separator = " › ",
+          ignore_patterns = {},
+          hide_keyword = true,
+          show_file = true,
+          folder_level = 2,
+          respect_root = false,
+          color_mode = true,
+        },
+        rename = {
+          quit = "<C-c>",
+          exec = "<CR>",
+          mark = "x",
+          confirm = "<CR>",
+          in_select = true,
+        },
+        outline = {
+          win_position = "right",
+          win_with = "",
+          win_width = 30,
+          preview_width = 0.4,
+          show_detail = true,
+          auto_preview = true,
+          auto_refresh = true,
+          auto_close = true,
+          auto_resize = false,
+          custom_sort = nil,
+          keys = {
+            expand_or_jump = "o",
+            quit = "q",
+          },
+        },
+        callhierarchy = {
+          show_detail = false,
+          keys = {
+            edit = "e",
+            vsplit = "s",
+            split = "i",
+            tabe = "t",
+            jump = "o",
+            quit = "q",
+            expand_collapse = "u",
+          },
+        },
+      })
+    end,
     dependencies = {
       "nvim-treesitter/nvim-treesitter",
       "nvim-tree/nvim-web-devicons",
     },
-  },
-
-  -- Show function signature as you type
-  {
-    "ray-x/lsp_signature.nvim",
-    event = "VeryLazy",
-    opts = {
-      bind = true,
-      handler_opts = {
-        border = "rounded",
-      },
-      hint_prefix = "󰏪 ",
-    },
-  },
+  }
 }

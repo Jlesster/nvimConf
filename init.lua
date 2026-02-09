@@ -11,6 +11,9 @@ for _, path in ipairs(paths_to_add) do
   end
 end
 
+--get rid of annoying deprecate warining
+vim.deprecate = function() end
+
 -- Set leader key before lazy
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
@@ -18,6 +21,7 @@ vim.g.maplocalleader = " "
 -- Basic Neovim settings
 require("config.options")
 require("config.keymaps")
+require("config.highlights")
 require("config.smart-docs")
 
 -- Bootstrap lazy.nvim plugin manager

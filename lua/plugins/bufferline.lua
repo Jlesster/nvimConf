@@ -7,12 +7,12 @@ return {
       require("bufferline").setup({
         options = {
           -- CORE BEHAVIOR
-          mode = "buffers", -- "buffers" shows open buffers, "tabs" shows vim tabs
-          themable = true, -- allows colors from your colorscheme
-          close_command = "bdelete! %d", -- command to close buffer (can use "Bdelete %d" if using bufdelete.nvim)
+          mode = "buffers",                    -- "buffers" shows open buffers, "tabs" shows vim tabs
+          themable = true,                     -- allows colors from your colorscheme
+          close_command = "bdelete! %d",       -- command to close buffer (can use "Bdelete %d" if using bufdelete.nvim)
           right_mouse_command = "bdelete! %d", -- right click closes buffer
-          left_mouse_command = "buffer %d", -- left click switches to buffer
-          middle_mouse_command = nil, -- middle click does nothing (can set to close)
+          left_mouse_command = "buffer %d",    -- left click switches to buffer
+          middle_mouse_command = nil,          -- middle click does nothing (can set to close)
 
           -- VISUAL STYLE
           style_preset = require("bufferline").style_preset.default,
@@ -21,7 +21,7 @@ return {
 
           indicator = {
             -- icon = '▎', -- The character shown on the left of active buffer
-            icon = '│',  -- Alternative: thin line
+            icon = '│', -- Alternative: thin line
             -- icon = '▌',  -- Alternative: thick line
             style = 'icon', -- 'icon' | 'underline' | 'none'
           },
@@ -40,13 +40,13 @@ return {
           -- numbers = function(opts) return string.format('%s', opts.raise(opts.ordinal)) end,
 
           -- TAB BEHAVIOR
-          max_name_length = 18, -- Max chars for buffer name before truncating
+          max_name_length = 18,   -- Max chars for buffer name before truncating
           max_prefix_length = 15, -- Max chars for directory name (when showing path)
-          truncate_names = true, -- Truncate long names instead of ellipsis
-          tab_size = 18, -- Width of each buffer tab
+          truncate_names = true,  -- Truncate long names instead of ellipsis
+          tab_size = 18,          -- Width of each buffer tab
 
           -- DIAGNOSTICS (LSP errors/warnings)
-          diagnostics = "false", -- false | "nvim_lsp" | "coc"
+          diagnostics = false,                -- false | "nvim_lsp" | "coc"
           diagnostics_update_in_insert = false, -- Don't update diagnostics while typing
           diagnostics_indicator = function(count, level, diagnostics_dict, context)
             local icon = level:match("error") and " " or " "
@@ -67,10 +67,10 @@ return {
           offsets = {
             {
               filetype = "neo-tree",
-              text = "NeoTree", -- Header text for the offset area
+              text = "NeoTree",        -- Header text for the offset area
               -- text = function() return vim.fn.getcwd() end, -- Alternative: show cwd
-              text_align = "left", -- "left" | "center" | "right"
-              separator = true, -- Show a separator line
+              text_align = "left",     -- "left" | "center" | "right"
+              separator = true,        -- Show a separator line
               highlight = "Directory", -- Highlight group for text
             },
             -- You can add more offsets for other sidebars
@@ -82,12 +82,12 @@ return {
           },
 
           -- COLORS & HIGHLIGHTS
-          color_icons = true, -- Show colored icons (uses nvim-web-devicons)
-          show_buffer_icons = true, -- Show file type icons
+          color_icons = true,             -- Show colored icons (uses nvim-web-devicons)
+          show_buffer_icons = true,       -- Show file type icons
           show_buffer_close_icons = true, -- Show close button on each buffer
-          show_close_icon = false, -- Show close button in top right corner
-          show_tab_indicators = true, -- Show indicator for active tab
-          show_duplicate_prefix = true, -- Show directory when multiple files have same name
+          show_close_icon = false,        -- Show close button in top right corner
+          show_tab_indicators = true,     -- Show indicator for active tab
+          show_duplicate_prefix = true,   -- Show directory when multiple files have same name
 
           -- SEPARATORS
           separator_style = "thin", -- "slant" | "slope" | "thick" | "thin" | { 'any', 'any' }
@@ -118,16 +118,16 @@ return {
           },
 
           -- SORTING
-          sort_by = 'insert_at_end',
+          -- sort_by = 'insert_at_end',
           -- Options: 'insert_after_current' | 'insert_at_end' | 'id' | 'extension' | 'relative_directory' | 'directory' | 'tabs'
-          -- sort_by = 'extension', -- Group by file type
+          sort_by = 'extension, insert_after_current, directory', -- Group by file type
           -- sort_by = 'directory', -- Group by directory
 
           -- HOVER BEHAVIOR
           hover = {
-            enabled = true, -- Show file path on hover
-            delay = 200, -- Delay in ms before showing
-            reveal = {'close'}, -- What to show on hover: 'close' button
+            enabled = true,     -- Show file path on hover
+            delay = 200,        -- Delay in ms before showing
+            reveal = { 'close' }, -- What to show on hover: 'close' button
           },
         },
 

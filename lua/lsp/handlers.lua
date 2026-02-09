@@ -13,19 +13,26 @@ function M.setup()
   end
 
   vim.diagnostic.config({
-    virtual_text = { prefix = "●", spacing = 4 },
+    virtual_text = { prefix = "●", spacing = 2 },
     signs = { active = signs },
     update_in_insert = false,
     underline = true,
     severity_sort = true,
     float = {
-      border = "rounded",
+      border = "single",
       source = "always",
     },
   })
 
-  vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = "rounded" })
-  vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, { border = "rounded" })
+  vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(
+    vim.lsp.handlers.hover,
+    { border = "single" }
+  )
+
+  vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(
+    vim.lsp.handlers.signature_help,
+    { border = "single" }
+  )
 end
 
 return M

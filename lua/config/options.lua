@@ -40,7 +40,7 @@ opt.shell = "fish"
 
 opt.termguicolors = true -- Enable 24-bit RGB color in the TUI.
 opt.undofile = true -- Enable persistent undo between session and reboots.
-opt.updatetime = 30 -- Length of time to wait before triggering the plugin.
+opt.updatetime = 300 -- Length of time to wait before triggering the plugin.
 opt.virtualedit = "none" -- Allow going past end of line in visual block mode.
 opt.writebackup = false -- Disable making a backup before overwriting a file.
 opt.shada = "!,'1000,<50,s10,h" -- Remember the last 1000 opened files

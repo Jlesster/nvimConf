@@ -101,6 +101,13 @@ return {
       require("toggleterm").setup({
         size = 20,
         direction = "horizontal",
+        shell = vim.o.shell,
+        -- Add these options
+        start_in_insert = true,
+        insert_mappings = true,
+        terminal_mappings = true,
+        persist_size = true,
+        persist_mode = true,
       })
     end,
   },
