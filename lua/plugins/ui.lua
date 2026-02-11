@@ -289,7 +289,7 @@ return {
           refresh = { statusline = 100, },
           globalstatus = true,
           disabled_filetypes = {
-            statusline = { 'alpha', 'dashboard' },
+            statusline = { 'snacks_dashboard' },
           },
         },
         sections = {
@@ -432,140 +432,6 @@ return {
     end,
   },
   { "nvim-tree/nvim-web-devicons", lazy = true },
-  {
-    "goolord/alpha-nvim",
-    cmd = "Alpha",
-    -- setup header and buttonts
-    opts = function()
-      local dashboard = require("alpha.themes.dashboard")
-      local icons = require("utils.icons")
-      local get_icon = icons.get_icon
-
-        dashboard.section.header.val = {
-          [[  ⠀ ⣿⠙⣦⠀⠀⠀⠀⠀⠀⣀⣤⡶⠛⠁]],
-          [[⠀⠀⠀⠀⢻⠀⠈⠳⠀⠀⣀⣴⡾⠛⠁⣠⠂⢠⠇]],
-          [[⠀⠀⠀⠀⠈⢀⣀⠤⢤⡶⠟⠁⢀⣴⣟⠀⠀⣾]],
-          [[⠀⠀⠀⠠⠞⠉⢁⠀⠉⠀⢀⣠⣾⣿⣏⠀⢠⡇]],
-          [[⠀⠀⡰⠋⠀⢰⠃⠀⠀⠉⠛⠿⠿⠏⠁⠀⣸⠁]],
-          [[ ⠀⣄⠀⠀⠏⣤⣤⣀⡀⠀⠀⠀⠀⠀⠾⢯⣀]],
-          [[ ⠀⣻⠃⠀⣰⡿⠛⠁⠀⠀⠀⢤⣀⡀⠀⠺⣿⡟⠛⠁]],
-          [[⠀⡠⠋⡤⠠⠋⠀⠀⢀⠐⠁⠀⠈⣙⢯⡃⠀⢈⡻⣦]],
-          [[⢰⣷⠇⠀⠀⠀⢀⡠⠃⠀⠀⠀⠀⠈⠻⢯⡄⠀⢻⣿⣷]],
-          [[⠉⠲⣶⣶⢾⣉⣐⡚⠋⠀⠀⠀⠀⠀⠘⠀⠀⡎⣿⣿⡇]],
-          [[⠀⠀⠀⠀⣸⣿⣿⣿⣷⡄⠀⠀⢠⣿⣴⠀⠀⣿⣿⣿⣧]],
-          [[⠀⠀⢀⣴⣿⣿⣿⣿⣿⠇⠀⢠⠟⣿⠏⢀⣾⠟⢸⣿⡇]],
-          [[⠀⢠⣿⣿⣿⣿⠟⠘⠁⢠⠜⢉⣐⡥⠞⠋⢁⣴⣿⣿⠃]],
-          [[⠀⣾⢻⣿⣿⠃⠀⠀⡀⢀⡄⠁⠀⠀⢠⡾⠁⢠⣾⣿⠃]],
-          [[⠀⠃⢸⣿⡇⠀⢠⣾⡇⢸⡇⠀⠀⠀⡞]],
-          [[⠀⠀⠈⢿⡇⡰⠋⠈⠙⠂⠙⠢]],
-          [[⠀⠀⠀⠀⠈⢧]],
-        }
-
-
-      dashboard.section.header.opts.hl = "DashboardHeader"
-
-      -- If yazi is not installed, don't show the button.
-      local is_yazi_installed = vim.fn.executable("ya") == 1
-      local yazi_button = dashboard.button("r", get_icon("GreeterYazi") .. " Yazi", "<cmd>Yazi<CR>")
-      if not is_yazi_installed then yazi_button = nil end
-
-      -- Buttons
-      local buttons = {
-        dashboard.button("n", get_icon("GreeterNew") .. " New", "<cmd>ene<CR>"),
-        dashboard.button("e", get_icon("GreeterRecent") .. " Recent  ", "<cmd>Telescope oldfiles<CR>"),
-        yazi_button,
-        dashboard.button("s", get_icon("GreeterSessions") .. " Sessions", "<cmd>SessionManager! load_session<CR>"),
-        dashboard.button("p", get_icon("GreeterProjects") .. " Projects", "<cmd>Telescope projects<CR>"),
-        dashboard.button("", ""),
-        dashboard.button("q", "   Quit", "<cmd>exit<CR>"),
-      }
-
-      -- Apply highlight groups to buttons
-      buttons[1].opts.hl = "AlphaIconNew"
-      buttons[1].opts.hl_shortcut = "AlphaShortcut"
-      buttons[2].opts.hl = "AlphaIconRecent"
-      buttons[2].opts.hl_shortcut = "AlphaShortcut"
-
-      if yazi_button then
-        buttons[3].opts.hl = "AlphaIconYazi"
-        buttons[3].opts.hl_shortcut = "AlphaShortcut"
-        buttons[4].opts.hl = "AlphaIconSessions"
-        buttons[4].opts.hl_shortcut = "AlphaShortcut"
-        buttons[5].opts.hl = "AlphaIconProjects"
-        buttons[5].opts.hl_shortcut = "AlphaShortcut"
-        buttons[7].opts.hl = "AlphaIconQuit"
-        buttons[7].opts.hl_shortcut = "AlphaShortcut"
-      else
-        buttons[3].opts.hl = "AlphaIconSessions"
-        buttons[3].opts.hl_shortcut = "AlphaShortcut"
-        buttons[4].opts.hl = "AlphaIconProjects"
-        buttons[4].opts.hl_shortcut = "AlphaShortcut"
-        buttons[6].opts.hl = "AlphaIconQuit"
-        buttons[6].opts.hl_shortcut = "AlphaShortcut"
-      end
-
-      dashboard.section.buttons.val = buttons
-
-      -- Vertical margins
-      dashboard.config.layout[1].val =
-          vim.fn.max { 2, vim.fn.floor(vim.fn.winheight(0) * 0.10) } -- Above header
-      dashboard.config.layout[3].val =
-          vim.fn.max { 2, vim.fn.floor(vim.fn.winheight(0) * 0.10) } -- Above buttons
-
-      -- Disable autocmd and return
-      dashboard.config.opts.noautocmd = true
-      return dashboard
-    end,
-    config = function(_, opts)
-
-      -- Close empty buffers automatically when Alpha opens
-      vim.api.nvim_create_autocmd("User", {
-        pattern = "AlphaReady",
-        callback = function()
-          -- Delete the initial empty buffer if it exists
-          local bufs = vim.api.nvim_list_bufs()
-          for _, buf in ipairs(bufs) do
-            local bufname = vim.api.nvim_buf_get_name(buf)
-            local buftype = vim.api.nvim_buf_get_option(buf, 'buftype')
-            -- If buffer is empty, unnamed, and not modified
-            if bufname == '' and buftype == '' and not vim.api.nvim_buf_get_option(buf, 'modified') then
-              vim.api.nvim_buf_delete(buf, { force = true })
-            end
-          end
-        end,
-      })
-      -- Footer
-      require("alpha").setup(opts.config)
-      vim.api.nvim_create_autocmd("User", {
-        pattern = "LazyVimStarted",
-        desc = "Add Alpha dashboard footer",
-        once = true,
-        callback = function()
-          local  footer_icon = require("utils.icons").get_icon("GreeterPlug")
-          local stats = require("lazy").stats()
-          stats.real_cputime = not is_windows
-          local ms = math.floor(stats.startuptime * 100 + 0.5) / 100
-          opts.section.footer.val = {
-            " ",
-            " ",
-            " ",
-            "Loaded " .. stats.loaded .. " plugins " .. footer_icon .. " in " .. ms .. "ms",
-            ".............................",
-          }
-          opts.section.footer.opts.hl = "DashboardFooter"
-          pcall(vim.cmd.AlphaRedraw)
-        end,
-      })
-    vim.api.nvim_create_autocmd("User", {
-      pattern = "AlphaReady",
-      callback = function()
-        -- Reapply colorscheme highlights
-        vim.cmd("colorscheme material_purple_mocha")
-      end,
-      once = false, -- Keep reapplying on every Alpha open
-    })
-    end,
-  },
   {
     "folke/which-key.nvim",
     event = "VeryLazy",

@@ -16,9 +16,9 @@ return {
   },
   opts = {
     -- Automatically save sessions
-    auto_save = true,
+    auto_save = false,
     -- Automatically restore sessions
-    auto_restore = true,
+    auto_restore = false,
     -- Auto save on exit
     auto_session_enable_last_session = false,
     -- Use git branch in session name
@@ -44,8 +44,7 @@ return {
     },
     -- Files/directories to ignore when saving sessions
     bypass_session_save_file_types = {
-      "alpha",
-      "dashboard",
+      "snacks_dashboard",
       "neo-tree",
       "Trouble",
       "lazy",

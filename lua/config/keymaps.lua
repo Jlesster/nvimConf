@@ -87,7 +87,7 @@ keymap("n", "<leader>bd", function()
   )
 end, { desc = "Delete buffer menu" })
 keymap("n", "<leader>ba", ":wa<CR>", { desc = "Write all changed buffers" })
-keymap("n", "<leader>c", '<cmd>Bdelete<CR>', { desc = "Close buffer" })
+keymap("n", "<leader>c", function() Snacks.bufdelete() end, { desc = "Close buffer" })
 keymap("n", "<leader>bw", function() vim.cmd("silent! close") end, { desc = "Close window" })
 
 -- Tab navigation
@@ -245,20 +245,7 @@ keymap("n", "<leader>gC", ":Telescope git_bcommits<CR>", { desc = "Git commits (
 keymap("n", "<leader>gt", ":Telescope git_status<CR>", { desc = "Git status" })
 
 -- Git client (LazyGit/GitUI)
-keymap("n", "<leader>gg", function()
-  local git_dir = vim.fn.finddir(".git", vim.fn.getcwd() .. ";")
-  if git_dir ~= "" then
-    if vim.fn.executable("lazygit") == 1 then
-      vim.cmd("ToggleTerm cmd='lazygit' direction=float")
-    elseif vim.fn.executable("gitui") == 1 then
-      vim.cmd("ToggleTerm cmd='gitui' direction=float")
-    else
-      vim.notify("No git UI found (install lazygit or gitui)", vim.log.levels.WARN)
-    end
-  else
-    vim.notify("Not a git repository", vim.log.levels.WARN)
-  end
-end, { desc = "LazyGit/GitUI" })
+keymap("n", "<leader>gg", function() Snacks.lazygit(nil, { win = { position = "float" } }) end, { desc = "LazyGit" })
 
 -- Yazi file manager
 keymap("n", "<leader>r", ":Yazi<CR>", { desc = "File browser" })
@@ -270,22 +257,23 @@ keymap("n", "<leader>tt", function()
     { prompt = "Terminal Type:" },
     function(choice)
       if choice == "Float Terminal" then
-        vim.cmd("ToggleTerm direction=float")
+        Snacks.terminal()
       elseif choice == "Horizontal Terminal" then
-        vim.cmd("ToggleTerm size=10 direction=horizontal")
+        Snacks.terminal(nil, { win = { position = "bottom", height = 0.3 } })
       elseif choice == "Vertical Terminal" then
-        vim.cmd("ToggleTerm size=80 direction=vertical")
+        Snacks.terminal(nil, { win = { position = "right", width = 0.4 } })
       end
     end
   )
 end, { desc = "Toggle terminal menu" })
-keymap("n", "<leader>th", ":ToggleTerm size=10 direction=horizontal<CR>", { desc = "Toggle terminal horizontal" })
-keymap("n", "<leader>tv", ":ToggleTerm size=80 direction=vertical<CR>", { desc = "Toggle terminal vertical" })
-keymap("n", "<F7>", ":1ToggleTerm dorection=float<CR>", { desc = "Toggle terminal" })
-keymap("t", "<F7>", "<C-\\><C-n>:1ToggleTerm<CR>", { desc = "Toggle terminal" })
-keymap("t", "<Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
-keymap("n", "<C-'>", ":1ToggleTerm direction=float<CR>", { desc = "Toggle terminal" })
-keymap("t", "<C-'>", "<C-\\><C-n>:1ToggleTerm<CR>", { desc = "Toggle terminal" })
+keymap("n", "<leader>th", function() Snacks.terminal(nil, { win = { position = "bottom", height = 0.3 } }) end, { desc = "Toggle terminal horizontal" })
+keymap("n", "<leader>tv", function() Snacks.terminal(nil, { win = { position = "right", width = 0.4 } }) end, { desc = "Toggle terminal vertical" })
+
+keymap("n", "<F7>", function() Snacks.terminal(nil, { win = { position = "float" } }) end, { desc = "Toggle terminal" })
+keymap("t", "<F7>", "<cmd>close<cr>", { desc = "Close terminal" })
+
+keymap("n", "<C-'>", function() Snacks.terminal(nil, { win = { position = "float" } }) end, { desc = "Toggle terminal" })
+keymap("t", "<C-'>", "<cmd>close<cr>", { desc = "Close terminal" })
 
 -- Terminal navigation
 keymap("t", "<C-h>", "<cmd>wincmd h<cr>", { desc = "Terminal left window navigation" })
@@ -438,30 +426,13 @@ keymap("n", "<leader>oi", function() require("opencode").command("session.interr
 
 -- Quick opencode terminal toggle
 keymap("n", "<C-;>", function()
-  local Terminal = require("toggleterm.terminal").Terminal
-  local opencode_term = Terminal:new({
-    id = 2,
-    cmd = "opencode",
-    direction = "float",
-    float_opts = {
-      width = function() return math.floor(vim.o.columns * 0.9) end,
-      height = function() return math.floor(vim.o.lines * 0.9) end,
-    },
+  Snacks.terminal("opencode", {
+    win = {
+      position = "float",
+      width = 0.9,
+      height = 0.9,
+    }
   })
-  opencode_term:toggle()
-end, { desc = "Toggle opencode terminal" })
-keymap("t", "<C-;>", function()
-  local Terminal = require("toggleterm.terminal").Terminal
-  local opencode_term = Terminal:new({
-    id = 2,
-    cmd = "opencode",
-    direction = "float",
-    float_opts = {
-      width = function() return math.floor(vim.o.columns * 0.9) end,
-      height = function() return math.floor(vim.o.lines * 0.9) end,
-    },
-  })
-  opencode_term:toggle()
 end, { desc = "Toggle opencode terminal" })
 
 -- Alpha dashboard (home screen)
@@ -470,7 +441,7 @@ keymap("n", "<leader>h", function()
   if #wins > 1 and vim.api.nvim_get_option_value("filetype", {}) == "neo-tree" then
     vim.fn.win_gotoid(wins[2])
   end
-  require("alpha").start(false, require("alpha").default_config)
+  Snacks.dashboard()
 end, { desc = "Home screen" })
 
 -- Special autocommands for q to close certain windows

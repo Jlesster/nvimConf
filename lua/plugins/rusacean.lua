@@ -11,7 +11,7 @@ return {
           auto_focus = true,
         },
         float_win_config = {
-          border = "rounded",
+          border = "single",
         },
       },
 
@@ -32,6 +32,11 @@ return {
       pattern = "rust",
       callback = function()
         local opts = { buffer = true, silent = true }
+
+        vim.opt_local.shiftwidth = 2
+        vim.opt_local.tabstop = 2
+        vim.opt_local.softtabstop = 2
+        vim.opt_local.expandtab = true
 
         vim.keymap.set("n", "<leader>Rr", "<cmd>RustRun<CR>", opts)
         vim.keymap.set("n", "<leader>Rt", "<cmd>RustTest<CR>", opts)

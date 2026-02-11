@@ -49,15 +49,6 @@ autocmd("FileType", {
   end,
 })
 
--- Make sure alpha shows when opening nvim without arguments
-vim.api.nvim_create_autocmd("VimEnter", {
-  callback = function()
-    if vim.fn.argc() == 0 then
-      require("alpha").start()
-    end
-  end,
-})
-
 -- ## PROJECT ROOT MANAGEMENT -----------------------------------------------
 
 autocmd("BufEnter", {

@@ -16,9 +16,22 @@ return {
     end,
   },
   {
-    "kdheepak/lazygit.nvim",
-    cmd = "LazyGit",
-    dependencies = { "nvim-lua/plenary.nvim" },
+    "NMAC427/guess-indent.nvim",
+    lazy = false,
+    opts = {}
+  },
+  {
+    "brenoprata10/nvim-highlight-colors",
+    lazy = false,
+    cmd = { "HighlightColors" }, -- followed by 'On' / 'Off' / 'Toggle'
+    opts = {
+      enabled_named_colors = false,
+      render = 'virtual',
+      virtual_symbol = '■',
+ 	    ---@usage 'inline'|'eol'|'eow'
+	    virtual_symbol_position = 'inline',
+	    enable_tailwind = true,
+    },
   },
   {
     "mikavilpas/yazi.nvim",
@@ -89,27 +102,6 @@ return {
   {
     "lambdalisue/vim-suda",
     cmd = { "SudaRead", "SudaWrite" },
-  },
-  {
-    "famiu/bufdelete.nvim",
-    cmd = { "Bdelete", "Bwipeout" },
-  },
-  {
-    "akinsho/toggleterm.nvim",
-    cmd = "ToggleTerm",
-    config = function()
-      require("toggleterm").setup({
-        size = 20,
-        direction = "horizontal",
-        shell = vim.o.shell,
-        -- Add these options
-        start_in_insert = true,
-        insert_mappings = true,
-        terminal_mappings = true,
-        persist_size = true,
-        persist_mode = true,
-      })
-    end,
   },
 }
 

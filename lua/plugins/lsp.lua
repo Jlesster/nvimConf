@@ -240,7 +240,6 @@ return {
           "lua_ls",
           "ts_ls",
           "pyright",
-          "rust_analyzer",
           "gopls",
           "clangd",
           "jsonls",
@@ -524,7 +523,7 @@ return {
           show_server_name = false,
           extend_gitsigns = true,
           keys = {
-            quit = "q, <ESC>",
+            quit = {"q,", "<ESC>"},
             exec = "<CR>",
           },
         },

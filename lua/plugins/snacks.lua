@@ -11,8 +11,21 @@ return {
           border = "rounded",
         },
       },
-      terminal = { enabled = true },
-      notifier = { enabled = true },
+      terminal = {
+        enabled = true,
+        win = {
+          style = "terminal",
+          border = "single",
+        },
+      },
+      select  = { enabled = true },
+      notifier = {
+        enabled = true,
+        timeout = 3000,
+        width = { min = 40, max = 0.4 },
+        height = { min = 1, max = 0.6 },
+        style = "compact",
+      },
       bigfile = { enabled = true },
       indent = {
         enabled = true,
@@ -29,10 +42,125 @@ return {
         char = "│",
         treesitter = { enabled = true },
       },
-      scroll = { enabled = false },
+      scroll = {
+        enabled = false,
+        animate = {
+          duration = { step = 50, total = 250 },
+          easing = "linear",
+        },
+      },
       statuscolumn = { enabled = true },
       words = { enabled = true },
-      zen = { enabled = true },
+      zen = {
+        enabled = true,
+        toggles = {
+          dim = true,
+          git_signs = false,
+          mini_diff_signs = false,
+        },
+        zoom = {
+          width = 0.8,
+          height = 0.9,
+        },
+      },
+      git = { enabled = true },
+      gitbrowse = { enabled = true },
+      lazygit = {
+        enabled = true,
+        configure = true,
+        theme = {
+          activeBorderColor = { fg = "Special" },
+          inactiveBorderColor = { fg = "Comment" },
+        },
+      },
+      bufdelete = { enabled = true },
+      scratch = {
+        enabled = true,
+        name = "Scratch",
+        ft = "markdown",
+        icon = "󱓧",
+        root = vim.fn.stdpath("data") .. "/scratch",
+        autowrite = true,
+        filekey = {
+          cwd = true,
+          branch = true,
+          count = true,
+        },
+        win = {
+          width = 100,
+          height = 30,
+          bo = { filetype = "markdown" },
+          minimal = false,
+          noautocmd = false,
+        },
+        win_by_ft = {
+          lua = {
+            keys = {
+              ["source"] = {
+                "<cr>",
+                function(self)
+                  local name = "scratch." .. vim.fn.fnamemodify(vim.api.nvim_buf_get_name(self.buf), ":e")
+                  Snacks.debug.run({ buf = self.buf, name = name })
+                end,
+                desc = "Source buffer",
+                mode = { "n", "x" },
+              },
+            },
+          },
+        },
+      },
+      quickfile = { enabled = true }, -- Fast file opening
+      rename = { enabled = true },    -- Better file rename
+      toggle = {
+        enabled = true,
+        which_key = true,
+        notify = true,
+      },
+      dashboard = {
+        enabled = true,
+        preset = {
+          header =[[
+          ⠀ ⣿⠙⣦⠀⠀⠀⠀⠀⠀⣀⣤⡶⠛⠁
+          ⠀⠀⠀⠀⢻⠀⠈⠳⠀⠀⣀⣴⡾⠛⠁⣠⠂⢠⠇
+          ⠀⠀⠀⠀⠈⢀⣀⠤⢤⡶⠟⠁⢀⣴⣟⠀⠀⣾
+          ⠀⠀⠀⠠⠞⠉⢁⠀⠉⠀⢀⣠⣾⣿⣏⠀⢠⡇
+          ⠀⠀⡰⠋⠀⢰⠃⠀⠀⠉⠛⠿⠿⠏⠁⠀⣸⠁
+            ⠀⣄⠀⠀⠏⣤⣤⣀⡀⠀⠀⠀⠀⠀⠾⢯⣀
+            ⠀⣻⠃⠀⣰⡿⠛⠁⠀⠀⠀⢤⣀⡀⠀⠺⣿⡟⠛⠁
+          ⠀⡠⠋⡤⠠⠋⠀⠀⢀⠐⠁⠀⠈⣙⢯⡃⠀⢈⡻⣦
+          ⢰⣷⠇⠀⠀⠀⢀⡠⠃⠀⠀⠀⠀⠈⠻⢯⡄⠀⢻⣿⣷
+          ⠉⠲⣶⣶⢾⣉⣐⡚⠋⠀⠀⠀⠀⠀⠘⠀⠀⡎⣿⣿⡇
+          ⠀⠀⠀⠀⣸⣿⣿⣿⣷⡄⠀⠀⢠⣿⣴⠀⠀⣿⣿⣿⣧
+          ⠀⠀⢀⣴⣿⣿⣿⣿⣿⠇⠀⢠⠟⣿⠏⢀⣾⠟⢸⣿⡇
+          ⠀⢠⣿⣿⣿⣿⠟⠘⠁⢠⠜⢉⣐⡥⠞⠋⢁⣴⣿⣿⠃
+          ⠀⣾⢻⣿⣿⠃⠀⠀⡀⢀⡄⠁⠀⠀⢠⡾⠁⢠⣾⣿⠃
+    ⠀⠃⢸⣿⡇⠀⢠⣾⡇⢸⡇⠀⠀⠀⡞
+⠀⠀⠈⢿⡇⡰⠋⠈⠙⠂⠙⠢
+⠈⢧
+          ]],
+          -- stylua: ignore
+          --@type snacks.dashboard.Item[]
+          keys = {
+            { icon = "󰈙 ", key = "n", desc = "New File", action = ":ene | startinsert" },
+            { icon = "󰮳 ", key = "e", desc = "Recent Files", action = ":Telescope oldfiles" },
+            { icon = "󰪶 ", key = "r", desc = "Yazi", action = ":Yazi", enabled = vim.fn.executable("ya") == 1 },
+            { icon = "󰮗 ", key = "s", desc = "Sessions", action = ":SessionManager! load_session" },
+            { icon = " ", key = "p", desc = "Projects", action = ":Telescope projects" },
+            { icon = " ", key = "c", desc = "Config", action = ":lua Snacks.dashboard.pick('files', {cwd = vim.fn.stdpath('config')})" },
+            { icon = "󰅚 ", key = "q", desc = "Quit", action = ":qa" }
+          }
+        },
+        sections = {
+          { section = "header" },
+          { section = "keys", gap = 1, padding = 1, },
+          { section = "startup" },
+        },
+        formats = {
+          key = function(item)
+            return { { "[", hl = "SnacksDashboardSpecial" }, { item.key, hl = "SnacksDashboardKey" }, { "]", hl = "SnacksDashboardSpecial" } }
+          end,
+        },
+      },
     },
     config = function(_, opts)
       require("snacks").setup(opts)
@@ -67,7 +195,6 @@ return {
         end
       end
 
-      -- FINAL: Support both braces and Lua keywords
       local function update_scope_color()
         local cursor_line = vim.fn.line('.')
         local cursor_col = vim.fn.col('.')
@@ -75,15 +202,12 @@ return {
         local filetype = vim.bo.filetype
         local is_lua = (filetype == 'lua')
 
-        -- Helper to get rainbow highlight with wider search for keywords
         local function get_rainbow_hl(line_num, col, is_keyword)
           local search_start, search_end
           if is_lua and is_keyword then
-            -- For Lua keywords, search wider range
             search_start = math.max(0, col - 5)
             search_end = col + 20
           else
-            -- For braces/parens, exact or small range
             search_start = math.max(0, col - 2)
             search_end = col + 2
           end
@@ -104,13 +228,11 @@ return {
           return nil
         end
 
-        -- First check: is there an opening delimiter on the current line?
         local current_line_text = vim.fn.getline(cursor_line)
         local current_line_hl = nil
         local has_immediate_close = false
 
         if is_lua then
-          -- Check for Lua keywords (if, for, while, function, repeat)
           local keywords = {
             {pattern = '%f[%w_]if%f[^%w_]', closer = 'end'},
             {pattern = '%f[%w_]for%f[^%w_]', closer = 'end'},
@@ -122,7 +244,6 @@ return {
           for _, kw in ipairs(keywords) do
             local kw_start, kw_end = current_line_text:find(kw.pattern)
             if kw_start then
-              -- Check if 'end' appears after this keyword on same line
               local closer_pattern = '%f[%w_]' .. kw.closer .. '%f[^%w_]'
               local closer_pos = current_line_text:find(closer_pattern, kw_end + 1)
               if closer_pos then
@@ -134,9 +255,7 @@ return {
             end
           end
 
-          -- Also check for braces and parens in Lua (prioritize braces)
           if not current_line_hl then
-            -- First pass: look for opening braces
             for col = 1, #current_line_text do
               if current_line_text:sub(col, col) == '{' then
                 local close_pos = current_line_text:find('}', col + 1, true)
@@ -149,7 +268,6 @@ return {
               end
             end
 
-            -- Second pass: if no braces, look for opening parens
             if not current_line_hl and not has_immediate_close then
               for col = 1, #current_line_text do
                 if current_line_text:sub(col, col) == '(' then
@@ -165,8 +283,6 @@ return {
             end
           end
         else
-          -- Non-Lua: just check for braces and parens (prioritize braces)
-          -- First pass: look for opening braces
           for col = 1, #current_line_text do
             if current_line_text:sub(col, col) == '{' then
               local close_pos = current_line_text:find('}', col + 1, true)
@@ -179,7 +295,6 @@ return {
             end
           end
 
-          -- Second pass: if no braces, look for opening parens
           if not current_line_hl and not has_immediate_close then
             for col = 1, #current_line_text do
               if current_line_text:sub(col, col) == '(' then
@@ -195,7 +310,6 @@ return {
           end
         end
 
-        -- If there's a delimiter on current line that opens a real scope, use its color
         if current_line_hl and not has_immediate_close then
           local hl = vim.api.nvim_get_hl(0, { name = current_line_hl, link = false })
           if hl.fg then
@@ -207,20 +321,16 @@ return {
           end
         end
 
-        -- Otherwise, find the parent scope
         local stack = {}
 
-        for line_num = 1, cursor_line - 1 do  -- Only scan BEFORE current line
+        for line_num = 1, cursor_line - 1 do
           local line = vim.fn.getline(line_num)
 
           if is_lua then
-            -- Lua: scan for both keywords and braces
             local i = 1
             while i <= #line do
-              -- Check for keywords at current position
               local found_keyword = false
 
-              -- Check for scope-opening keywords (if/for/while/function)
               local keywords = {
                 {pattern = '%f[%w_]if%f[^%w_]'},
                 {pattern = '%f[%w_]for%f[^%w_]'},
@@ -248,21 +358,18 @@ return {
               if not found_keyword then
                 local char = line:sub(i, i)
 
-                -- Check for 'end' keyword
                 local end_start, end_end = line:find('%f[%w_]end%f[^%w_]', i)
                 if end_start == i then
                   if #stack > 0 and stack[#stack].type == 'keyword' then
                     table.remove(stack)
                   end
                   i = end_end + 1
-                -- Check for 'until' keyword (closes 'repeat')
                 elseif line:find('%f[%w_]until%f[^%w_]', i) == i then
                   if #stack > 0 and stack[#stack].type == 'keyword' then
                     table.remove(stack)
                   end
                   local _, until_end = line:find('%f[%w_]until%f[^%w_]', i)
                   i = until_end + 1
-                -- Check for braces and parens
                 elseif char == '{' then
                   local hl_name = get_rainbow_hl(line_num, i, false)
                   table.insert(stack, {
@@ -273,7 +380,6 @@ return {
                   })
                   i = i + 1
                 elseif char == '}' then
-                  -- Find and remove the most recent brace
                   for i = #stack, 1, -1 do
                     if stack[i].type == 'brace' then
                       table.remove(stack, i)
@@ -291,7 +397,6 @@ return {
                   })
                   i = i + 1
                 elseif char == ')' then
-                  -- Find and remove the most recent paren
                   for i = #stack, 1, -1 do
                     if stack[i].type == 'paren' then
                       table.remove(stack, i)
@@ -305,7 +410,6 @@ return {
               end
             end
           else
-            -- Non-Lua: just scan for braces and parens
             for col = 1, #line do
               local char = line:sub(col, col)
 
@@ -318,7 +422,6 @@ return {
                   type = 'brace'
                 })
               elseif char == '}' then
-                -- Find and remove the most recent brace
                 for i = #stack, 1, -1 do
                   if stack[i].type == 'brace' then
                     table.remove(stack, i)
@@ -334,7 +437,6 @@ return {
                   type = 'paren'
                 })
               elseif char == ')' then
-                -- Find and remove the most recent paren
                 for i = #stack, 1, -1 do
                   if stack[i].type == 'paren' then
                     table.remove(stack, i)
@@ -346,11 +448,9 @@ return {
           end
         end
 
-        -- Use the parent scope (prioritize braces/keywords over parens)
         if #stack > 0 then
           local top = nil
 
-          -- First, look for the most recent brace or keyword
           for i = #stack, 1, -1 do
             if stack[i].type == 'brace' or stack[i].type == 'keyword' then
               top = stack[i]
@@ -358,7 +458,6 @@ return {
             end
           end
 
-          -- If no brace or keyword found, use the most recent item (likely a paren)
           if not top then
             for i = #stack, 1, -1 do
               if stack[i].type == 'paren' then
@@ -368,7 +467,6 @@ return {
             end
           end
 
-          -- Final fallback: just use the last item
           if not top then
             top = stack[#stack]
           end
@@ -385,7 +483,6 @@ return {
           end
         end
 
-        -- Fallback: indent-based coloring
         local current_indent = vim.fn.indent('.')
         local shiftwidth = vim.bo.shiftwidth
         if shiftwidth == 0 then shiftwidth = 2 end
@@ -403,9 +500,21 @@ return {
         end
       end
 
+      -- Single ColorScheme autocmd for both scope and dashboard colors
       vim.api.nvim_create_autocmd({"ColorScheme"}, {
         callback = function()
-          vim.defer_fn(sync_scope_colors, 50)
+          vim.defer_fn(function()
+            -- Sync scope colors
+            sync_scope_colors()
+
+            -- Dashboard colors - set custom colors
+            vim.api.nvim_set_hl(0, 'ModeMsg', { fg = '#a78bfa', bold = true })
+            vim.api.nvim_set_hl(0, 'SnacksDashboardIcon', { fg = '#8b5cf6', bold = true })
+            vim.api.nvim_set_hl(0, 'SnacksDashboardKey', { fg = '#fbbf24', bold = true })
+            vim.api.nvim_set_hl(0, 'SnacksDashboardSpecial', { fg = '#6b7280' })
+            vim.api.nvim_set_hl(0, 'MoreMsg', { fg = '#e0e7ff' })
+            vim.api.nvim_set_hl(0, 'SnacksDashboardFooter', { fg = '#9ca3af', italic = true })
+          end, 50)
         end
       })
 
@@ -449,13 +558,10 @@ return {
       end, 100)
     end
   },
-  --hack to only show scope lines for curr scope
   {
     "lukas-reineke/indent-blankline.nvim",
     main = "ibl",
     lazy = false,
-    ---@module "ibl"
-    ---@type ibl.config
     opts = {
       scope = {
         enabled = false,
