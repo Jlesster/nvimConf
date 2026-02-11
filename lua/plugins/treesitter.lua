@@ -1,286 +1,140 @@
--- Treesitter configuration
-local M = {
-  "nvim-treesitter/nvim-treesitter",
-  lazy = false,  -- CRITICAL: Must NOT be lazy-loaded
-  build = ":TSUpdate",
+-- Enhanced nvim-treesitter config for the NEW API
+-- No folding (using ufo.nvim), no conflicting keymaps
+return {
+  'nvim-treesitter/nvim-treesitter',
+  lazy = false,
+  build = ':TSUpdate',
   dependencies = {
-    "nvim-treesitter/nvim-treesitter-textobjects",
-    "nvim-treesitter/nvim-treesitter-context",
+    'nvim-treesitter/nvim-treesitter-textobjects',
+    'nvim-treesitter/nvim-treesitter-context',
   },
   config = function()
-    -- Setup nvim-treesitter with custom install directory
+    -- Setup with install directory
     require('nvim-treesitter').setup({
       install_dir = vim.fn.stdpath('data') .. '/site',
     })
 
-    -- Install parsers for all your languages
-    -- This runs asynchronously, so it won't block startup
+    -- Install parsers (async)
     require('nvim-treesitter').install({
-      -- Core languages
-      'java',
-      'lua',
-      'vim',
-      'vimdoc',
-      'query',
-
-      -- Web development
-      'javascript',
-      'typescript',
-      'tsx',
-      'html',
-      'css',
-      'json',
-      'yaml',
-
-      -- Systems programming
-      'c',
-      'cpp',
-      'rust',
-      'zig',
-      'go',
-
-      -- Scripting
-      'python',
-      'bash',
-      'fish',
-
-      -- Markup/Config
-      'markdown',
-      'markdown_inline',
-      'toml',
-      'xml',
-
-      -- Other
-      'regex',
-      'comment',
+      -- Core
+      'go', 'lua', 'vim', 'vimdoc', 'query',
+      -- Web
+      'javascript', 'typescript', 'tsx', 'html', 'css', 'json', 'yaml',
+      -- Systems
+      'c', 'cpp', 'rust', 'zig', 'python', 'bash', 'fish',
+      -- Java/Dart for your plugins
+      'java', 'dart',
+      -- Others
+      'markdown', 'markdown_inline', 'toml', 'xml', 'regex', 'comment',
     })
 
     -- =========================================================================
-    -- HIGHLIGHTING
+    -- HIGHLIGHTING - Enable for all file buffers
     -- =========================================================================
-    -- Enable treesitter highlighting for all installed languages
     vim.api.nvim_create_autocmd('FileType', {
-      pattern = {
-        'java', 'lua', 'vim', 'python', 'javascript', 'typescript', 'tsx',
-        'html', 'css', 'json', 'yaml', 'bash', 'fish', 'markdown',
-        'c', 'cpp', 'rust', 'zig', 'go', 'toml', 'xml',
-      },
-      callback = function()
-        vim.treesitter.start()
+      pattern = '*',
+      callback = function(args)
+        local buftype = vim.bo[args.buf].buftype
+        if buftype == '' then
+          pcall(vim.treesitter.start)
+        end
       end,
     })
 
     -- =========================================================================
-    -- FOLDING
+    -- INDENTATION (Optional - using treesitter for indent)
     -- =========================================================================
-    -- Enable treesitter-based folding
     vim.api.nvim_create_autocmd('FileType', {
-      pattern = {
-        'java', 'lua', 'python', 'javascript', 'typescript',
-        'c', 'cpp', 'rust', 'go',
-      },
-      callback = function()
-        vim.wo[0][0].foldexpr = 'v:lua.vim.treesitter.foldexpr()'
-        vim.wo[0][0].foldmethod = 'expr'
-        vim.wo[0][0].foldenable = false  -- Don't fold by default
-        vim.wo[0][0].foldlevel = 99      -- Open all folds by default
-      end,
-    })
-
-    -- =========================================================================
-    -- INDENTATION (Experimental)
-    -- =========================================================================
-    -- Enable treesitter-based indentation
-    -- Note: This is experimental and may not work perfectly for all languages
-    vim.api.nvim_create_autocmd('FileType', {
-      pattern = {
-        'lua', 'python', 'javascript', 'typescript',
-        'html', 'css', 'json', 'yaml',
-      },
+      pattern = { 'go', 'lua', 'python', 'javascript', 'typescript', 'rust', 'c', 'cpp', 'java', 'dart' },
       callback = function()
         vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
       end,
     })
 
     -- =========================================================================
-    -- TEXTOBJECTS (requires nvim-treesitter-textobjects)
+    -- TEXTOBJECTS - Smart code navigation and selection
     -- =========================================================================
-    -- Enhanced text objects for functions, classes, etc.
-    vim.api.nvim_create_autocmd('FileType', {
-      pattern = {
-        'java', 'lua', 'python', 'javascript', 'typescript',
-        'c', 'cpp', 'rust', 'go',
-      },
-      callback = function()
-        local bufnr = vim.api.nvim_get_current_buf()
+    local textobjects_ok, ts_textobjects = pcall(require, 'nvim-treesitter-textobjects')
+    if textobjects_ok then
+      -- Select around/inside functions, classes
+      vim.keymap.set({'x', 'o'}, 'af', function()
+        ts_textobjects.select_textobject('@function.outer')
+      end, { desc = 'Select around function' })
 
-        -- Select function outer
-        vim.keymap.set({'x', 'o'}, 'af', function()
-          require('nvim-treesitter.textobjects.select').select_textobject('@function.outer', 'textobjects')
-        end, { buffer = bufnr, desc = 'Select around function' })
+      vim.keymap.set({'x', 'o'}, 'if', function()
+        ts_textobjects.select_textobject('@function.inner')
+      end, { desc = 'Select inside function' })
 
-        -- Select function inner
-        vim.keymap.set({'x', 'o'}, 'if', function()
-          require('nvim-treesitter.textobjects.select').select_textobject('@function.inner', 'textobjects')
-        end, { buffer = bufnr, desc = 'Select inside function' })
+      vim.keymap.set({'x', 'o'}, 'ac', function()
+        ts_textobjects.select_textobject('@class.outer')
+      end, { desc = 'Select around class' })
 
-        -- Select class outer
-        vim.keymap.set({'x', 'o'}, 'ac', function()
-          require('nvim-treesitter.textobjects.select').select_textobject('@class.outer', 'textobjects')
-        end, { buffer = bufnr, desc = 'Select around class' })
+      vim.keymap.set({'x', 'o'}, 'ic', function()
+        ts_textobjects.select_textobject('@class.inner')
+      end, { desc = 'Select inside class' })
 
-        -- Select class inner
-        vim.keymap.set({'x', 'o'}, 'ic', function()
-          require('nvim-treesitter.textobjects.select').select_textobject('@class.inner', 'textobjects')
-        end, { buffer = bufnr, desc = 'Select inside class' })
+      -- NOTE: Using ]m/[m for method navigation (]f/[f conflicts with your LSP keymaps)
+      vim.keymap.set('n', ']m', function()
+        ts_textobjects.goto_next('@function.outer')
+      end, { desc = 'Next method/function' })
 
-        -- Select parameter/argument
-        vim.keymap.set({'x', 'o'}, 'ia', function()
-          require('nvim-treesitter.textobjects.select').select_textobject('@parameter.inner', 'textobjects')
-        end, { buffer = bufnr, desc = 'Select inside parameter' })
+      vim.keymap.set('n', '[m', function()
+        ts_textobjects.goto_previous('@function.outer')
+      end, { desc = 'Previous method/function' })
 
-        -- Select conditional
-        vim.keymap.set({'x', 'o'}, 'ii', function()
-          require('nvim-treesitter.textobjects.select').select_textobject('@conditional.inner', 'textobjects')
-        end, { buffer = bufnr, desc = 'Select inside conditional' })
+      -- NOTE: ]C/[C for class navigation (avoiding conflict with ]c/[c which may be used elsewhere)
+      vim.keymap.set('n', ']C', function()
+        ts_textobjects.goto_next('@class.outer')
+      end, { desc = 'Next class' })
 
-        -- Select loop
-        vim.keymap.set({'x', 'o'}, 'il', function()
-          require('nvim-treesitter.textobjects.select').select_textobject('@loop.inner', 'textobjects')
-        end, { buffer = bufnr, desc = 'Select inside loop' })
-      end,
-    })
+      vim.keymap.set('n', '[C', function()
+        ts_textobjects.goto_previous('@class.outer')
+      end, { desc = 'Previous class' })
+    end
 
     -- =========================================================================
-    -- NAVIGATION (Jump to next/previous function, class, etc.)
+    -- INCREMENTAL SELECTION - Expand selection intelligently
+    -- NOTE: Your keymaps.lua doesn't use <C-space>, so this is safe
     -- =========================================================================
-    vim.api.nvim_create_autocmd('FileType', {
-      pattern = {
-        'java', 'lua', 'python', 'javascript', 'typescript',
-        'c', 'cpp', 'rust', 'go',
-      },
-      callback = function()
-        local bufnr = vim.api.nvim_get_current_buf()
+    vim.keymap.set('n', '<C-space>', function()
+      local ok, incr_sel = pcall(require, 'nvim-treesitter.incremental_selection')
+      if ok then
+        incr_sel.init_selection()
+      end
+    end, { desc = 'Init treesitter selection' })
 
-        -- Jump to next function
-        vim.keymap.set('n', ']f', function()
-          require('nvim-treesitter.textobjects.move').goto_next_start('@function.outer')
-        end, { buffer = bufnr, desc = 'Next function start' })
+    vim.keymap.set('x', '<C-space>', function()
+      local ok, incr_sel = pcall(require, 'nvim-treesitter.incremental_selection')
+      if ok then
+        incr_sel.node_incremental()
+      end
+    end, { desc = 'Increment selection' })
 
-        -- Jump to previous function
-        vim.keymap.set('n', '[f', function()
-          require('nvim-treesitter.textobjects.move').goto_previous_start('@function.outer')
-        end, { buffer = bufnr, desc = 'Previous function start' })
-
-        -- Jump to next class
-        vim.keymap.set('n', ']c', function()
-          require('nvim-treesitter.textobjects.move').goto_next_start('@class.outer')
-        end, { buffer = bufnr, desc = 'Next class start' })
-
-        -- Jump to previous class
-        vim.keymap.set('n', '[c', function()
-          require('nvim-treesitter.textobjects.move').goto_previous_start('@class.outer')
-        end, { buffer = bufnr, desc = 'Previous class start' })
-
-        -- Jump to next parameter
-        vim.keymap.set('n', ']a', function()
-          require('nvim-treesitter.textobjects.move').goto_next_start('@parameter.inner')
-        end, { buffer = bufnr, desc = 'Next parameter' })
-
-        -- Jump to previous parameter
-        vim.keymap.set('n', '[a', function()
-          require('nvim-treesitter.textobjects.move').goto_previous_start('@parameter.inner')
-        end, { buffer = bufnr, desc = 'Previous parameter' })
-      end,
-    })
+    vim.keymap.set('x', '<BS>', function()
+      local ok, incr_sel = pcall(require, 'nvim-treesitter.incremental_selection')
+      if ok then
+        incr_sel.node_decremental()
+      end
+    end, { desc = 'Decrement selection' })
 
     -- =========================================================================
-    -- SWAP (Swap function parameters, etc.)
+    -- CONTEXT - Show current function/class at top of screen
+    -- NOTE: Conflicts with your [t keymap, using [x instead
     -- =========================================================================
-    vim.api.nvim_create_autocmd('FileType', {
-      pattern = {
-        'java', 'lua', 'python', 'javascript', 'typescript',
-        'c', 'cpp', 'rust', 'go',
-      },
-      callback = function()
-        local bufnr = vim.api.nvim_get_current_buf()
-
-        -- Swap parameter with next
-        vim.keymap.set('n', '<leader>sa', function()
-          require('nvim-treesitter.textobjects.swap').swap_next('@parameter.inner')
-        end, { buffer = bufnr, desc = 'Swap parameter with next' })
-
-        -- Swap parameter with previous
-        vim.keymap.set('n', '<leader>sA', function()
-          require('nvim-treesitter.textobjects.swap').swap_previous('@parameter.inner')
-        end, { buffer = bufnr, desc = 'Swap parameter with previous' })
-
-        -- Swap function with next
-        vim.keymap.set('n', '<leader>sf', function()
-          require('nvim-treesitter.textobjects.swap').swap_next('@function.outer')
-        end, { buffer = bufnr, desc = 'Swap function with next' })
-
-        -- Swap function with previous
-        vim.keymap.set('n', '<leader>sF', function()
-          require('nvim-treesitter.textobjects.swap').swap_previous('@function.outer')
-        end, { buffer = bufnr, desc = 'Swap function with previous' })
-      end,
-    })
-
-    -- =========================================================================
-    -- INCREMENTAL SELECTION
-    -- =========================================================================
-    -- Incrementally select larger syntax regions
-    vim.api.nvim_create_autocmd('FileType', {
-      pattern = {
-        'java', 'lua', 'python', 'javascript', 'typescript',
-        'c', 'cpp', 'rust', 'go', 'html', 'css',
-      },
-      callback = function()
-        local bufnr = vim.api.nvim_get_current_buf()
-
-        -- Init selection
-        vim.keymap.set('n', '<C-space>', function()
-          require('nvim-treesitter.incremental_selection').init_selection()
-        end, { buffer = bufnr, desc = 'Init selection' })
-
-        -- Increment selection
-        vim.keymap.set('x', '<C-space>', function()
-          require('nvim-treesitter.incremental_selection').node_incremental()
-        end, { buffer = bufnr, desc = 'Increment selection' })
-
-        -- Decrement selection
-        vim.keymap.set('x', '<BS>', function()
-          require('nvim-treesitter.incremental_selection').node_decremental()
-        end, { buffer = bufnr, desc = 'Decrement selection' })
-
-        -- Scope incremental
-        vim.keymap.set('x', '<C-S-space>', function()
-          require('nvim-treesitter.incremental_selection').scope_incremental()
-        end, { buffer = bufnr, desc = 'Increment to scope' })
-      end,
-    })
-
-    -- =========================================================================
-    -- CONTEXT (Show context at top of screen)
-    -- =========================================================================
-    -- Setup nvim-treesitter-context
     local context_ok, context = pcall(require, 'treesitter-context')
     if context_ok then
       context.setup({
         enable = true,
-        max_lines = 3,            -- How many lines the window should span
-        min_window_height = 20,   -- Minimum editor window height to enable context
+        max_lines = 3,
+        min_window_height = 20,
         line_numbers = true,
-        multiline_threshold = 1,  -- Maximum number of lines to show for a single context
-        trim_scope = 'outer',     -- Which context lines to discard if max_lines is exceeded
-        mode = 'cursor',          -- Line used to calculate context. Choices: 'cursor', 'topline'
-        separator = nil,          -- Separator between context and content
-        zindex = 20,              -- The Z-index of the context window
+        multiline_threshold = 1,
+        trim_scope = 'outer',
+        mode = 'cursor',
       })
 
-      -- Keybinding to jump to context
-      vim.keymap.set('n', '[t', function()
+      -- Jump to context (using [x to avoid conflict with [t = previous tab)
+      vim.keymap.set('n', '[x', function()
         context.go_to_context(vim.v.count1)
       end, { silent = true, desc = 'Jump to context' })
     end
@@ -288,46 +142,19 @@ local M = {
     -- =========================================================================
     -- UTILITIES
     -- =========================================================================
-    -- Show current node under cursor (useful for debugging queries)
     vim.keymap.set('n', '<leader>ti', ':Inspect<CR>', { desc = 'Inspect treesitter node' })
-    vim.keymap.set('n', '<leader>tt', ':InspectTree<CR>', { desc = 'Show treesitter tree' })
+    vim.keymap.set('n', '<leader>tT', ':InspectTree<CR>', { desc = 'Show treesitter tree' })
 
     -- Toggle treesitter highlighting
     vim.keymap.set('n', '<leader>th', function()
       local bufnr = vim.api.nvim_get_current_buf()
       if vim.treesitter.highlighter.active[bufnr] then
         vim.treesitter.stop(bufnr)
-        vim.notify('Treesitter highlighting disabled', vim.log.levels.INFO)
+        vim.notify('Treesitter disabled', vim.log.levels.INFO)
       else
         vim.treesitter.start(bufnr)
-        vim.notify('Treesitter highlighting enabled', vim.log.levels.INFO)
+        vim.notify('Treesitter enabled', vim.log.levels.INFO)
       end
-    end, { desc = 'Toggle treesitter highlighting' })
+    end, { desc = 'Toggle treesitter' })
   end,
-}
-
--- Optional plugins
-return {
-  M,
-
-  -- Context plugin
-  {
-    "nvim-treesitter/nvim-treesitter-context",
-    dependencies = { "nvim-treesitter/nvim-treesitter" },
-    opts = {
-      enable = true,
-      max_lines = 3,
-      min_window_height = 20,
-      line_numbers = true,
-      multiline_threshold = 1,
-      trim_scope = 'outer',
-      mode = 'cursor',
-    },
-  },
-
-  -- Textobjects plugin
-  {
-    "nvim-treesitter/nvim-treesitter-textobjects",
-    dependencies = { "nvim-treesitter/nvim-treesitter" },
-  },
 }

@@ -201,8 +201,22 @@ return {
               },
               staticcheck = true,
               gofumpt = true,
+              -- CRITICAL: Enable semantic tokens
+              semanticTokens = true,
             },
           },
+          -- Also ensure capabilities include semantic tokens
+          on_attach = function(client, bufnr)
+            -- Call the global on_attach first
+            if _G.lsp_on_attach then
+              _G.lsp_on_attach(client, bufnr)
+            end
+
+            -- Force enable semantic tokens for gopls
+            if client.server_capabilities.semanticTokensProvider then
+              vim.lsp.semantic_tokens.start(bufnr, client.id)
+            end
+          end,
         },
 
         clangd = {
