@@ -1,4 +1,8 @@
--- lua/plugins/lsp.lua
+-- ============================================================================
+-- FILE: lua/plugins/lsp.lua
+-- Enhanced LSP configuration with additional plugins
+-- ============================================================================
+
 return {
   -- Mason: LSP/DAP/Linter/Formatter installer
   {
@@ -7,7 +11,7 @@ return {
     build = ":MasonUpdate",
     opts = {
       ui = {
-        border = "double",
+        border = "rounded",
         width = 0.8,
         height = 0.8,
         icons = {
@@ -42,17 +46,59 @@ return {
 
         -- Highlight symbol under cursor
         if client.server_capabilities.documentHighlightProvider then
-          vim.api.nvim_create_augroup("lsp_document_highlight", { clear = false })
+          local highlight_group = vim.api.nvim_create_augroup("lsp_document_highlight", { clear = false })
+          vim.api.nvim_clear_autocmds({ buffer = bufnr, group = highlight_group })
           vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
             buffer = bufnr,
-            group = "lsp_document_highlight",
+            group = highlight_group,
             callback = vim.lsp.buf.document_highlight,
           })
           vim.api.nvim_create_autocmd("CursorMoved", {
             buffer = bufnr,
-            group = "lsp_document_highlight",
+            group = highlight_group,
             callback = vim.lsp.buf.clear_references,
           })
+        end
+
+        -- Navigation keymaps
+        vim.keymap.set("n", "gd", "<cmd>Lspsaga goto_definition<CR>", opts)
+        vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
+        vim.keymap.set("n", "gr", "<cmd>Telescope lsp_references<CR>", opts)
+        vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts)
+        vim.keymap.set("n", "gt", vim.lsp.buf.type_definition, opts)
+
+        -- Documentation
+        vim.keymap.set("n", "K", "<cmd>Lspsaga hover_doc<CR>", opts)
+
+        -- Actions
+        vim.keymap.set("n", "<leader>ca", "<cmd>Lspsaga code_action<CR>", opts)
+        vim.keymap.set("n", "<leader>rn", "<cmd>Lspsaga rename<CR>", opts)
+
+        -- Diagnostics (lspsaga handles these)
+        vim.keymap.set("n", "<leader>d", "<cmd>Lspsaga show_line_diagnostics<CR>", opts)
+        vim.keymap.set("n", "[d", "<cmd>Lspsaga diagnostic_jump_prev<CR>", opts)
+        vim.keymap.set("n", "]d", "<cmd>Lspsaga diagnostic_jump_next<CR>", opts)
+
+        -- Jump to errors specifically
+        vim.keymap.set("n", "[e", function()
+          require("lspsaga.diagnostic"):goto_prev({ severity = vim.diagnostic.severity.ERROR })
+        end, opts)
+        vim.keymap.set("n", "]e", function()
+          require("lspsaga.diagnostic"):goto_next({ severity = vim.diagnostic.severity.ERROR })
+        end, opts)
+
+        -- Workspace folders
+        vim.keymap.set("n", "<leader>wa", vim.lsp.buf.add_workspace_folder, opts)
+        vim.keymap.set("n", "<leader>wr", vim.lsp.buf.remove_workspace_folder, opts)
+        vim.keymap.set("n", "<leader>wl", function()
+          print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
+        end, opts)
+
+        -- Toggle inlay hints (if you added lsp-inlayhints plugin)
+        if client.supports_method("textDocument/inlayHint") then
+          vim.keymap.set("n", "<leader>th", function()
+            require("lsp-inlayhints").toggle()
+          end, { buffer = bufnr, desc = "Toggle Inlay Hints" })
         end
       end
 
@@ -70,7 +116,7 @@ return {
         update_in_insert = false,
         severity_sort = true,
         float = {
-          border = "single",
+          border = "rounded",
           source = "always",
           header = "",
           prefix = "",
@@ -78,30 +124,34 @@ return {
       })
 
       -- Diagnostic signs
-      local signs = { Error = " ", Warn = " ", Hint = "󰠠 ", Info = " " }
+      local signs = {
+        Error = " ",
+        Warn = " ",
+        Hint = "󰌵 ",
+        Info = " "
+      }
       for type, icon in pairs(signs) do
         local hl = "DiagnosticSign" .. type
         vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = "" })
       end
 
-    -- AGGRESSIVELY FORCE BORDERS ON ALL LSP HANDLERS
-    local orig_util_open_floating_preview = vim.lsp.util.open_floating_preview
-    function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
-      opts = opts or {}
-      opts.border = opts.border or "single"
-      return orig_util_open_floating_preview(contents, syntax, opts, ...)
-    end
+      -- Force borders on all LSP handlers
+      local orig_util_open_floating_preview = vim.lsp.util.open_floating_preview
+      function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
+        opts = opts or {}
+        opts.border = opts.border or "rounded"
+        return orig_util_open_floating_preview(contents, syntax, opts, ...)
+      end
 
-    -- Also set handlers explicitly
-    vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(
-      vim.lsp.handlers.hover,
-      { border = "single" }
-    )
+      vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(
+        vim.lsp.handlers.hover,
+        { border = "rounded" }
+      )
 
-    vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(
-      vim.lsp.handlers.signature_help,
-      { border = "single" }
-    )
+      vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(
+        vim.lsp.handlers.signature_help,
+        { border = "rounded" }
+      )
 
       -- Store config globally for mason-lspconfig to use
       _G.lsp_on_attach = on_attach
@@ -201,18 +251,13 @@ return {
               },
               staticcheck = true,
               gofumpt = true,
-              -- CRITICAL: Enable semantic tokens
               semanticTokens = true,
             },
           },
-          -- Also ensure capabilities include semantic tokens
           on_attach = function(client, bufnr)
-            -- Call the global on_attach first
             if _G.lsp_on_attach then
               _G.lsp_on_attach(client, bufnr)
             end
-
-            -- Force enable semantic tokens for gopls
             if client.server_capabilities.semanticTokensProvider then
               vim.lsp.semantic_tokens.start(bufnr, client.id)
             end
@@ -272,7 +317,6 @@ return {
               capabilities = _G.lsp_capabilities,
             }
 
-            -- Merge with server-specific config if it exists
             if server_configs[server_name] then
               config = vim.tbl_deep_extend("force", config, server_configs[server_name])
             end
@@ -281,70 +325,26 @@ return {
           end,
 
           -- Skip jdtls (handled by ftplugin)
-          ["jdtls"] = function()
-            -- No-op, handled by nvim-jdtls in ftplugin/java.lua
-          end,
+          ["jdtls"] = function() end,
         },
       })
     end,
   },
 
-  -- JSON/YAML schemas (optional enhancement)
+  -- JSON/YAML schemas
   {
     "b0o/schemastore.nvim",
     lazy = true,
     ft = { "json", "jsonc", "yaml" },
-    config = function()
-      -- Update jsonls and yamlls with schemastore if they're already running
-      local lspconfig = require("lspconfig")
-      local has_schemastore, schemastore = pcall(require, "schemastore")
-
-      if has_schemastore then
-        -- Update jsonls
-        if lspconfig.jsonls then
-          lspconfig.jsonls.setup({
-            settings = {
-              json = {
-                schemas = schemastore.json.schemas(),
-                validate = { enable = true },
-              },
-            },
-          })
-        end
-
-        -- Update yamlls
-        if lspconfig.yamlls then
-          lspconfig.yamlls.setup({
-            settings = {
-              yaml = {
-                schemaStore = {
-                  enable = false,
-                  url = "",
-                },
-                schemas = schemastore.yaml.schemas(),
-              },
-            },
-          })
-        end
-      end
-    end,
   },
 
-  -- Java LSP (jdtls)
+  -- Java LSP
   {
     "mfussenegger/nvim-jdtls",
     ft = "java",
-    dependencies = {
-      "neovim/nvim-lspconfig",
-    },
-    config = function()
-      -- jdtls setup is typically done in ftplugin/java.lua
-      -- See the companion ftplugin file for full configuration
-    end,
   },
 
   -- Autocompletion
--- Autocompletion
   {
     "hrsh7th/nvim-cmp",
     event = "InsertEnter",
@@ -376,9 +376,7 @@ return {
           ["<C-f>"] = cmp.mapping.scroll_docs(4),
           ["<C-Space>"] = cmp.mapping.complete(),
           ["<C-e>"] = cmp.mapping.abort(),
-
-          -- Better completion acceptance
-          ["<S-CR>"] = cmp.mapping.confirm({ select = true }),
+          ["<CR>"] = cmp.mapping.confirm({ select = true }),
           ["<Tab>"] = cmp.mapping(function(fallback)
             if cmp.visible() then
               cmp.select_next_item()
@@ -399,13 +397,12 @@ return {
           end, { "i", "s" }),
         }),
 
-        -- Prioritize sources for multi-language workflow
         sources = cmp.config.sources({
-          { name = "nvim_lsp", priority = 900 },  -- LSP second
-          { name = "luasnip", priority = 750 },   -- Snippets third
-          { name = "path", priority = 500 },      -- File paths
+          { name = "nvim_lsp", priority = 1000 },
+          { name = "luasnip",  priority = 750 },
+          { name = "path",     priority = 500 },
         }, {
-          { name = "buffer", keyword_length = 3, priority = 250 },  -- Buffer last
+          { name = "buffer", keyword_length = 3, priority = 250 },
         }),
 
         formatting = {
@@ -413,14 +410,11 @@ return {
             mode = "symbol_text",
             maxwidth = 50,
             ellipsis_char = "...",
-            symbol_map = {
-            },
             before = function(entry, vim_item)
-              -- Add source name for debugging
               vim_item.menu = ({
                 nvim_lsp = "[LSP]",
-                luasnip = "[Snip]",
-                buffer = "[Buf]",
+                luasnip = "[Snippet]",
+                buffer = "[Buffer]",
                 path = "[Path]",
               })[entry.source.name]
               return vim_item
@@ -430,33 +424,19 @@ return {
 
         window = {
           completion = cmp.config.window.bordered({
-            border = "single",
-            winhighlight = "Normal:Normal,FloatBorder:FloatBorder,CursorLine:Visual,Search:None",
+            border = "rounded",
           }),
           documentation = cmp.config.window.bordered({
-            border = "single",
-            winhighlight = "Normal:Normal,FloatBorder:FloatBorder,CursorLine:Visual,Search:None",
+            border = "rounded",
           }),
         },
 
         experimental = {
-          ghost_text = {
-            hl_group = "CmpGhostText",
-          },
-        },
-
-        -- Performance tuning for TUI
-        performance = {
-          debounce = 60,
-          throttle = 30,
-          fetching_timeout = 500,
-          confirm_resolve_timeout = 80,
-          async_budget = 1,
-          max_view_entries = 200,
+          ghost_text = true,
         },
       })
 
-      -- `/` cmdline setup
+      -- Cmdline setup
       cmp.setup.cmdline("/", {
         mapping = cmp.mapping.preset.cmdline(),
         sources = {
@@ -464,7 +444,6 @@ return {
         },
       })
 
-      -- `:` cmdline setup
       cmp.setup.cmdline(":", {
         mapping = cmp.mapping.preset.cmdline(),
         sources = cmp.config.sources({
@@ -490,7 +469,7 @@ return {
     config = function()
       require("lspsaga").setup({
         ui = {
-          border = "single",
+          border = "rounded",
           title = true,
           winblend = 0,
           expand = "",
@@ -505,7 +484,6 @@ return {
           max_width = 0.6,
           max_height = 0.8,
           open_link = "gx",
-          open_cmd = "!chrome",
         },
         diagnostic = {
           show_code_action = true,
@@ -513,11 +491,8 @@ return {
           jump_num_shortcut = true,
           max_width = 0.7,
           max_height = 0.6,
-          max_show_width = 0.9,
-          max_show_height = 0.6,
           text_hl_follow = false,
           border_follow = true,
-          extend_relatedInformation = false,
           keys = {
             exec_action = "o",
             quit = "q",
@@ -525,19 +500,13 @@ return {
             quit_in_show = { "q", "<ESC>" },
           },
         },
-        definition = {
-          edit = "<C-c>o",
-          vsplit = "<C-c>v",
-          split = "<C-c>i",
-          tabe = "<C-c>t",
-          quit = "q",
-        },
         code_action = {
           num_shortcut = true,
           show_server_name = false,
           extend_gitsigns = true,
+          only_in_cursor = true,
           keys = {
-            quit = {"q,", "<ESC>"},
+            quit = { "q", "<ESC>" },
             exec = "<CR>",
           },
         },
@@ -555,61 +524,39 @@ return {
         request_timeout = 2000,
         finder = {
           max_height = 0.5,
-          force_max_height = false,
           keys = {
             jump_to = "p",
             expand_or_jump = "o",
             vsplit = "s",
             split = "i",
             tabe = "t",
-            tabnew = "r",
             quit = { "q", "<ESC>" },
-            close_in_preview = "<ESC>",
           },
         },
         symbol_in_winbar = {
-          enable = true,
+          enable = false, -- Disabled since we're using navic in lualine
           separator = " › ",
-          ignore_patterns = {},
           hide_keyword = true,
           show_file = true,
           folder_level = 2,
-          respect_root = false,
           color_mode = true,
         },
         rename = {
           quit = "<C-c>",
           exec = "<CR>",
-          mark = "x",
-          confirm = "<CR>",
           in_select = true,
         },
         outline = {
           win_position = "right",
-          win_with = "",
           win_width = 30,
           preview_width = 0.4,
           show_detail = true,
           auto_preview = true,
           auto_refresh = true,
           auto_close = true,
-          auto_resize = false,
-          custom_sort = nil,
           keys = {
             expand_or_jump = "o",
             quit = "q",
-          },
-        },
-        callhierarchy = {
-          show_detail = false,
-          keys = {
-            edit = "e",
-            vsplit = "s",
-            split = "i",
-            tabe = "t",
-            jump = "o",
-            quit = "q",
-            expand_collapse = "u",
           },
         },
       })
@@ -618,5 +565,149 @@ return {
       "nvim-treesitter/nvim-treesitter",
       "nvim-tree/nvim-web-devicons",
     },
-  }
+  },
+
+  -- LSP progress notifications
+  {
+    "j-hui/fidget.nvim",
+    event = "LspAttach",
+    opts = {
+      notification = {
+        window = {
+          winblend = 0,
+          border = "rounded",
+        },
+      },
+      progress = {
+        display = {
+          done_icon = "✓",
+        },
+      },
+    },
+  },
+  -- Function signatures
+  {
+    "ray-x/lsp_signature.nvim",
+    event = "LspAttach",
+    opts = {
+      bind = true,
+      handler_opts = {
+        border = "rounded",
+      },
+      hint_enable = false,
+      floating_window_above_cur_line = true,
+      toggle_key = "<C-k>",
+    },
+  },
+
+  -- Breadcrumbs (will be shown in lualine)
+  {
+    "SmiteshP/nvim-navic",
+    event = "LspAttach",
+    opts = {
+      separator = " > ",
+      highlight = true,
+      depth_limit = 5,
+      lazy_update_context = true,
+    },
+    config = function(_, opts)
+      require("nvim-navic").setup(opts)
+      vim.api.nvim_create_autocmd("LspAttach", {
+        callback = function(args)
+          local client = vim.lsp.get_client_by_id(args.data.client_id)
+          if client and client.server_capabilities.documentSymbolProvider then
+            require("nvim-navic").attach(client, args.buf)
+          end
+        end,
+      })
+    end,
+  },
+
+  -- Better quickfix
+  {
+    "kevinhwang91/nvim-bqf",
+    ft = "qf",
+    opts = {
+      preview = {
+        border = "rounded",
+        show_title = true,
+        win_height = 15,
+      },
+    },
+  },
+
+  -- Formatting
+  {
+    "stevearc/conform.nvim",
+    event = { "BufWritePre" },
+    cmd = { "ConformInfo" },
+    keys = {
+      {
+        "<leader>f",
+        function()
+          require("conform").format({ async = true, lsp_fallback = true })
+        end,
+        mode = "",
+        desc = "Format buffer",
+      },
+    },
+    opts = {
+      formatters_by_ft = {
+        lua = { "stylua" },
+        python = { "isort", "black" },
+        javascript = { { "prettierd", "prettier" } },
+        typescript = { { "prettierd", "prettier" } },
+        javascriptreact = { { "prettierd", "prettier" } },
+        typescriptreact = { { "prettierd", "prettier" } },
+        json = { { "prettierd", "prettier" } },
+        yaml = { "prettier" },
+        markdown = { { "prettierd", "prettier" } },
+        go = { "goimports", "gofmt" },
+        rust = { "rustfmt" },
+      },
+      format_on_save = {
+        timeout_ms = 500,
+        lsp_fallback = true,
+      },
+    },
+  },
+
+  -- Linting
+  {
+    "mfussenegger/nvim-lint",
+    event = { "BufReadPre", "BufNewFile" },
+    config = function()
+      local lint = require("lint")
+      lint.linters_by_ft = {
+        javascript = { "eslint_d" },
+        typescript = { "eslint_d" },
+        javascriptreact = { "eslint_d" },
+        typescriptreact = { "eslint_d" },
+        python = { "pylint" },
+        go = { "golangcilint" },
+        markdown = { "markdownlint" },
+      }
+
+      vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePost", "InsertLeave" }, {
+        callback = function()
+          lint.try_lint()
+        end,
+      })
+    end,
+  },
+
+  -- Tool installer for formatters/linters
+  {
+    "WhoIsSethDaniel/mason-tool-installer.nvim",
+    dependencies = { "williamboman/mason.nvim" },
+    opts = {
+      ensure_installed = {
+        "stylua", "prettier", "prettierd", "black", "isort",
+        "gofmt", "goimports", "rustfmt",
+        "eslint_d", "pylint", "golangcilint", "markdownlint",
+      },
+      auto_update = true,
+      run_on_start = true,
+    },
+  },
 }

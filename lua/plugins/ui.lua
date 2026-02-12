@@ -61,7 +61,6 @@ return {
             },
           },
         },
-        -- A command is a function that we can assign to a mapping (below)
         commands = {
           system_open = function(state)
             local path = state.tree:get_node():get_id()
@@ -92,15 +91,15 @@ return {
           child_or_open = function(state)
             local node = state.tree:get_node()
             if node.type == "directory" or node:has_children() then
-              if not node:is_expanded() then -- if unexpanded, expand
+              if not node:is_expanded() then
                 state.commands.toggle_node(state)
-              else                           -- if expanded and has children, seleect the next child
+              else
                 require("neo-tree.ui.renderer").focus_node(
                   state,
                   node:get_child_ids()[1]
                 )
               end
-            else -- if not a directory just open it
+            else
               state.commands.open(state)
             end
           end,
@@ -203,6 +202,7 @@ return {
     dependencies = { 'nvim-tree/nvim-web-devicons' },
     event = "VeryLazy",
     config = function()
+      local navic = require("nvim-navic")
       -- Helper function to get colors from highlight groups
       local function get_hl_colors(hl_name)
         local hl = vim.api.nvim_get_hl(0, { name = hl_name, link = false })
@@ -280,16 +280,23 @@ return {
         return " " .. table.concat(client_names, ", ")
       end
 
+      local function navic_breadcrumbs()
+        if navic.is_available() then
+          return navic.get_location()
+        end
+        return ""
+      end
+
       require('lualine').setup({
         options = {
           theme = build_theme(),
           component_separators = { left = '', right = '' },
           section_separators = { left = '', right = '' },
-          icon = '',  -- Neovim logo,
+          icon = ' ', -- Neovim logo,
           refresh = { statusline = 100, },
           globalstatus = true,
           disabled_filetypes = {
-            statusline = { 'snacks_dashboard' },
+            statusline = { 'snacks-dashboard' },
           },
         },
         sections = {
@@ -297,19 +304,19 @@ return {
             {
               'mode',
               fmt = function(mode)
-                  local map = {
-                    ['NORMAL'] = 'N',
-                    ['INSERT'] = 'I',
-                    ['VISUAL'] = 'V',
-                    ['V-LINE'] = 'VI',
-                    ['V-BLOCK'] = 'VB',
-                    ['SELECT'] = 'S',
-                    ['S-LINE'] = 'S',
-                    ['S-BLOCK'] = 'SB',
-                    ['REPLACE'] = 'R',
-                    ['COMMAND'] = 'C',
-                    ['TERMINAL'] = 'T',
-                  }
+                local map = {
+                  ['NORMAL'] = 'N',
+                  ['INSERT'] = 'I',
+                  ['VISUAL'] = 'V',
+                  ['V-LINE'] = 'VI',
+                  ['V-BLOCK'] = 'VB',
+                  ['SELECT'] = 'S',
+                  ['S-LINE'] = 'S',
+                  ['S-BLOCK'] = 'SB',
+                  ['REPLACE'] = 'R',
+                  ['COMMAND'] = 'C',
+                  ['TERMINAL'] = 'T',
+                }
                 return map[mode] or mode:sub(1, 1)
               end,
             }
@@ -317,7 +324,7 @@ return {
           lualine_b = {
             {
               'branch',
-              icon = '',
+              icon = ' ',
             },
             {
               'diff',
@@ -345,7 +352,7 @@ return {
                 end
 
                 -- keep filename, truncate directories
-                local sep = package.config:sub(1,1)
+                local sep = package.config:sub(1, 1)
                 local parts = vim.split(name, sep)
 
                 if #parts <= 1 then
@@ -370,17 +377,17 @@ return {
                 -- Detect OS and use appropriate command
                 local open_cmd
                 if vim.fn.has('mac') == 1 then
-                  open_cmd = 'open'  -- macOS
+                  open_cmd = 'open'     -- macOS
                 elseif vim.fn.has('win32') == 1 then
-                  open_cmd = 'explorer'  -- Windows
+                  open_cmd = 'explorer' -- Windows
                 else
-                  open_cmd = 'xdg-open'  -- Linux
+                  open_cmd = 'xdg-open' -- Linux
                 end
 
                 -- Open in background without blocking
-                vim.fn.jobstart({open_cmd, file_dir}, {detach = true})
+                vim.fn.jobstart({ open_cmd, file_dir }, { detach = true })
               end,
-            }
+            },
           },
           lualine_x = {
             {
@@ -397,7 +404,7 @@ return {
               sources = { 'nvim_diagnostic' },
               symbols = { error = ' ', warn = '●', info = '', hint = ' ' },
               on_click = function()
-                  require('telescope.builtin').diagnostics()
+                require('telescope.builtin').diagnostics()
               end,
             },
             {
@@ -452,8 +459,9 @@ return {
       wk.add({
         { "<leader>j", group = get_icon("Java", true) .. "Java" },
         { "<leader>o", group = get_icon("AI", true) .. "OpenCode" },
+        { "<leader>t", group = " Toggle" },
+        { "<leader>w", group = "󰘦 Workspace" },
       })
     end,
   },
 }
-

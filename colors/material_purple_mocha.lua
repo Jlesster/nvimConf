@@ -270,6 +270,52 @@ local function setup_highlights()
     hi("@lsp.type.keyword", { fg = colors.mauve, style = "bold" })
     hi("@lsp.typemod.keyword.controlFlow", { fg = colors.pink, style = "bold" })
 
+-- Decorators and Annotations
+    hi("@lsp.type.decorator", { fg = colors.yellow, style = "italic" })
+    hi("@lsp.type.annotation", { fg = colors.yellow, style = "italic" })
+
+    -- Keywords (when LSP provides them)
+    hi("@lsp.type.keyword", { fg = colors.mauve, style = "bold" })
+    hi("@lsp.typemod.keyword.controlFlow", { fg = colors.pink, style = "bold" })
+
+    -- ============================================================================
+    -- LANGUAGE-SPECIFIC LSP SEMANTIC TOKENS
+    -- ============================================================================
+
+    -- Python-specific
+    hi("@lsp.type.selfParameter.python", { fg = colors.red, style = "italic" })
+    hi("@lsp.type.clsParameter.python", { fg = colors.red, style = "italic" })
+    hi("@lsp.type.decorator.python", { fg = colors.yellow, style = "italic" })
+    hi("@lsp.typemod.function.builtin.python", { fg = colors.blue, style = "italic" })
+    hi("@lsp.type.method.python", { fg = colors.sky, style = "italic" })
+    hi("@lsp.typemod.property.static.python", { fg = colors.teal, style = "italic,bold" })
+
+    -- Go-specific
+    hi("@lsp.type.namespace.go", { fg = colors.sapphire, style = "italic" })
+    hi("@lsp.typemod.variable.exported.go", { fg = colors.flamingo })
+    hi("@lsp.typemod.function.exported.go", { fg = colors.sky, style = "bold" })
+    hi("@lsp.typemod.method.exported.go", { fg = colors.sapphire, style = "bold" })
+    hi("@lsp.typemod.type.exported.go", { fg = colors.yellow, style = "bold" })
+    hi("@lsp.type.typeParameter.go", { fg = colors.flamingo, style = "italic" })
+    hi("@lsp.type.method.go", { fg = colors.sky, style = "italic" })
+    hi("@lsp.mod.importDeclaration.go", { fg = colors.yellow, style = "italic" })
+
+    -- C/C++-specific
+    hi("@lsp.type.concept.cpp", { fg = colors.yellow, style = "italic" })
+    hi("@lsp.typemod.variable.functionScope.cpp", { fg = colors.text })
+    hi("@lsp.typemod.variable.fileScope.cpp", { fg = colors.flamingo })
+    hi("@lsp.typemod.function.functionScope.cpp", { fg = colors.blue, style = "bold" })
+    hi("@lsp.type.templateParameter.cpp", { fg = colors.flamingo, style = "italic" })
+    hi("@lsp.type.namespace.cpp", { fg = colors.sapphire, style = "italic" })
+    hi("@lsp.type.method.cpp", { fg = colors.sky, style = "italic" })
+    hi("@lsp.typemod.property.static.cpp", { fg = colors.teal, style = "italic,bold" })
+    hi("@lsp.typemod.macro.globalScope.c", { fg = colors.sapphire })
+
+    -- Bash-specific
+    hi("@lsp.type.variable.bash", { fg = colors.text })
+    hi("@lsp.type.function.bash", { fg = colors.blue, style = "bold" })
+    hi("@lsp.typemod.variable.readonly.bash", { fg = colors.teal })
+
     -- ============================================================================
     -- DIAGNOSTIC
     -- ============================================================================

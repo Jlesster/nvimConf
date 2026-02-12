@@ -4,30 +4,30 @@ return {
     priority = 1000,
     lazy = false,
     opts = {
-      input = { enabled = true },
-      picker = {
+      input        = { enabled = true },
+      picker       = {
         enabled = true,
         win = {
           border = "rounded",
         },
       },
-      terminal = {
+      terminal     = {
         enabled = true,
         win = {
           style = "terminal",
           border = "single",
         },
       },
-      select  = { enabled = true },
-      notifier = {
+      select       = { enabled = true },
+      notifier     = {
         enabled = true,
         timeout = 3000,
         width = { min = 40, max = 0.4 },
         height = { min = 1, max = 0.6 },
         style = "compact",
       },
-      bigfile = { enabled = true },
-      indent = {
+      bigfile      = { enabled = true },
+      indent       = {
         enabled = true,
         char = " ",
         only_scope = false,
@@ -36,13 +36,13 @@ return {
           enabled = true,
         },
       },
-      scope = {
+      scope        = {
         enabled = true,
         cursor = false,
         char = "│",
         treesitter = { enabled = true },
       },
-      scroll = {
+      scroll       = {
         enabled = false,
         animate = {
           duration = { step = 50, total = 250 },
@@ -50,8 +50,8 @@ return {
         },
       },
       statuscolumn = { enabled = true },
-      words = { enabled = true },
-      zen = {
+      words        = { enabled = true },
+      zen          = {
         enabled = true,
         toggles = {
           dim = true,
@@ -63,9 +63,9 @@ return {
           height = 0.9,
         },
       },
-      git = { enabled = true },
-      gitbrowse = { enabled = true },
-      lazygit = {
+      git          = { enabled = true },
+      gitbrowse    = { enabled = true },
+      lazygit      = {
         enabled = true,
         configure = true,
         theme = {
@@ -73,8 +73,8 @@ return {
           inactiveBorderColor = { fg = "Comment" },
         },
       },
-      bufdelete = { enabled = true },
-      scratch = {
+      bufdelete    = { enabled = true },
+      scratch      = {
         enabled = true,
         name = "Scratch",
         ft = "markdown",
@@ -109,17 +109,17 @@ return {
           },
         },
       },
-      quickfile = { enabled = true }, -- Fast file opening
-      rename = { enabled = true },    -- Better file rename
-      toggle = {
+      quickfile    = { enabled = true }, -- Fast file opening
+      rename       = { enabled = true }, -- Better file rename
+      toggle       = {
         enabled = true,
         which_key = true,
         notify = true,
       },
-      dashboard = {
+      dashboard    = {
         enabled = true,
         preset = {
-          header =[[
+          header = [[
           ⠀ ⣿⠙⣦⠀⠀⠀⠀⠀⠀⣀⣤⡶⠛⠁
           ⠀⠀⠀⠀⢻⠀⠈⠳⠀⠀⣀⣴⡾⠛⠁⣠⠂⢠⠇
           ⠀⠀⠀⠀⠈⢀⣀⠤⢤⡶⠟⠁⢀⣴⣟⠀⠀⣾
@@ -142,17 +142,18 @@ return {
           --@type snacks.dashboard.Item[]
           keys = {
             { icon = "󰈙 ", key = "n", desc = "New File", action = ":ene | startinsert" },
-            { icon = "󰮳 ", key = "e", desc = "Recent Files", action = ":Telescope oldfiles" },
+            { icon = "󰮳 ", key = "e", desc = "Recent Files", action = function() Snacks.picker.recent() end },
             { icon = "󰪶 ", key = "r", desc = "Yazi", action = ":Yazi", enabled = vim.fn.executable("ya") == 1 },
             { icon = "󰮗 ", key = "s", desc = "Sessions", action = ":SessionManager! load_session" },
-            { icon = " ", key = "p", desc = "Projects", action = ":Telescope projects" },
-            { icon = " ", key = "c", desc = "Config", action = ":lua Snacks.dashboard.pick('files', {cwd = vim.fn.stdpath('config')})" },
+            { icon = " ", key = "p", desc = "Projects", action = function() Snacks.picker.projects() end },
+            { icon = " ", key = "c", desc = "Config", action = function() Snacks.picker.files({ cwd = vim.fn.stdpath(
+              'config') }) end },
             { icon = "󰅚 ", key = "q", desc = "Quit", action = ":qa" }
           }
         },
         sections = {
           { section = "header" },
-          { section = "keys", gap = 1, padding = 1, },
+          { section = "keys",   gap = 1, padding = 1, },
           { section = "startup" },
         },
         formats = {
@@ -214,9 +215,9 @@ return {
 
           local extmarks = vim.api.nvim_buf_get_extmarks(
             bufnr, -1,
-            {line_num - 1, search_start},
-            {line_num - 1, search_end},
-            {details = true}
+            { line_num - 1, search_start },
+            { line_num - 1, search_end },
+            { details = true }
           )
 
           for _, extmark in ipairs(extmarks) do
@@ -234,11 +235,11 @@ return {
 
         if is_lua then
           local keywords = {
-            {pattern = '%f[%w_]if%f[^%w_]', closer = 'end'},
-            {pattern = '%f[%w_]for%f[^%w_]', closer = 'end'},
-            {pattern = '%f[%w_]while%f[^%w_]', closer = 'end'},
-            {pattern = '%f[%w_]function%f[^%w_]', closer = 'end'},
-            {pattern = '%f[%w_]repeat%f[^%w_]', closer = 'until'},
+            { pattern = '%f[%w_]if%f[^%w_]',       closer = 'end' },
+            { pattern = '%f[%w_]for%f[^%w_]',      closer = 'end' },
+            { pattern = '%f[%w_]while%f[^%w_]',    closer = 'end' },
+            { pattern = '%f[%w_]function%f[^%w_]', closer = 'end' },
+            { pattern = '%f[%w_]repeat%f[^%w_]',   closer = 'until' },
           }
 
           for _, kw in ipairs(keywords) do
@@ -332,11 +333,11 @@ return {
               local found_keyword = false
 
               local keywords = {
-                {pattern = '%f[%w_]if%f[^%w_]'},
-                {pattern = '%f[%w_]for%f[^%w_]'},
-                {pattern = '%f[%w_]while%f[^%w_]'},
-                {pattern = '%f[%w_]function%f[^%w_]'},
-                {pattern = '%f[%w_]repeat%f[^%w_]'},
+                { pattern = '%f[%w_]if%f[^%w_]' },
+                { pattern = '%f[%w_]for%f[^%w_]' },
+                { pattern = '%f[%w_]while%f[^%w_]' },
+                { pattern = '%f[%w_]function%f[^%w_]' },
+                { pattern = '%f[%w_]repeat%f[^%w_]' },
               }
 
               for _, kw in ipairs(keywords) do
@@ -501,7 +502,7 @@ return {
       end
 
       -- Single ColorScheme autocmd for both scope and dashboard colors
-      vim.api.nvim_create_autocmd({"ColorScheme"}, {
+      vim.api.nvim_create_autocmd({ "ColorScheme" }, {
         callback = function()
           vim.defer_fn(function()
             -- Sync scope colors
@@ -519,7 +520,7 @@ return {
       })
 
       local timer = nil
-      vim.api.nvim_create_autocmd({"CursorMoved", "CursorMovedI", "BufEnter"}, {
+      vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI", "BufEnter" }, {
         callback = function()
           if timer then
             vim.fn.timer_stop(timer)

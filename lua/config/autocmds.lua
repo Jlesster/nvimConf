@@ -1,31 +1,83 @@
--- Auto Commands Configuration
 local autocmd = vim.api.nvim_create_autocmd
 local augroup = vim.api.nvim_create_augroup
 
--- Helper function to check if a plugin is available
-local function is_available(plugin)
-  local lazy_config_avail, lazy_config = pcall(require, "lazy.core.config")
-  return lazy_config_avail and lazy_config.plugins[plugin] ~= nil
-end
-
 -- Highlight on yank
 autocmd("TextYankPost", {
-  group = augroup("YankHighlight", { clear = true }),
+  group = augroup("highlight_yank", { clear = true }),
   callback = function()
-    vim.highlight.on_yank({ higroup = "IncSearch", timeout = 300 })
+    vim.highlight.on_yank({ higroup = "Visual", timeout = 200 })
   end,
 })
 
--- Remove trailing whitespace on save
+-- Close some filetypes with <q>
+autocmd("FileType", {
+  group = augroup("close_with_q", { clear = true }),
+  pattern = {
+    "help",
+    "lspinfo",
+    "man",
+    "qf",
+    "query",
+    "checkhealth",
+    "startuptime",
+  },
+  callback = function(event)
+    vim.bo[event.buf].buflisted = false
+    vim.keymap.set("n", "q", "<cmd>close<CR>", { buffer = event.buf, silent = true })
+  end,
+})
+
+-- Auto-create parent directories when saving
 autocmd("BufWritePre", {
-  group = augroup("TrimWhitespace", { clear = true }),
-  pattern = "*",
-  command = [[%s/\s\+$//e]],
+  group = augroup("auto_create_dir", { clear = true }),
+  callback = function(event)
+    if event.match:match("^%w%w+://") then
+      return
+    end
+    local file = vim.loop.fs_realpath(event.match) or event.match
+    vim.fn.mkdir(vim.fn.fnamemodify(file, ":p:h"), "p")
+  end,
+})
+
+-- User events for lazy loading
+autocmd("User", {
+  pattern = "VeryLazy",
+  callback = function()
+    vim.api.nvim_exec_autocmds("User", { pattern = "BaseDefered" })
+  end,
+})
+
+autocmd("BufReadPost", {
+  group = augroup("base_file", { clear = true }),
+  callback = function()
+    vim.api.nvim_exec_autocmds("User", { pattern = "BaseFile" })
+  end,
+})
+
+-- Disable features in large files
+autocmd("BufReadPre", {
+  group = augroup("disable_large_file_features", { clear = true }),
+  callback = function(args)
+    local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(args.buf))
+    if ok and stats and stats.size > vim.g.big_file.size then
+      vim.b[args.buf].large_file = true
+      vim.diagnostic.disable(args.buf)
+      vim.cmd("syntax clear")
+      vim.opt_local.spell = false
+      vim.opt_local.swapfile = false
+      vim.opt_local.undofile = false
+      vim.opt_local.breakindent = false
+      vim.opt_local.colorcolumn = ""
+      vim.opt_local.statuscolumn = ""
+      vim.opt_local.signcolumn = "no"
+      vim.opt_local.foldcolumn = "0"
+    end
+  end,
 })
 
 -- Restore cursor position
 autocmd("BufReadPost", {
-  group = augroup("RestoreCursor", { clear = true }),
+  group = augroup("restore_cursor", { clear = true }),
   callback = function()
     local mark = vim.api.nvim_buf_get_mark(0, '"')
     local lcount = vim.api.nvim_buf_line_count(0)
@@ -35,107 +87,29 @@ autocmd("BufReadPost", {
   end,
 })
 
--- Java-specific settings and LSP setup
-autocmd("FileType", {
-  group = augroup("JavaSettings", { clear = true }),
-  pattern = "java",
+-- Auto-resize splits when terminal is resized
+autocmd("VimResized", {
+  group = augroup("resize_splits", { clear = true }),
   callback = function()
-    vim.opt_local.shiftwidth = 2
-    vim.opt_local.tabstop = 2
-    vim.opt_local.colorcolumn = "920"
-
-    -- Start Java LSP
-    require("lsp.java").setup()
+    vim.cmd("tabdo wincmd =")
   end,
 })
 
--- ## PROJECT ROOT MANAGEMENT -----------------------------------------------
-
-autocmd("BufEnter", {
-  desc = "Change directory to project root or current buffer's directory",
-  callback = function(args)
-    -- Skip for special buffers
-    local buftype = vim.api.nvim_get_option_value("buftype", { buf = args.buf })
-    local filetype = vim.api.nvim_get_option_value("filetype", { buf = args.buf })
-    if buftype ~= "" or
-       vim.tbl_contains({ "alpha", "neo-tree", "OverseerList", "toggleterm" }, filetype) then
-      return
-    end
-
-    -- Get the buffer's file path
-    local bufname = vim.api.nvim_buf_get_name(args.buf)
-    if bufname == "" or not vim.loop.fs_stat(bufname) then
-      return
-    end
-
-    local old_cwd = vim.fn.getcwd()
-    local new_cwd = nil
-    local found_project_root = false
-
-    -- 🔥 NEW: Manually search for project root markers
-    local function find_project_root(path)
-      local markers = { "pom.xml", ".git", "build.gradle", "package.json" }
-      local current = path
-
-      while current ~= "/" do
-        for _, marker in ipairs(markers) do
-          local marker_path = current .. "/" .. marker
-          if vim.fn.filereadable(marker_path) == 1 or vim.fn.isdirectory(marker_path) == 1 then
-            return current
-          end
-        end
-        current = vim.fn.fnamemodify(current, ":h")
-      end
-
-      return nil
-    end
-
-    -- Start from the file's directory
-    local file_dir = vim.fn.fnamemodify(bufname, ":h")
-    local project_root = find_project_root(file_dir)
-
-    if project_root and vim.fn.isdirectory(project_root) == 1 then
-      found_project_root = true
-      new_cwd = project_root
-    else
-      -- Fallback to file directory
-      new_cwd = file_dir
-    end
-
-    -- Only change directory if we found a valid new directory and it's different
-    if new_cwd and new_cwd ~= old_cwd then
-      local ok = pcall(function()
-        vim.cmd("cd " .. vim.fn.fnameescape(new_cwd))
-      end)
-
-      if not ok then
-        return
-      end
-
-      -- Refresh Neo-tree if directory actually changed
-      if is_available("neo-tree.nvim") then
-        vim.schedule(function()
-          pcall(function()
-            local manager = require("neo-tree.sources.manager")
-            local state = manager.get_state("filesystem")
-
-            if state then
-              state.path = new_cwd
-              manager.refresh("filesystem")
-            end
-          end)
-        end)
-      end
-    end
+-- Wrap and check for spell in text filetypes
+autocmd("FileType", {
+  group = augroup("wrap_spell", { clear = true }),
+  pattern = { "gitcommit", "markdown", "text" },
+  callback = function()
+    vim.opt_local.wrap = true
+    vim.opt_local.spell = true
   end,
 })
 
--- Enable semantic token highlighting globally
-vim.api.nvim_create_autocmd("LspAttach", {
-  callback = function(args)
-    local client = vim.lsp.get_client_by_id(args.data.client_id)
-    if client and client.server_capabilities.semanticTokensProvider then
-      vim.lsp.semantic_tokens.start(args.buf, client.id)
-    end
+-- Fix conceallevel for json files
+autocmd("FileType", {
+  group = augroup("json_conceal", { clear = true }),
+  pattern = { "json", "jsonc", "json5" },
+  callback = function()
+    vim.opt_local.conceallevel = 0
   end,
 })

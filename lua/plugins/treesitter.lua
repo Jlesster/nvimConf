@@ -1,5 +1,3 @@
--- Enhanced nvim-treesitter config for the NEW API
--- No folding (using ufo.nvim), no conflicting keymaps
 return {
   'nvim-treesitter/nvim-treesitter',
   lazy = false,
@@ -28,9 +26,6 @@ return {
       'markdown', 'markdown_inline', 'toml', 'xml', 'regex', 'comment',
     })
 
-    -- =========================================================================
-    -- HIGHLIGHTING - Enable for all file buffers
-    -- =========================================================================
     vim.api.nvim_create_autocmd('FileType', {
       pattern = '*',
       callback = function(args)
@@ -41,9 +36,6 @@ return {
       end,
     })
 
-    -- =========================================================================
-    -- INDENTATION (Optional - using treesitter for indent)
-    -- =========================================================================
     vim.api.nvim_create_autocmd('FileType', {
       pattern = { 'go', 'lua', 'python', 'javascript', 'typescript', 'rust', 'c', 'cpp', 'java', 'dart' },
       callback = function()
@@ -51,9 +43,6 @@ return {
       end,
     })
 
-    -- =========================================================================
-    -- TEXTOBJECTS - Smart code navigation and selection
-    -- =========================================================================
     local textobjects_ok, ts_textobjects = pcall(require, 'nvim-treesitter-textobjects')
     if textobjects_ok then
       -- Select around/inside functions, classes
@@ -92,10 +81,6 @@ return {
       end, { desc = 'Previous class' })
     end
 
-    -- =========================================================================
-    -- INCREMENTAL SELECTION - Expand selection intelligently
-    -- NOTE: Your keymaps.lua doesn't use <C-space>, so this is safe
-    -- =========================================================================
     vim.keymap.set('n', '<C-space>', function()
       local ok, incr_sel = pcall(require, 'nvim-treesitter.incremental_selection')
       if ok then
@@ -117,10 +102,6 @@ return {
       end
     end, { desc = 'Decrement selection' })
 
-    -- =========================================================================
-    -- CONTEXT - Show current function/class at top of screen
-    -- NOTE: Conflicts with your [t keymap, using [x instead
-    -- =========================================================================
     local context_ok, context = pcall(require, 'treesitter-context')
     if context_ok then
       context.setup({
@@ -139,9 +120,6 @@ return {
       end, { silent = true, desc = 'Jump to context' })
     end
 
-    -- =========================================================================
-    -- UTILITIES
-    -- =========================================================================
     vim.keymap.set('n', '<leader>ti', ':Inspect<CR>', { desc = 'Inspect treesitter node' })
     vim.keymap.set('n', '<leader>tT', ':InspectTree<CR>', { desc = 'Show treesitter tree' })
 
