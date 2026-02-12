@@ -44,9 +44,9 @@ return {
       enabled_named_colors = false,
       render = 'virtual',
       virtual_symbol = '■',
- 	    ---@usage 'inline'|'eol'|'eow'
-	    virtual_symbol_position = 'inline',
-	    enable_tailwind = true,
+      ---@usage 'inline'|'eol'|'eow'
+      virtual_symbol_position = 'inline',
+      enable_tailwind = true,
     },
   },
   {
@@ -54,8 +54,8 @@ return {
     event = "User BaseDefered",
     cmd = { "Yazi", "Yazi cwd", "Yazi toggle" },
     opts = {
-        open_for_directories = true,
-        floating_window_scaling_factor = 0.71
+      open_for_directories = true,
+      floating_window_scaling_factor = 0.71
     },
   },
   {
@@ -104,14 +104,266 @@ return {
     end,
   },
   {
-    "tpope/vim-surround",
-    lazy = false,
+    "kylechui/nvim-surround",
+    version = "*", -- Use for stability; omit to use `main` branch for the latest features
+    event = "VeryLazy",
+    config = function()
+      require("nvim-surround").setup({
+        -- Configuration here, or leave empty to use defaults
+        keymaps = {
+          -- Default keymaps (vim-surround compatible)
+          insert = "<C-g>s",
+          insert_line = "<C-g>S",
+          normal = "ys",
+          normal_cur = "yss",
+          normal_line = "yS",
+          normal_cur_line = "ySS",
+          visual = "S",
+          visual_line = "gS",
+          delete = "ds",
+          change = "cs",
+          change_line = "cS",
+        },
+
+        -- Surround characters (extend defaults)
+        surrounds = {
+          -- Default surrounds include: (, ), {, }, [, ], <, >, ', ", `, etc.
+
+          -- Add custom Lua function surround
+          ["f"] = {
+            add = function()
+              local result = require("nvim-surround.config").get_input("Enter the function name: ")
+              if result then
+                return { { result .. "(" }, { ")" } }
+              end
+            end,
+            find = "[%w_]+%b()",
+            delete = "^([%w_]+%()().-(%))()$",
+            change = {
+              target = "^([%w_]+%()().-(%))()$",
+              replacement = function()
+                local result = require("nvim-surround.config").get_input("Enter the function name: ")
+                if result then
+                  return { { result .. "(" }, { ")" } }
+                end
+              end,
+            },
+          },
+
+          -- Add markdown code block surround
+          ["c"] = {
+            add = function()
+              local lang = require("nvim-surround.config").get_input("Enter language (optional): ")
+              if lang == "" then lang = nil end
+              return {
+                { "```" .. (lang or ""), "" },
+                { "",                    "```" }
+              }
+            end,
+          },
+
+          -- Add HTML/JSX tag surround
+          ["t"] = {
+            add = function()
+              local tag = require("nvim-surround.config").get_input("Enter tag name: ")
+              if tag then
+                return { { "<" .. tag .. ">" }, { "</" .. tag .. ">" } }
+              end
+            end,
+            find = "<[^>]+>.-</.->",
+            delete = "^(<[^>]+>)().-(</[^>]+>)()$",
+            change = {
+              target = "^<([^>]+)().-</([^>]+)()$",
+              replacement = function()
+                local tag = require("nvim-surround.config").get_input("Enter tag name: ")
+                if tag then
+                  return { { "<" .. tag .. ">" }, { "</" .. tag .. ">" } }
+                end
+              end,
+            },
+          },
+
+          -- Add Lua table surround
+          ["T"] = {
+            add = { "{ ", " }" },
+          },
+
+          -- Add LaTeX math surround
+          ["m"] = {
+            add = { "$", "$" },
+          },
+
+          -- Add LaTeX display math surround
+          ["M"] = {
+            add = { "$$", "$$" },
+          },
+
+          -- Add comment surround (language-aware)
+          ["/"] = {
+            add = function()
+              local cs = vim.bo.commentstring
+              if cs == "" then cs = "# %s" end
+              local left, right = cs:match("^(.*)%%s(.*)$")
+              if not left then
+                left = cs
+                right = ""
+              end
+              return { { left }, { right } }
+            end,
+          },
+
+          -- Invalid surround (shows error)
+          invalid_key_behavior = {
+            add = function()
+              vim.notify("Invalid surround key", vim.log.levels.ERROR)
+            end,
+          },
+        },
+
+        -- Aliases for convenience
+        aliases = {
+          -- Bracket aliases
+          ["a"] = ">", -- <a>ngle brackets
+          ["b"] = ")", -- (b)rackets
+          ["B"] = "}", -- {B}races
+          ["r"] = "]", -- [r]ectangular brackets
+
+          -- Quote aliases
+          ["q"] = { '"', "'", "`" }, -- any (q)uote
+
+          -- Custom aliases
+          ["s"] = { "}", "]", ")", ">", "'", '"', "`" }, -- any (s)urround
+        },
+
+        -- Move cursor after operations
+        move_cursor = "begin", -- or "end" or false
+
+        -- Indent after adding surround
+        indent_lines = function(start, stop)
+          local b = vim.bo
+          -- Only re-indent if the buffer is not a special buffer
+          if b.buftype ~= "" then
+            return false
+          end
+          return true
+        end,
+
+        -- Highlight on yank (optional, complements your setup)
+        highlight = {
+          duration = 200,
+        },
+      })
+
+      -- Additional keymaps for enhanced workflow (optional)
+      local keymap = vim.keymap.set
+
+      -- Quick surround with common pairs
+      keymap("v", "<leader>s(", "S)", { desc = "Surround with ()" })
+      keymap("v", "<leader>s{", "S}", { desc = "Surround with {}" })
+      keymap("v", "<leader>s[", "S]", { desc = "Surround with []" })
+      keymap("v", "<leader>s<", "S>", { desc = "Surround with <>" })
+      keymap("v", '<leader>s"', 'S"', { desc = 'Surround with ""' })
+      keymap("v", "<leader>s'", "S'", { desc = "Surround with ''" })
+      keymap("v", "<leader>s`", "S`", { desc = "Surround with ``" })
+
+      -- Function and tag shortcuts
+      keymap("v", "<leader>sf", "Sf", { desc = "Surround with function()" })
+      keymap("v", "<leader>st", "St", { desc = "Surround with tag" })
+      keymap("v", "<leader>sc", "Sc", { desc = "Surround with code block" })
+      keymap("v", "<leader>s/", "S/", { desc = "Surround with comment" })
+
+      -- Surround menu (using vim.ui.select for consistency with your config)
+      keymap("v", "<leader>sm", function()
+        vim.ui.select(
+          {
+            "() - Parentheses",
+            "{} - Braces",
+            "[] - Brackets",
+            "<> - Angle Brackets",
+            '"" - Double Quotes',
+            "'' - Single Quotes",
+            "`` - Backticks",
+            "f - Function",
+            "t - HTML Tag",
+            "c - Code Block",
+            "/ - Comment",
+            "Cancel"
+          },
+          { prompt = "Surround with:" },
+          function(choice)
+            if not choice or choice == "Cancel" then return end
+
+            local surround_map = {
+              ["() - Parentheses"] = ")",
+              ["{} - Braces"] = "}",
+              ["[] - Brackets"] = "]",
+              ["<> - Angle Brackets"] = ">",
+              ['"" - Double Quotes'] = '"',
+              ["'' - Single Quotes"] = "'",
+              ["`` - Backticks"] = "`",
+              ["f - Function"] = "f",
+              ["t - HTML Tag"] = "t",
+              ["c - Code Block"] = "c",
+              ["/ - Comment"] = "/",
+            }
+
+            local key = surround_map[choice]
+            if key then
+              vim.cmd("normal! S" .. key)
+            end
+          end
+        )
+      end, { desc = "Surround menu" })
+
+      -- Normal mode surround menu (for surrounding word/WORD)
+      keymap("n", "<leader>sm", function()
+        vim.ui.select(
+          {
+            "() - Parentheses",
+            "{} - Braces",
+            "[] - Brackets",
+            "<> - Angle Brackets",
+            '"" - Double Quotes',
+            "'' - Single Quotes",
+            "`` - Backticks",
+            "f - Function",
+            "t - HTML Tag",
+            "c - Code Block",
+            "/ - Comment",
+            "Cancel"
+          },
+          { prompt = "Surround word with:" },
+          function(choice)
+            if not choice or choice == "Cancel" then return end
+
+            local surround_map = {
+              ["() - Parentheses"] = ")",
+              ["{} - Braces"] = "}",
+              ["[] - Brackets"] = "]",
+              ["<> - Angle Brackets"] = ">",
+              ['"" - Double Quotes'] = '"',
+              ["'' - Single Quotes"] = "'",
+              ["`` - Backticks"] = "`",
+              ["f - Function"] = "f",
+              ["t - HTML Tag"] = "t",
+              ["c - Code Block"] = "c",
+              ["/ - Comment"] = "/",
+            }
+
+            local key = surround_map[choice]
+            if key then
+              vim.cmd("normal! ysiw" .. key)
+            end
+          end
+        )
+      end, { desc = "Surround word menu" })
+    end,
   },
   {
     'nvim-flutter/flutter-tools.nvim',
     lazy = false,
     dependencies = {
-        'nvim-lua/plenary.nvim',
+      'nvim-lua/plenary.nvim',
     },
     config = true,
   },
@@ -120,4 +372,3 @@ return {
     cmd = { "SudaRead", "SudaWrite" },
   },
 }
-

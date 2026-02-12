@@ -70,10 +70,6 @@ return {
         -- Documentation
         vim.keymap.set("n", "K", "<cmd>Lspsaga hover_doc<CR>", opts)
 
-        -- Actions
-        vim.keymap.set("n", "<leader>ca", "<cmd>Lspsaga code_action<CR>", opts)
-        vim.keymap.set("n", "<leader>rn", "<cmd>Lspsaga rename<CR>", opts)
-
         -- Diagnostics (lspsaga handles these)
         vim.keymap.set("n", "<leader>d", "<cmd>Lspsaga show_line_diagnostics<CR>", opts)
         vim.keymap.set("n", "[d", "<cmd>Lspsaga diagnostic_jump_prev<CR>", opts)
@@ -376,12 +372,10 @@ return {
           ["<C-f>"] = cmp.mapping.scroll_docs(4),
           ["<C-Space>"] = cmp.mapping.complete(),
           ["<C-e>"] = cmp.mapping.abort(),
-          ["<CR>"] = cmp.mapping.confirm({ select = true }),
+          ["<S-CR>"] = cmp.mapping.confirm({ select = true }),
           ["<Tab>"] = cmp.mapping(function(fallback)
             if cmp.visible() then
               cmp.select_next_item()
-            elseif luasnip.expand_or_jumpable() then
-              luasnip.expand_or_jump()
             else
               fallback()
             end

@@ -457,10 +457,44 @@ return {
       local get_icon = icons.get_icon
 
       wk.add({
-        { "<leader>j", group = get_icon("Java", true) .. "Java" },
-        { "<leader>o", group = get_icon("AI", true) .. "OpenCode" },
+        -- AI & Assistants
+        { "<leader>a", group = get_icon("AI", true) .. "AI" },
+
+        -- File Operations
+        { "<leader>f", group = " Files" },
+
+        -- Buffers
+        { "<leader>b", group = " Buffers" },
+
+        -- Search/Find
+        { "<leader>s", group = " Search" },
+
+        -- Explorer/Tree
+        { "<leader>e", group = " Explorer" },
+
+        -- Quick Toggles
         { "<leader>t", group = " Toggle" },
-        { "<leader>w", group = "󰘦 Workspace" },
+
+        -- LSP
+        { "<leader>l", group = "󱇯 LSP" },
+
+        -- Git
+        { "<leader>g", group = " Git" },
+
+        -- Debug
+        { "<leader>d", group = " Debug" },
+
+        -- Java
+        { "<leader>j", group = get_icon("Java", true) .. "Java" },
+
+        -- Compiler/Make
+        { "<leader>m", group = " Make/Build" },
+
+        -- Notifications
+        { "<leader>S", group = " Session" },
+
+        -- Workspace/Windows
+        { "<leader>w", group = " Workspace" },
       })
     end,
   },

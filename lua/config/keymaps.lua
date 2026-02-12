@@ -149,8 +149,8 @@ keymap("n", "<C-Right>", ":vertical resize +2<CR>", { desc = "Resize split right
 -- Splits
 keymap("n", "|", ":vsplit<CR>", { desc = "Vertical Split" })
 keymap("n", "\\", ":split<CR>", { desc = "Horizontal Split" })
-keymap("n", "<leader>w|", ":vsplit<CR>", { desc = "Vertical Split" })
-keymap("n", "<leader>w-", ":split<CR>", { desc = "Horizontal Split" })
+keymap("n", "<leader>w|", ":vsplit<CR>", { desc = "Vertical split" })
+keymap("n", "<leader>w-", ":split<CR>", { desc = "Horizontal split" })
 keymap("n", "<leader>wm", function()
   vim.ui.select(
     { "Vertical Split", "Horizontal Split", "Cancel" },
@@ -167,346 +167,340 @@ end, { desc = "Split menu" })
 keymap("n", "<leader>wc", function() vim.cmd("silent! close") end, { desc = "Close window" })
 
 -- ============================================================================
--- FILE/BUFFER MANAGEMENT (<leader>b for buffers, <leader>f* for files)
+-- FILE OPERATIONS (<leader>f)
 -- ============================================================================
 
--- File operations
+-- Browse Neovim config directory
+keymap("n", "<leader>fa", function()
+  Snacks.picker.files({ cwd = vim.fn.stdpath("config") })
+end, { desc = "Browse Neovim config" })
+
+-- Browse Hyprland config directory
+keymap("n", "<leader>fA", function()
+  Snacks.picker.files({ cwd = "~/.config/hypr" })
+end, { desc = "Browse Hyprland config" })
+
 keymap("n", "<C-s>", ":w!<CR>", { desc = "Force write" })
 keymap("n", "<leader>fs", ":w<CR>", { desc = "Save file" })
 keymap("n", "<leader>fS", ":w!<CR>", { desc = "Force save file" })
 keymap("n", "<leader>fn", ":enew<CR>", { desc = "New file" })
 keymap("n", "<leader>fW", function()
-  vim.ui.input(
-    { prompt = "Sudo Password: ", default = "" },
-    function(password)
-      if password and password ~= "" then
-        vim.env.SUDO_ASKPASS = "echo " .. vim.fn.shellescape(password)
-        vim.cmd("SudaWrite")
+  Snacks.input({
+    prompt = "Sudo Password",
+    icon = " ",
+    secret = true,
+  }, function(password)
+    if password and password ~= "" then
+      local filepath = vim.fn.expand("%:p")
+      if filepath == "" then
+        Snacks.notify("No file to save", { level = "warn" })
+        return
       end
-    end
-  )
-end, { desc = "Save as Sudo" })
 
--- Quit operations
-keymap("n", "<leader>q", function()
-  vim.ui.select(
-    { "Save and Quit", "Quit without Saving", "Cancel" },
-    { prompt = "Quit Options:" },
-    function(choice)
-      if choice == "Save and Quit" then
-        vim.cmd("wq")
-      elseif choice == "Quit without Saving" then
-        vim.cmd("q!")
-      end
-    end
-  )
-end, { desc = "Quit menu" })
+      local tmpfile = vim.fn.tempname()
+      vim.cmd("silent! write! " .. vim.fn.fnameescape(tmpfile))
 
--- Buffer navigation
-keymap("n", "<S-l>", ":bnext<CR>", { desc = "Next buffer" })
-keymap("n", "<S-h>", ":bprevious<CR>", { desc = "Previous buffer" })
-keymap("n", "]b", ":bnext<CR>", { desc = "Next buffer" })
-keymap("n", "[b", ":bprevious<CR>", { desc = "Previous buffer" })
+      vim.system(
+        { "sh", "-c", string.format(
+          "echo %s | sudo -S cp %s %s",
+          vim.fn.shellescape(password),
+          vim.fn.shellescape(tmpfile),
+          vim.fn.shellescape(filepath)
+        ) },
+        { text = true },
+        vim.schedule_wrap(function(result)
+          vim.fn.delete(tmpfile)
 
--- Buffer management
-keymap("n", "<leader>bc", function() Snacks.bufdelete() end, { desc = "Close buffer" })
-keymap("n", "<leader>bm", function()
-  vim.ui.select(
-    { "Delete Current Buffer", "Delete All Other Buffers", "Cancel" },
-    { prompt = "Buffer Delete:" },
-    function(choice)
-      if choice == "Delete Current Buffer" then
-        vim.cmd("bdelete")
-      elseif choice == "Delete All Other Buffers" then
-        local current = vim.api.nvim_get_current_buf()
-        for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-          if buf ~= current and vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_buf_get_option(buf, 'buflisted') then
-            vim.cmd("bdelete " .. buf)
+          if result.code == 0 then
+            vim.cmd("edit!")
+            vim.bo.modified = false
+            Snacks.notify("File saved with sudo ✓", { level = "info" })
+          else
+            Snacks.notify("Failed to save with sudo (wrong password?)", { level = "error" })
           end
-        end
-      end
+        end)
+      )
     end
-  )
-end, { desc = "Buffer delete menu" })
-keymap("n", "<leader>bw", ":wa<CR>", { desc = "Write all changed buffers" })
-
--- Tab navigation
-keymap("n", "]t", ":tabnext<CR>", { desc = "Next tab" })
-keymap("n", "[t", ":tabprevious<CR>", { desc = "Previous tab" })
-
--- ============================================================================
--- FUZZY FINDING (<leader>f)
--- ============================================================================
-
--- File Finding
+  end)
+end, { desc = "Write with sudo" })
 keymap("n", "<leader>ff", function() Snacks.picker.files() end, { desc = "Find files" })
-keymap("n", "<leader>fF", function() Snacks.picker.files({ hidden = false, no_ignore = false }) end,
-  { desc = "Find files (no hidden)" })
-keymap("n", "<leader>fg", function() Snacks.picker.grep() end, { desc = "Live grep" })
+keymap("n", "<leader>fr", function() Snacks.picker.recent() end, { desc = "Recent files" })
+keymap("n", "<leader>fg", function() Snacks.picker.grep() end, { desc = "Grep in files" })
 keymap("n", "<leader>fw", function() Snacks.picker.grep_word() end, { desc = "Find word under cursor" })
-keymap("n", "<leader>f/", function() Snacks.picker.lines() end, { desc = "Find in current buffer" })
-keymap("n", "<leader>fb", function() Snacks.picker.buffers() end, { desc = "Find buffers" })
-keymap("n", "<leader>fo", function() Snacks.picker.recent() end, { desc = "Recent files" })
-keymap("n", "<leader>fh", function() Snacks.picker.help() end, { desc = "Help tags" })
-keymap("n", "<leader>fk", function() Snacks.picker.keymaps() end, { desc = "Find keymaps" })
-keymap("n", "<leader>fv", function() Snacks.picker.registers() end, { desc = "Find vim registers" })
-keymap("n", "<leader>ft", function() Snacks.picker.colorschemes() end, { desc = "Find themes" })
-keymap("n", "<leader>f'", function() Snacks.picker.marks() end, { desc = "Find marks" })
-keymap("n", "<leader>fC", function() Snacks.picker.commands() end, { desc = "Find commands" })
-keymap("n", "<leader>f<CR>", function() Snacks.picker.resume() end, { desc = "Resume previous search" })
-keymap("n", "<leader>fp", function() Snacks.picker.projects() end, { desc = "Find Project" })
-keymap("n", "<leader>fa", function()
-  Snacks.picker.files({
-    cwd = vim.fn.stdpath("config"),
-  })
-end, { desc = "Find nvim config files" })
 
 -- ============================================================================
--- FILE EXPLORER & BROWSERS
+-- BUFFER MANAGEMENT (<leader>b)
 -- ============================================================================
 
-keymap("n", "<leader>e", function() Snacks.explorer() end, { desc = "Toggle file explorer" })
-keymap("n", "<leader>r", ":Yazi<CR>", { desc = "File browser (Yazi)" })
+keymap("n", "<leader>bd", function() Snacks.bufdelete() end, { desc = "Delete buffer" })
+keymap("n", "<leader>bw", ":q<CR>", { desc = "Close Window" })
+keymap("n", "<leader>c", function() Snacks.bufdelete() end, { desc = "Delete Buffer" })
+keymap("n", "<leader>bD", function() Snacks.bufdelete.other() end, { desc = "Delete other buffers" })
+keymap("n", "<leader>ba", function() Snacks.bufdelete.all() end, { desc = "Delete all buffers" })
+keymap("n", "<leader>bp", function() Snacks.picker.buffers() end, { desc = "Pick buffer" })
+keymap("n", "<leader>bb", function() Snacks.picker.buffers() end, { desc = "List buffers" })
+keymap("n", "<S-l>", ":bnext<CR>", { desc = "Next Buffer" })
+keymap("n", "<S-h>", ":bprevious<CR>", { desc = "Prev Buffer" })
 
 -- ============================================================================
--- GIT (<leader>g)
+-- SEARCH/FIND (<leader>s)
 -- ============================================================================
 
--- Git client (LazyGit)
-keymap("n", "<leader>gg", function() Snacks.lazygit(nil, { win = { position = "float" } }) end, { desc = "LazyGit" })
+keymap("n", "<leader>sf", function() Snacks.picker.files() end, { desc = "Find files" })
+keymap("n", "<leader>sr", function() Snacks.picker.recent() end, { desc = "Recent files" })
+keymap("n", "<leader>sg", function() Snacks.picker.grep() end, { desc = "Grep in files" })
+keymap("n", "<leader>sw", function() Snacks.picker.grep_word() end, { desc = "Find word" })
+keymap("n", "<leader>sb", function() Snacks.picker.lines() end, { desc = "Search in buffer" })
+keymap("n", "<leader>sh", function() Snacks.picker.help() end, { desc = "Help tags" })
+keymap("n", "<leader>sk", function() Snacks.picker.keymaps() end, { desc = "Keymaps" })
+keymap("n", "<leader>sc", function() Snacks.picker.commands() end, { desc = "Commands" })
+keymap("n", "<leader>sm", function() Snacks.picker.marks() end, { desc = "Marks" })
+keymap("n", "<leader>sn", function() Snacks.notifier.show_history() end, { desc = "Notification history" })
 
--- Git pickers
-keymap("n", "<leader>gb", function() Snacks.picker.git_branches() end, { desc = "Git branches" })
-keymap("n", "<leader>gc", function() Snacks.picker.git_log() end, { desc = "Git commits (repository)" })
-keymap("n", "<leader>gC", function() Snacks.picker.git_log_line() end, { desc = "Git commits (current file)" })
-keymap("n", "<leader>gt", function() Snacks.picker.git_status() end, { desc = "Git status" })
+-- ============================================================================
+-- EXPLORER/TREE (<leader>e)
+-- ============================================================================
 
--- Gitsigns navigation
-keymap("n", "]g", function() require("gitsigns").nav_hunk('next') end, { desc = "Next Git hunk" })
-keymap("n", "[g", function() require("gitsigns").nav_hunk('prev') end, { desc = "Previous Git hunk" })
+keymap("n", "<leader>e", ":Neotree toggle<CR>", { desc = "Toggle file explorer" })
 
--- Gitsigns operations
-keymap("n", "<leader>gl", function() require("gitsigns").blame_line() end, { desc = "View Git blame" })
-keymap("n", "<leader>gL", function() require("gitsigns").blame_line({ full = true }) end,
-  { desc = "View full Git blame" })
-keymap("n", "<leader>gB", function() Snacks.git.blame_line() end, { desc = "Git blame line (snacks)" })
-keymap("n", "<leader>gp", function() require("gitsigns").preview_hunk() end, { desc = "Preview Git hunk" })
-keymap("n", "<leader>gh", function() require("gitsigns").reset_hunk() end, { desc = "Reset Git hunk" })
-keymap("n", "<leader>gr", function() require("gitsigns").reset_buffer() end, { desc = "Reset Git buffer" })
-keymap("n", "<leader>gs", function() require("gitsigns").stage_hunk() end, { desc = "Stage Git hunk" })
-keymap("n", "<leader>gS", function() require("gitsigns").stage_buffer() end, { desc = "Stage Git buffer" })
-keymap("n", "<leader>gu", function() require("gitsigns").undo_stage_hunk() end, { desc = "Unstage Git hunk" })
-keymap("n", "<leader>gd", function() require("gitsigns").diffthis() end, { desc = "View Git diff" })
+-- ============================================================================
+-- QUICK TOGGLES (<leader>t)
+-- ============================================================================
 
--- Git menu
-keymap("n", "<leader>gm", function()
+keymap("n", "<leader>te", ":Neotree toggle<CR>", { desc = "Toggle file explorer" })
+keymap("n", "<leader>ta", ":AerialToggle<CR>", { desc = "Toggle Aerial" })
+keymap("n", "<leader>tc", function()
+  vim.opt.conceallevel = vim.opt.conceallevel:get() == 0 and 2 or 0
+end, { desc = "Toggle conceal" })
+keymap("n", "<leader>ts", function()
+  vim.opt.spell = not vim.opt.spell:get()
+end, { desc = "Toggle spell check" })
+keymap("n", "<leader>tw", function()
+  vim.opt.wrap = not vim.opt.wrap:get()
+end, { desc = "Toggle wrap" })
+keymap("n", "<leader>tz", function()
+  if pcall(require, "zen-mode") then
+    require("zen-mode").toggle()
+  end
+end, { desc = "Toggle Zen Mode" })
+keymap("n", "<leader>tt", function()
   vim.ui.select(
-    { "Blame Line", "Blame (Full)", "Preview Hunk", "Reset Hunk", "Reset Buffer", "Stage Hunk", "Stage Buffer",
-      "Unstage Hunk", "Diff", "Cancel" },
-    { prompt = "Git Actions:" },
+    { "Float Terminal", "Horizontal Terminal", "Vertical Terminal", "Cancel" },
+    { prompt = "Terminal Type:" },
     function(choice)
-      if choice == "Blame Line" then
-        require("gitsigns").blame_line()
-      elseif choice == "Blame (Full)" then
-        require("gitsigns").blame_line({ full = true })
-      elseif choice == "Preview Hunk" then
-        require("gitsigns").preview_hunk()
-      elseif choice == "Reset Hunk" then
-        require("gitsigns").reset_hunk()
-      elseif choice == "Reset Buffer" then
-        require("gitsigns").reset_buffer()
-      elseif choice == "Stage Hunk" then
-        require("gitsigns").stage_hunk()
-      elseif choice == "Stage Buffer" then
-        require("gitsigns").stage_buffer()
-      elseif choice == "Unstage Hunk" then
-        require("gitsigns").undo_stage_hunk()
-      elseif choice == "Diff" then
-        require("gitsigns").diffthis()
+      if choice == "Float Terminal" then
+        Snacks.terminal()
+      elseif choice == "Horizontal Terminal" then
+        Snacks.terminal(nil, { win = { position = "bottom", height = 0.3 } })
+      elseif choice == "Vertical Terminal" then
+        Snacks.terminal(nil, { win = { position = "right", width = 0.4 } })
       end
     end
   )
-end, { desc = "Git menu" })
+end, { desc = "Toggle terminal menu" })
+keymap("n", "<leader>th", function() Snacks.terminal(nil, { win = { position = "bottom", height = 0.3 } }) end,
+  { desc = "Terminal horizontal" })
+keymap("n", "<leader>tv", function() Snacks.terminal(nil, { win = { position = "right", width = 0.4 } }) end,
+  { desc = "Terminal vertical" })
+
+-- Quick terminal toggles
+keymap("n", "<F7>", function() Snacks.terminal(nil, { win = { position = "float" } }) end, { desc = "Toggle terminal" })
+keymap("t", "<F7>", "<cmd>close<cr>", { desc = "Close terminal" })
+keymap("n", "<C-'>", function() Snacks.terminal(nil, { win = { position = "float" } }) end, { desc = "Toggle terminal" })
+keymap("t", "<C-'>", "<cmd>close<cr>", { desc = "Close terminal" })
+
+-- Terminal navigation
+keymap("t", "<C-h>", "<cmd>wincmd h<cr>", { desc = "Terminal left window navigation" })
+keymap("t", "<C-j>", "<cmd>wincmd j<cr>", { desc = "Terminal down window navigation" })
+keymap("t", "<C-k>", "<cmd>wincmd k<cr>", { desc = "Terminal up window navigation" })
+keymap("t", "<C-l>", "<cmd>wincmd l<cr>", { desc = "Terminal right window navigation" })
+
+-- ============================================================================
+-- AI ASSISTANTS (<leader>a for AI, <leader>o for OpenCode)
+-- ============================================================================
+
+-- OpenCode
+keymap("n", "<leader>aa", function() require("opencode").ask("@this: ", { submit = true }) end,
+  { desc = "Ask about this" })
+keymap("x", "<leader>aa", function() require("opencode").ask("@this: ", { submit = true }) end,
+  { desc = "Ask about selection" })
+keymap("n", "<leader>aA", function() require("opencode").ask() end, { desc = "Ask (free-form)" })
+keymap("n", "<leader>as", function() require("opencode").select() end, { desc = "Select action" })
+keymap("x", "<leader>as", function() require("opencode").select() end, { desc = "Select action" })
+keymap("n", "<leader>ao", function() require("opencode").toggle() end, { desc = "Toggle OpenCode" })
+keymap("t", "<leader>ao", function() require("opencode").toggle() end, { desc = "Toggle OpenCode" })
+keymap("n", "<leader>al", function() require("opencode").prompt("explain @this") end, { desc = "Explain code" })
+keymap("x", "<leader>al", function() require("opencode").prompt("explain @this") end, { desc = "Explain selection" })
+keymap("n", "<leader>ar", function() require("opencode").prompt("review @this") end, { desc = "Review code" })
+keymap("x", "<leader>ar", function() require("opencode").prompt("review @this") end, { desc = "Review selection" })
+keymap("n", "<leader>af", function() require("opencode").prompt("fix @diagnostics") end, { desc = "Fix diagnostics" })
+keymap("n", "<leader>an", function() require("opencode").prompt("document @this") end, { desc = "Document code" })
+keymap("x", "<leader>an", function() require("opencode").prompt("document @this") end, { desc = "Document selection" })
+keymap("n", "<leader>at", function() require("opencode").prompt("test @this") end, { desc = "Generate tests" })
+keymap("x", "<leader>at", function() require("opencode").prompt("test @this") end,
+  { desc = "Generate tests for selection" })
+keymap("n", "<leader>ap", function() require("opencode").prompt("optimize @this") end, { desc = "Optimize code" })
+keymap("x", "<leader>ap", function() require("opencode").prompt("optimize @this") end, { desc = "Optimize selection" })
+keymap("n", "<leader>aw", function() require("opencode").prompt("@this") end, { desc = "Add context" })
+keymap("x", "<leader>aw", function() require("opencode").prompt("@this") end, { desc = "Add selection" })
+keymap("n", "<leader>aS", function() require("opencode").command("session.new") end, { desc = "New session" })
+keymap("n", "<leader>aL", function() require("opencode").command("session.list") end, { desc = "List sessions" })
+keymap("n", "<leader>ai", function() require("opencode").command("session.interrupt") end, { desc = "Interrupt" })
+
+-- Quick opencode terminal toggle
+keymap("n", "<C-;>", function()
+  Snacks.terminal("opencode", {
+    win = {
+      position = "float",
+      width = 0.9,
+      height = 0.9,
+    }
+  })
+end, { desc = "Toggle OpenCode terminal" })
+
+-- Codeium
+keymap("n", "<leader>ac", function() vim.cmd("Codeium Chat") end, { desc = "Open chat" })
+keymap("n", "<leader>ae", function() vim.cmd("Codeium Enable") end, { desc = "Enable Codeium" })
+keymap("n", "<leader>ad", function() vim.cmd("Codeium Disable") end, { desc = "Disable Codeium" })
+keymap("n", "<leader>aT", function() vim.cmd("Codeium Toggle") end, { desc = "Toggle Codeium" })
+keymap("n", "<leader>am", function()
+  vim.ui.select(
+    { "Open Chat", "Enable", "Disable", "Toggle", "Cancel" },
+    { prompt = "Codeium Actions:" },
+    function(choice)
+      if choice == "Open Chat" then
+        vim.cmd("Codeium Chat")
+      elseif choice == "Enable" then
+        vim.cmd("Codeium Enable")
+      elseif choice == "Disable" then
+        vim.cmd("Codeium Disable")
+      elseif choice == "Toggle" then
+        vim.cmd("Codeium Toggle")
+      end
+    end
+  )
+end, { desc = "AI" })
 
 -- ============================================================================
 -- LSP (<leader>l)
 -- ============================================================================
 
--- Core LSP Navigation (using lspsaga)
-keymap("n", "gd", "<cmd>Lspsaga goto_definition<CR>", { desc = "Go to definition" })
-keymap("n", "gp", "<cmd>Lspsaga peek_definition<CR>", { desc = "Peek definition" })
-keymap("n", "gD", vim.lsp.buf.declaration, { desc = "Go to declaration" })
-keymap("n", "gI", "<cmd>Lspsaga finder imp<CR>", { desc = "Go to implementation" })
-keymap("n", "gT", "<cmd>Lspsaga goto_type_definition<CR>", { desc = "Go to type definition" })
-keymap("n", "gt", "<cmd>Lspsaga peek_type_definition<CR>", { desc = "Peek type definition" })
-keymap("n", "gr", "<cmd>Lspsaga finder<CR>", { desc = "Find references" })
+keymap("n", "<leader>la", "<cmd>Lspsaga code_action<CR>", { desc = "Code action" })
+keymap("n", "<leader>lr", "<cmd>Lspsaga rename<CR>", { desc = "Rename" })
+keymap("n", "<leader>lf", function() vim.lsp.buf.format() end, { desc = "Format" })
+keymap("n", "<leader>ld", "<cmd>Lspsaga show_line_diagnostics<CR>", { desc = "Line diagnostics" })
+keymap("n", "<leader>li", ":LspInfo<CR>", { desc = "LSP info" })
+keymap("n", "<leader>lR", ":LspRestart<CR>", { desc = "Restart LSP" })
+keymap("n", "<leader>lo", "<cmd>Lspsaga outline<CR>", { desc = "Outline" })
 
--- Hover and Help
+-- LSP Navigation
+keymap("n", "gd", "<cmd>Lspsaga goto_definition<CR>", { desc = "Go to definition" })
+keymap("n", "gD", "<cmd>Lspsaga peek_definition<CR>", { desc = "Peek definition" })
+keymap("n", "gi", "<cmd>Lspsaga finder imp<CR>", { desc = "Go to implementation" })
+keymap("n", "gr", "<cmd>Lspsaga finder ref<CR>", { desc = "Go to references" })
+keymap("n", "gt", "<cmd>Lspsaga goto_type_definition<CR>", { desc = "Go to type definition" })
+keymap("n", "gT", "<cmd>Lspsaga peek_type_definition<CR>", { desc = "Peek type definition" })
 keymap("n", "K", "<cmd>Lspsaga hover_doc<CR>", { desc = "Hover documentation" })
-keymap("n", "gh", "<cmd>Lspsaga hover_doc<CR>", { desc = "Hover help" })
-keymap("n", "gH", vim.lsp.buf.signature_help, { desc = "Signature help" })
-keymap("n", "<C-k>", vim.lsp.buf.signature_help, { desc = "Signature help" })
+keymap("n", "<C-k>", "<cmd>Lspsaga signature_help<CR>", { desc = "Signature help" })
 
 -- Diagnostics
-keymap("n", "gl", "<cmd>Lspsaga show_line_diagnostics<CR>", { desc = "Line diagnostics" })
 keymap("n", "[d", "<cmd>Lspsaga diagnostic_jump_prev<CR>", { desc = "Previous diagnostic" })
 keymap("n", "]d", "<cmd>Lspsaga diagnostic_jump_next<CR>", { desc = "Next diagnostic" })
-keymap("n", "<leader>ld", "<cmd>Lspsaga show_cursor_diagnostics<CR>", { desc = "Cursor diagnostics" })
-keymap("n", "<leader>lD", function() Snacks.picker.diagnostics() end, { desc = "Diagnostics picker" })
+keymap("n", "[e", function()
+  require("lspsaga.diagnostic"):goto_prev({ severity = vim.diagnostic.severity.ERROR })
+end, { desc = "Previous error" })
+keymap("n", "]e", function()
+  require("lspsaga.diagnostic"):goto_next({ severity = vim.diagnostic.severity.ERROR })
+end, { desc = "Next error" })
+keymap("n", "<leader>lb", "<cmd>Lspsaga show_buf_diagnostics<CR>", { desc = "Buffer diagnostics" })
+keymap("n", "<leader>lD", "<cmd>Lspsaga show_workspace_diagnostics<CR>", { desc = "Workspace diagnostics" })
 
--- Code Actions
-keymap("n", "<leader>la", "<cmd>Lspsaga code_action<CR>", { desc = "Code actions" })
-keymap("v", "<leader>la", "<cmd>Lspsaga code_action<CR>", { desc = "Code actions" })
+-- ============================================================================
+-- GIT (<leader>g)
+-- ============================================================================
 
--- Rename
-keymap("n", "<leader>lr", "<cmd>Lspsaga rename<CR>", { desc = "Rename symbol" })
-keymap("n", "<leader>lR", "<cmd>Lspsaga rename ++project<CR>", { desc = "Rename in project" })
-
--- Format
-keymap("n", "<leader>lf", function()
-  vim.lsp.buf.format({ async = true })
-end, { desc = "Format buffer" })
-keymap("v", "<leader>lf", function()
-  vim.lsp.buf.format({ async = true })
-end, { desc = "Format selection" })
-
--- Symbols
-keymap("n", "<leader>lo", "<cmd>Lspsaga outline<CR>", { desc = "Toggle outline" })
-keymap("n", "<leader>ls", function() Snacks.picker.lsp_symbols() end, { desc = "Document symbols" })
-keymap("n", "gs", function() Snacks.picker.lsp_symbols() end, { desc = "Document symbols" })
-keymap("n", "<leader>lS", function() Snacks.picker.lsp_workspace_symbols() end, { desc = "Workspace symbols" })
-keymap("n", "gS", function() Snacks.picker.lsp_workspace_symbols() end, { desc = "Workspace symbols" })
-
--- LSP Info and Control
-keymap("n", "<leader>li", ":LspInfo<CR>", { desc = "LSP info" })
-keymap("n", "<leader>lL", ":LspRestart<CR>", { desc = "LSP restart" })
-keymap("n", "<leader>lh", function()
-  if vim.lsp.inlay_hint then
-    vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
-  else
-    vim.notify("Inlay hints not supported", vim.log.levels.WARN)
+keymap("n", "<leader>gg", function() Snacks.lazygit() end, { desc = "LazyGit" })
+keymap("n", "<leader>gb", function()
+  if pcall(require, "gitsigns") then
+    require("gitsigns").blame_line({ full = true })
   end
-end, { desc = "Toggle inlay hints" })
+end, { desc = "Blame line" })
+keymap("n", "<leader>gB", function() Snacks.picker.git_branches() end, { desc = "Branches" })
+keymap("n", "<leader>gc", function() Snacks.picker.git_log() end, { desc = "Commits" })
+keymap("n", "<leader>gs", function() Snacks.picker.git_status() end, { desc = "Status" })
+keymap("n", "<leader>gd", function()
+  if pcall(require, "gitsigns") then
+    require("gitsigns").diffthis()
+  end
+end, { desc = "Diff this" })
+keymap("n", "<leader>gp", function()
+  if pcall(require, "gitsigns") then
+    require("gitsigns").preview_hunk()
+  end
+end, { desc = "Preview hunk" })
+keymap("n", "<leader>gr", function()
+  if pcall(require, "gitsigns") then
+    require("gitsigns").reset_hunk()
+  end
+end, { desc = "Reset hunk" })
+keymap("n", "<leader>gR", function()
+  if pcall(require, "gitsigns") then
+    require("gitsigns").reset_buffer()
+  end
+end, { desc = "Reset buffer" })
+keymap("n", "<leader>gS", function()
+  if pcall(require, "gitsigns") then
+    require("gitsigns").stage_hunk()
+  end
+end, { desc = "Stage hunk" })
+keymap("n", "<leader>gu", function()
+  if pcall(require, "gitsigns") then
+    require("gitsigns").undo_stage_hunk()
+  end
+end, { desc = "Undo stage hunk" })
 
--- Calls
-keymap("n", "<leader>lci", "<cmd>Lspsaga incoming_calls<CR>", { desc = "Incoming calls" })
-keymap("n", "<leader>lco", "<cmd>Lspsaga outgoing_calls<CR>", { desc = "Outgoing calls" })
-
--- References
-keymap("n", "<leader>lx", function() Snacks.picker.lsp_references() end, { desc = "LSP references" })
-
--- LSP Menu
-keymap("n", "<leader>lm", function()
-  vim.ui.select(
-    {
-      "Code Actions",
-      "Rename",
-      "Rename (Project)",
-      "Format",
-      "Hover Doc",
-      "Outline",
-      "LSP Info",
-      "Restart LSP",
-      "Document Symbols",
-      "Workspace Symbols",
-      "Toggle Inlay Hints",
-      "Cancel"
-    },
-    { prompt = "LSP Actions:" },
-    function(choice)
-      if choice == "Code Actions" then
-        vim.cmd("Lspsaga code_action")
-      elseif choice == "Rename" then
-        vim.cmd("Lspsaga rename")
-      elseif choice == "Rename (Project)" then
-        vim.cmd("Lspsaga rename ++project")
-      elseif choice == "Format" then
-        vim.lsp.buf.format({ async = true })
-      elseif choice == "Hover Doc" then
-        vim.cmd("Lspsaga hover_doc")
-      elseif choice == "Outline" then
-        vim.cmd("Lspsaga outline")
-      elseif choice == "LSP Info" then
-        vim.cmd("LspInfo")
-      elseif choice == "Restart LSP" then
-        vim.cmd("LspRestart")
-      elseif choice == "Document Symbols" then
-        Snacks.picker.lsp_symbols()
-      elseif choice == "Workspace Symbols" then
-        Snacks.picker.lsp_workspace_symbols()
-      elseif choice == "Toggle Inlay Hints" then
-        if vim.lsp.inlay_hint then
-          vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
-        end
-      end
-    end
-  )
-end, { desc = "LSP menu" })
-
--- Workspace Management (<leader>L)
-keymap("n", "<leader>La", vim.lsp.buf.add_workspace_folder, { desc = "Add workspace folder" })
-keymap("n", "<leader>Lr", vim.lsp.buf.remove_workspace_folder, { desc = "Remove workspace folder" })
-keymap("n", "<leader>Ll", function()
-  print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
-end, { desc = "List workspace folders" })
-
--- ============================================================================
--- CODE TOOLS
--- ============================================================================
-
--- Code Folding (nvim-ufo)
-keymap("n", "zR", function() require("ufo").openAllFolds() end, { desc = "Open all folds" })
-keymap("n", "zM", function() require("ufo").closeAllFolds() end, { desc = "Close all folds" })
-keymap("n", "zr", function() require("ufo").openFoldsExceptKinds() end, { desc = "Fold less" })
-keymap("n", "zm", function() require("ufo").closeFoldsWith() end, { desc = "Fold more" })
-keymap("n", "zp", function() require("ufo").peekFoldedLinesUnderCursor() end, { desc = "Peek fold" })
-
--- Aerial (code outline)
-keymap("n", "<leader>i", function() require("aerial").toggle() end, { desc = "Toggle Aerial" })
+-- Git hunk navigation
+keymap("n", "]g", function()
+  if pcall(require, "gitsigns") then
+    require("gitsigns").next_hunk()
+  end
+end, { desc = "Next git hunk" })
+keymap("n", "[g", function()
+  if pcall(require, "gitsigns") then
+    require("gitsigns").prev_hunk()
+  end
+end, { desc = "Previous git hunk" })
 
 -- ============================================================================
 -- DEBUGGER (<leader>d)
 -- ============================================================================
 
--- Function keys
-keymap("n", "<F5>", function() require("dap").continue() end, { desc = "Debugger: Start/Continue" })
-keymap("n", "<S-F5>", function() require("dap").terminate() end, { desc = "Debugger: Stop" })
-keymap("n", "<C-F5>", function() require("dap").restart_frame() end, { desc = "Debugger: Restart" })
-keymap("n", "<F9>", function() require("dap").toggle_breakpoint() end, { desc = "Toggle breakpoint" })
-keymap("n", "<S-F9>", function()
-  vim.ui.input({ prompt = "Condition: " }, function(condition)
-    if condition then require("dap").set_breakpoint(condition) end
+keymap("n", "<leader>db", function() require("dap").toggle_breakpoint() end, { desc = "Toggle breakpoint" })
+keymap("n", "<leader>dB", function()
+  vim.ui.input({ prompt = "Breakpoint condition: " }, function(condition)
+    if condition then
+      require("dap").set_breakpoint(condition)
+    end
   end)
 end, { desc = "Conditional breakpoint" })
-keymap("n", "<F10>", function() require("dap").step_over() end, { desc = "Step over" })
-keymap("n", "<S-F10>", function() require("dap").step_back() end, { desc = "Step back" })
-keymap("n", "<F11>", function() require("dap").step_into() end, { desc = "Step into" })
-keymap("n", "<S-F11>", function() require("dap").step_out() end, { desc = "Step out" })
-
--- DAP leader mappings
-keymap("n", "<leader>db", function() require("dap").toggle_breakpoint() end, { desc = "Toggle breakpoint" })
-keymap("n", "<leader>dB", function() require("dap").clear_breakpoints() end, { desc = "Clear breakpoints" })
-keymap("n", "<leader>dc", function() require("dap").continue() end, { desc = "Start/Continue" })
+keymap("n", "<leader>dc", function() require("dap").continue() end, { desc = "Continue" })
+keymap("n", "<leader>dC", function() require("dap").run_to_cursor() end, { desc = "Run to cursor" })
 keymap("n", "<leader>di", function() require("dap").step_into() end, { desc = "Step into" })
 keymap("n", "<leader>do", function() require("dap").step_over() end, { desc = "Step over" })
 keymap("n", "<leader>dO", function() require("dap").step_out() end, { desc = "Step out" })
-keymap("n", "<leader>dq", function() require("dap").close() end, { desc = "Close session" })
-keymap("n", "<leader>dQ", function() require("dap").terminate() end, { desc = "Terminate session" })
-keymap("n", "<leader>dr", function() require("dap").restart_frame() end, { desc = "Restart" })
 keymap("n", "<leader>dp", function() require("dap").pause() end, { desc = "Pause" })
-keymap("n", "<leader>dR", function() require("dap").repl.toggle() end, { desc = "REPL" })
-
--- DAP UI
-keymap("n", "<leader>du", function() require("dapui").toggle() end, { desc = "Toggle DAP UI" })
-keymap("n", "<leader>dh", function() require("dap.ui.widgets").hover() end, { desc = "Debugger hover" })
-keymap("n", "<leader>dE", function()
+keymap("n", "<leader>dr", function() require("dap").restart_frame() end, { desc = "Restart" })
+keymap("n", "<leader>dt", function() require("dap").terminate() end, { desc = "Terminate" })
+keymap("n", "<leader>du", function() require("dapui").toggle() end, { desc = "Toggle UI" })
+keymap("n", "<leader>dw", function() require("dap.ui.widgets").hover() end, { desc = "Widgets" })
+keymap("n", "<leader>de", function()
   vim.ui.input({ prompt = "Expression: " }, function(expr)
-    if expr then require("dapui").eval(expr, { enter = true }) end
+    if expr then
+      require("dapui").eval(expr)
+    end
   end)
 end, { desc = "Evaluate expression" })
-keymap("x", "<leader>dE", function() require("dapui").eval() end, { desc = "Evaluate selection" })
-
--- Debug menu
+keymap("x", "<leader>de", function() require("dapui").eval() end, { desc = "Evaluate selection" })
 keymap("n", "<leader>dm", function()
   vim.ui.select(
     { "Continue/Start", "Pause", "Stop", "Restart", "Toggle Breakpoint", "Clear Breakpoints", "Cancel" },
@@ -529,134 +523,73 @@ keymap("n", "<leader>dm", function()
   )
 end, { desc = "Debug menu" })
 
+-- Function keys for debugging
+keymap("n", "<F5>", function() require("dap").continue() end, { desc = "Continue" })
+keymap("n", "<F10>", function() require("dap").step_over() end, { desc = "Step over" })
+keymap("n", "<F11>", function() require("dap").step_into() end, { desc = "Step into" })
+keymap("n", "<F12>", function() require("dap").step_out() end, { desc = "Step out" })
+
+-- ============================================================================
+-- JAVA (<leader>j)
+-- ============================================================================
+
+keymap("n", "<leader>jo", function()
+  if vim.bo.filetype == "java" then
+    require("jdtls").organize_imports()
+  end
+end, { desc = "Organize imports" })
+keymap("n", "<leader>jv", function()
+  if vim.bo.filetype == "java" then
+    require("jdtls").extract_variable()
+  end
+end, { desc = "Extract variable" })
+keymap("x", "<leader>jv", function()
+  if vim.bo.filetype == "java" then
+    require("jdtls").extract_variable(true)
+  end
+end, { desc = "Extract variable" })
+keymap("n", "<leader>jc", function()
+  if vim.bo.filetype == "java" then
+    require("jdtls").extract_constant()
+  end
+end, { desc = "Extract constant" })
+keymap("x", "<leader>jc", function()
+  if vim.bo.filetype == "java" then
+    require("jdtls").extract_constant(true)
+  end
+end, { desc = "Extract constant" })
+keymap("x", "<leader>jm", function()
+  if vim.bo.filetype == "java" then
+    require("jdtls").extract_method(true)
+  end
+end, { desc = "Extract method" })
+keymap("n", "<leader>jt", function()
+  if vim.bo.filetype == "java" then
+    require("jdtls").test_class()
+  end
+end, { desc = "Test class" })
+keymap("n", "<leader>jn", function()
+  if vim.bo.filetype == "java" then
+    require("jdtls").test_nearest_method()
+  end
+end, { desc = "Test method" })
+
 -- ============================================================================
 -- COMPILER & BUILD (<leader>m)
 -- ============================================================================
 
 keymap("n", "<leader>mm", ":CompilerOpen<CR>", { desc = "Open compiler" })
 keymap("n", "<leader>mr", ":CompilerRedo<CR>", { desc = "Compiler redo" })
-keymap("n", "<leader>mt", ":CompilerToggleResults<CR>", { desc = "Compiler results" })
+keymap("n", "<leader>mt", ":CompilerToggleResults<CR>", { desc = "Toggle results" })
 keymap("n", "<F6>", ":CompilerOpen<CR>", { desc = "Open compiler" })
 keymap("n", "<S-F6>", ":CompilerRedo<CR>", { desc = "Compiler redo" })
-keymap("n", "<S-F7>", ":CompilerToggleResults<CR>", { desc = "Compiler toggle results" })
+keymap("n", "<S-F7>", ":CompilerToggleResults<CR>", { desc = "Toggle results" })
 keymap("n", "<F8>", ":OverseerToggle<CR>", { desc = "Toggle Overseer" })
 
 -- ============================================================================
--- TERMINAL (<leader>t)
+-- HOME SCREEN
 -- ============================================================================
 
-keymap("n", "<leader>tt", function()
-  vim.ui.select(
-    { "Float Terminal", "Horizontal Terminal", "Vertical Terminal", "Cancel" },
-    { prompt = "Terminal Type:" },
-    function(choice)
-      if choice == "Float Terminal" then
-        Snacks.terminal()
-      elseif choice == "Horizontal Terminal" then
-        Snacks.terminal(nil, { win = { position = "bottom", height = 0.3 } })
-      elseif choice == "Vertical Terminal" then
-        Snacks.terminal(nil, { win = { position = "right", width = 0.4 } })
-      end
-    end
-  )
-end, { desc = "Toggle terminal menu" })
-keymap("n", "<leader>th", function() Snacks.terminal(nil, { win = { position = "bottom", height = 0.3 } }) end,
-  { desc = "Toggle terminal horizontal" })
-keymap("n", "<leader>tv", function() Snacks.terminal(nil, { win = { position = "right", width = 0.4 } }) end,
-  { desc = "Toggle terminal vertical" })
-
--- Quick terminal toggles
-keymap("n", "<F7>", function() Snacks.terminal(nil, { win = { position = "float" } }) end, { desc = "Toggle terminal" })
-keymap("t", "<F7>", "<cmd>close<cr>", { desc = "Close terminal" })
-keymap("n", "<C-'>", function() Snacks.terminal(nil, { win = { position = "float" } }) end, { desc = "Toggle terminal" })
-keymap("t", "<C-'>", "<cmd>close<cr>", { desc = "Close terminal" })
-
--- Terminal navigation
-keymap("t", "<C-h>", "<cmd>wincmd h<cr>", { desc = "Terminal left window navigation" })
-keymap("t", "<C-j>", "<cmd>wincmd j<cr>", { desc = "Terminal down window navigation" })
-keymap("t", "<C-k>", "<cmd>wincmd k<cr>", { desc = "Terminal up window navigation" })
-keymap("t", "<C-l>", "<cmd>wincmd l<cr>", { desc = "Terminal right window navigation" })
-
--- ============================================================================
--- AI ASSISTANTS
--- ============================================================================
-
--- OpenCode (<leader>o)
-keymap("n", "<leader>oa", function() require("opencode").ask("@this: ", { submit = true }) end,
-  { desc = "Ask opencode about this" })
-keymap("x", "<leader>oa", function() require("opencode").ask("@this: ", { submit = true }) end,
-  { desc = "Ask opencode about selection" })
-keymap("n", "<leader>oA", function() require("opencode").ask() end, { desc = "Ask opencode (free-form)" })
-keymap("n", "<leader>os", function() require("opencode").select() end, { desc = "Select opencode action" })
-keymap("x", "<leader>os", function() require("opencode").select() end, { desc = "Select opencode action" })
-keymap("n", "<leader>oo", function() require("opencode").toggle() end, { desc = "Toggle opencode" })
-keymap("t", "<leader>oo", function() require("opencode").toggle() end, { desc = "Toggle opencode" })
-keymap("n", "<leader>oe", function() require("opencode").prompt("explain @this") end, { desc = "Explain this code" })
-keymap("x", "<leader>oe", function() require("opencode").prompt("explain @this") end, { desc = "Explain selection" })
-keymap("n", "<leader>or", function() require("opencode").prompt("review @this") end, { desc = "Review this code" })
-keymap("x", "<leader>or", function() require("opencode").prompt("review @this") end, { desc = "Review selection" })
-keymap("n", "<leader>of", function() require("opencode").prompt("fix @diagnostics") end, { desc = "Fix diagnostics" })
-keymap("n", "<leader>od", function() require("opencode").prompt("document @this") end, { desc = "Document this code" })
-keymap("x", "<leader>od", function() require("opencode").prompt("document @this") end, { desc = "Document selection" })
-keymap("n", "<leader>ot", function() require("opencode").prompt("test @this") end, { desc = "Generate tests" })
-keymap("x", "<leader>ot", function() require("opencode").prompt("test @this") end,
-  { desc = "Generate tests for selection" })
-keymap("n", "<leader>op", function() require("opencode").prompt("optimize @this") end, { desc = "Optimize this code" })
-keymap("x", "<leader>op", function() require("opencode").prompt("optimize @this") end, { desc = "Optimize selection" })
-keymap("n", "<leader>oc", function() require("opencode").prompt("@this") end, { desc = "Add context to opencode" })
-keymap("x", "<leader>oc", function() require("opencode").prompt("@this") end, { desc = "Add selection to opencode" })
-keymap("n", "<leader>on", function() require("opencode").command("session.new") end, { desc = "New opencode session" })
-keymap("n", "<leader>ol", function() require("opencode").command("session.list") end, { desc = "List opencode sessions" })
-keymap("n", "<leader>oi", function() require("opencode").command("session.interrupt") end,
-  { desc = "Interrupt opencode" })
-
--- Quick opencode terminal toggle
-keymap("n", "<C-;>", function()
-  Snacks.terminal("opencode", {
-    win = {
-      position = "float",
-      width = 0.9,
-      height = 0.9,
-    }
-  })
-end, { desc = "Toggle opencode terminal" })
-
--- Codeium (<leader>a)
-keymap("n", "<leader>ac", function()
-  vim.cmd("Codeium Chat")
-end, { desc = "Open Codeium Chat" })
-keymap("n", "<leader>ae", function()
-  vim.cmd("Codeium Enable")
-end, { desc = "Enable Codeium" })
-keymap("n", "<leader>ad", function()
-  vim.cmd("Codeium Disable")
-end, { desc = "Disable Codeium" })
-keymap("n", "<leader>at", function()
-  vim.cmd("Codeium Toggle")
-end, { desc = "Toggle Codeium" })
-keymap("n", "<leader>am", function()
-  vim.ui.select(
-    { "Open Chat", "Enable", "Disable", "Toggle", "Cancel" },
-    { prompt = "Codeium Actions:" },
-    function(choice)
-      if choice == "Open Chat" then
-        vim.cmd("Codeium Chat")
-      elseif choice == "Enable" then
-        vim.cmd("Codeium Enable")
-      elseif choice == "Disable" then
-        vim.cmd("Codeium Disable")
-      elseif choice == "Toggle" then
-        vim.cmd("Codeium Toggle")
-      end
-    end
-  )
-end, { desc = "Codeium menu" })
-
--- ============================================================================
--- NOTIFICATIONS & UI
--- ============================================================================
-
-keymap("n", "<leader>nh", function() Snacks.notifier.show_history() end, { desc = "Notification history" })
 keymap("n", "<leader>h", function()
   local wins = vim.api.nvim_tabpage_list_wins(0)
   if #wins > 1 and vim.api.nvim_get_option_value("filetype", {}) == "neo-tree" then
