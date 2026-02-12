@@ -146,8 +146,17 @@ return {
             { icon = "󰪶 ", key = "r", desc = "Yazi", action = ":Yazi", enabled = vim.fn.executable("ya") == 1 },
             { icon = "󰮗 ", key = "s", desc = "Sessions", action = ":SessionManager! load_session" },
             { icon = " ", key = "p", desc = "Projects", action = function() Snacks.picker.projects() end },
-            { icon = " ", key = "c", desc = "Config", action = function() Snacks.picker.files({ cwd = vim.fn.stdpath(
-              'config') }) end },
+            {
+              icon = " ",
+              key = "c",
+              desc = "Config",
+              action = function()
+                Snacks.picker.files({
+                  cwd = vim.fn.stdpath(
+                    'config')
+                })
+              end
+            },
             { icon = "󰅚 ", key = "q", desc = "Quit", action = ":qa" }
           }
         },

@@ -261,7 +261,8 @@ keymap("n", "<leader>sn", function() Snacks.notifier.show_history() end, { desc 
 -- EXPLORER/TREE (<leader>e)
 -- ============================================================================
 
-keymap("n", "<leader>e", ":Neotree toggle<CR>", { desc = "Toggle file explorer" })
+keymap("n", "<leader>e", ":Neotree toggle<CR>", { desc = "Neo-Tree" })
+keymap("n", "<leader>r", ":Yazi <CR>", { desc = "Yazi" })
 
 -- ============================================================================
 -- QUICK TOGGLES (<leader>t)

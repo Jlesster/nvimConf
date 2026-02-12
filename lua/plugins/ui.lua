@@ -470,7 +470,8 @@ return {
         { "<leader>s", group = " Search" },
 
         -- Explorer/Tree
-        { "<leader>e", group = " Explorer" },
+        { "<leader>e", group = "Neo-Tree", icon = { icon = "󰉋", color = "green" } },
+        { "<leader>r", group = "Yazi", icon = { icon = "󰪶", color = "yellow" } },
 
         -- Quick Toggles
         { "<leader>t", group = " Toggle" },
@@ -492,6 +493,8 @@ return {
 
         -- Notifications
         { "<leader>S", group = " Session" },
+
+        { "<leader>h", group = "Home", icon = { icon = " ", color = "red" } },
 
         -- Workspace/Windows
         { "<leader>w", group = " Workspace" },
