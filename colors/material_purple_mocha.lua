@@ -1,4 +1,3 @@
-
 -- Auto-generated Neovim colorscheme
 -- Vibrant LSP-semantic based theme with Material You + Catppuccin Mocha
 
@@ -9,54 +8,54 @@ vim.o.termguicolors = true
 vim.g.colors_name = "material_purple_mocha"
 
 local colors = {
-  -- Base colors
-  base = "#1F1E2E",
-  mantle = "#191825",
-  crust = "#12111B",
+    -- Base colors
+    base = "#1F1E2E",
+    mantle = "#191825",
+    crust = "#12111B",
 
-  -- Surface colors
-  surface0 = "#323244",
-  surface1 = "#46475A",
-  surface2 = "#595B70",
+    -- Surface colors
+    surface0 = "#323244",
+    surface1 = "#46475A",
+    surface2 = "#595B70",
 
-  -- Overlay colors
-  overlay0 = "#6E7086",
-  overlay1 = "#81839C",
-  overlay2 = "#9598B2",
+    -- Overlay colors
+    overlay0 = "#6E7086",
+    overlay1 = "#81839C",
+    overlay2 = "#9598B2",
 
-  -- Text colors
-  text = "#D1D5F4",
-  subtext1 = "#BEC1DE",
-  subtext0 = "#AAACC8",
+    -- Text colors
+    text = "#D1D5F4",
+    subtext1 = "#BEC1DE",
+    subtext0 = "#AAACC8",
 
-  -- Accent colors (VIBRANT)
-  rosewater = "#FFD9FA",
-  flamingo = "#EEC8FF",
-  pink = "#BE9FD7",
-  mauve = "#BA95ED",
-  red = "#C383F1",
-  maroon = "#D89CFF",
-  peach = "#EB97C0",
-  yellow = "#E0BFB9",
-  green = "#00BDCC",
-  teal = "#8BB5DB",
-  sky = "#BFCEFF",
-  sapphire = "#B0ABF5",
-  blue = "#BBA2FC",
-  lavender = "#CEB6FF",
+    -- Accent colors (VIBRANT)
+    rosewater = "#FFD9FA",
+    flamingo = "#EEC8FF",
+    pink = "#BE9FD7",
+    mauve = "#BA95ED",
+    red = "#C383F1",
+    maroon = "#D89CFF",
+    peach = "#EB97C0",
+    yellow = "#E0BFB9",
+    green = "#00BDCC",
+    teal = "#8BB5DB",
+    sky = "#BFCEFF",
+    sapphire = "#B0ABF5",
+    blue = "#BBA2FC",
+    lavender = "#CEB6FF",
 }
 
 local function hi(group, opts)
-  local cmd = {"highlight", group}
-  if opts.fg then table.insert(cmd, "guifg=" .. opts.fg) end
-  if opts.bg then table.insert(cmd, "guibg=" .. opts.bg) end
-  if opts.sp then table.insert(cmd, "guisp=" .. opts.sp) end
-  if opts.style then table.insert(cmd, "gui=" .. opts.style) end
-  if opts.link then
-    vim.cmd(string.format("highlight! link %s %s", group, opts.link))
-  else
-    vim.cmd(table.concat(vim.tbl_flatten(cmd), " "))
-  end
+    local cmd = { "highlight", group }
+    if opts.fg then table.insert(cmd, "guifg=" .. opts.fg) end
+    if opts.bg then table.insert(cmd, "guibg=" .. opts.bg) end
+    if opts.sp then table.insert(cmd, "guisp=" .. opts.sp) end
+    if opts.style then table.insert(cmd, "gui=" .. opts.style) end
+    if opts.link then
+        vim.cmd(string.format("highlight! link %s %s", group, opts.link))
+    else
+        vim.cmd(table.concat(vim.tbl_flatten(cmd), " "))
+    end
 end
 
 -- ============================================================================
@@ -65,7 +64,7 @@ end
 local function setup_highlights()
     hi("Normal", { fg = colors.text, bg = "NONE" })
     hi("NormalFloat", { fg = colors.text, bg = colors.mantle })
-    hi("FloatBorder", { fg = colors.lavender, bg = "NONE"})
+    hi("FloatBorder", { fg = colors.lavender, bg = "NONE" })
     hi("FloatTitle", { fg = colors.mauve, bg = "NONE", style = "bold,italic" })
     hi("Folded", { fg = "NONE", bg = "NONE" })
     hi("FoldColumn", { fg = colors.red })
@@ -97,7 +96,7 @@ local function setup_highlights()
 
     hi("Pmenu", { fg = colors.text, bg = "NONE" })
     hi("PmenuSel", { fg = "NONE", bg = colors.surface1, style = "bold" })
-    hi("PmenuSbar", { bg = "NONE"})
+    hi("PmenuSbar", { bg = "NONE" })
     hi("PmenuThumb", { bg = "NONE" })
     hi("PmenuBorder", { fg = colors.lavender, bg = "NONE" })
 
@@ -189,7 +188,7 @@ local function setup_highlights()
     hi("@operator.java", { fg = "#00ffff" })
 
     hi("@keyword", { fg = colors.mauve, style = "bold" })
-    hi("@keyword.repeat.java", { fg = colors.mauve, style = "italic,bold"})
+    hi("@keyword.repeat.java", { fg = colors.mauve, style = "italic,bold" })
     hi("@keyword.conditional", { fg = colors.mauve, style = "bold,italic" })
     hi("@keyword.function", { fg = colors.mauve, style = "bold" })
     hi("@keyword.operator", { fg = colors.mauve })
@@ -255,6 +254,7 @@ local function setup_highlights()
     hi("@lsp.type.namespace.java", { fg = colors.sapphire, style = "italic" })
     hi("@lsp.mod.importDeclaration", { fg = colors.yellow, style = "italic" })
     hi("@lsp.mod.importDeclaration.java", { fg = colors.yellow, style = "italic" })
+    hi("@lsp.mod.public.java", { fg = colors.yellow, style = "italic" })
     hi("@lsp.typemod.namespace.importDeclaration.java", { fg = colors.yellow, style = "italic" })
 
     -- Macros and Preprocessor
@@ -270,13 +270,48 @@ local function setup_highlights()
     hi("@lsp.type.keyword", { fg = colors.mauve, style = "bold" })
     hi("@lsp.typemod.keyword.controlFlow", { fg = colors.pink, style = "bold" })
 
--- Decorators and Annotations
+    -- Decorators and Annotations
     hi("@lsp.type.decorator", { fg = colors.yellow, style = "italic" })
     hi("@lsp.type.annotation", { fg = colors.yellow, style = "italic" })
 
     -- Keywords (when LSP provides them)
     hi("@lsp.type.keyword", { fg = colors.mauve, style = "bold" })
     hi("@lsp.typemod.keyword.controlFlow", { fg = colors.pink, style = "bold" })
+
+    -- ============================================================================
+    -- VIM SYNTAX GROUPS (for languages without LSP semantic tokens)
+    -- ============================================================================
+    hi("Statement", { fg = colors.mauve, style = "bold" })
+    hi("Conditional", { fg = colors.mauve, style = "bold,italic" })
+    hi("Repeat", { fg = colors.mauve, style = "bold,italic" })
+    hi("Keyword", { fg = colors.mauve, style = "bold" })
+    hi("Exception", { fg = colors.mauve, style = "bold" })
+    hi("Operator", { fg = "#00ffff" })
+
+    hi("PreProc", { fg = colors.mauve, style = "bold" })
+    hi("Include", { fg = colors.mauve, style = "bold" })
+    hi("Define", { fg = colors.mauve, style = "bold" })
+    hi("Macro", { fg = colors.mauve, style = "bold" })
+
+    hi("Type", { fg = colors.yellow })
+    hi("StorageClass", { fg = colors.mauve, style = "bold" })
+    hi("Structure", { fg = colors.yellow })
+    hi("Typedef", { fg = colors.yellow })
+
+    hi("Constant", { fg = colors.teal })
+    hi("String", { fg = colors.green })
+    hi("Character", { fg = colors.teal })
+    hi("Number", { fg = colors.peach })
+    hi("Boolean", { fg = colors.peach })
+    hi("Float", { fg = colors.peach })
+
+    hi("Function", { fg = colors.blue, style = "bold" })
+    hi("Identifier", { fg = colors.text })
+
+    hi("Special", { fg = colors.pink })
+    hi("SpecialChar", { fg = colors.pink })
+    hi("Delimiter", { fg = colors.overlay2 })
+    hi("Comment", { fg = colors.pink, style = "italic" })
 
     -- ============================================================================
     -- LANGUAGE-SPECIFIC LSP SEMANTIC TOKENS
@@ -349,7 +384,7 @@ local function setup_highlights()
     -- PLUGIN: TELESCOPE
     -- ============================================================================
     hi("TelescopeBorder", { fg = colors.lavender, bg = "NONE" })
-    hi("TelescopePromptBorder", { fg = colors.mauve, bg = "NONE"})
+    hi("TelescopePromptBorder", { fg = colors.mauve, bg = "NONE" })
     hi("TelescopeResultsBorder", { fg = colors.lavender, bg = "NONE" })
     hi("TelescopePreviewBorder", { fg = colors.lavender, bg = "NONE" })
     hi("TelescopeSelection", { fg = colors.surface0, bg = colors.mauve, style = "bold" })
@@ -380,7 +415,7 @@ local function setup_highlights()
     hi("DressingInput", { fg = colors.text, bg = colors.mantle })
     hi("DressingInputBorder", { fg = colors.lavender, bg = "NONE" })
     hi("DressingInputTitle", { fg = colors.mauve, bg = "NONE", style = "bold" })
-    hi("DressingInputPrompt", { fg = colors.text, bg = "NONE" })  -- This is the key one!
+    hi("DressingInputPrompt", { fg = colors.text, bg = "NONE" }) -- This is the key one!
     hi("DressingInputText", { fg = colors.text, bg = "NONE" })
     hi("Prompt", { fg = colors.text, bg = "NONE" })
     hi("Question", { fg = colors.text, bg = "NONE" })
@@ -425,12 +460,12 @@ local function setup_highlights()
     -- ============================================================================
     -- PLUGIN: RAINBOW DELIMITERS
     -- ============================================================================
-    hi("RainbowDelimiterRed",    { fg = "#CD88FF" })
+    hi("RainbowDelimiterRed", { fg = "#CD88FF" })
     hi("RainbowDelimiterOrange", { fg = "#F88FC5" })
     hi("RainbowDelimiterYellow", { fg = "#E6BDB6" })
-    hi("RainbowDelimiterGreen",  { fg = "#00BDCC" })
-    hi("RainbowDelimiterCyan",   { fg = "#78B7EB" })
-    hi("RainbowDelimiterBlue",   { fg = "#BCA2FF" })
+    hi("RainbowDelimiterGreen", { fg = "#00BDCC" })
+    hi("RainbowDelimiterCyan", { fg = "#78B7EB" })
+    hi("RainbowDelimiterBlue", { fg = "#BCA2FF" })
     hi("RainbowDelimiterViolet", { fg = "#BE90FF" })
 
     -- ============================================================================
@@ -496,7 +531,7 @@ local function setup_highlights()
     hi("NvimScrollbarError", { fg = "NONE", bg = "NONE" })
     hi("NvimScrollbarWarn", { fg = "NONE", bg = "NONE" })
     hi("NvimScrollbarInfo", { fg = "NONE", bg = "NONE" })
-    hi("NvimScrollbarHint", {fg = "NONE", bg = "NONE" })
+    hi("NvimScrollbarHint", { fg = "NONE", bg = "NONE" })
     hi("NeoTreeScrollbar", { fg = "NONE", bg = "NONE" })
     hi("NeoTreeScrollbarThumb", { fg = "NONE", bg = "NONE" })
     hi("WinScrollbar", { fg = "NONE", bg = "NONE" })
@@ -538,12 +573,12 @@ local function setup_highlights()
 
     -- For syntax highlighting of color hex codes in your editor
     -- This will make the bright red/green hex codes themselves appear in purple tones
-    hi("@string.special", { fg = colors.green })  -- For color strings like "#FF0000"
+    hi("@string.special", { fg = colors.green }) -- For color strings like "#FF0000"
     hi("@number.css", { fg = colors.peach })
 
--- ============================================================================
--- PLUGIN: LUALINE
--- ============================================================================
+    -- ============================================================================
+    -- PLUGIN: LUALINE
+    -- ============================================================================
     -- Normal mode
     hi("lualine_a_normal", { fg = colors.base, bg = colors.blue, style = "bold" })
     hi("lualine_b_normal", { fg = colors.text, bg = colors.surface0 })
@@ -596,137 +631,137 @@ local function setup_highlights()
     --hi("lualine_transitional_lualine_a_replace_to_lualine_b_replace", { fg = colors.red, bg = colors.surface0 })
     --hi("lualine_transitional_lualine_a_command_to_lualine_b_command", { fg = colors.peach, bg = colors.surface0 })
 
--- ============================================================================
--- TRANSPARENCY REASSERTION (CRITICAL)
--- ============================================================================
+    -- ============================================================================
+    -- TRANSPARENCY REASSERTION (CRITICAL)
+    -- ============================================================================
     local transparent_groups = {
-      -- Core editor / windows
-      "Normal",
-      "NormalFloat",
-      "FloatBorder",
-      "SignColumn",
-      "EndOfBuffer",
-      "VertSplit",
-      "WinSeparator",
-      "WinBar",
-      "WinBarNC",
-      "Title",
+        -- Core editor / windows
+        "Normal",
+        "NormalFloat",
+        "FloatBorder",
+        "SignColumn",
+        "EndOfBuffer",
+        "VertSplit",
+        "WinSeparator",
+        "WinBar",
+        "WinBarNC",
+        "Title",
 
-      -- Cursor / columns (IMPORTANT)
-      "CursorLine",
-      "CursorColumn",
-      "ColorColumn",
+        -- Cursor / columns (IMPORTANT)
+        "CursorLine",
+        "CursorColumn",
+        "ColorColumn",
 
-      -- Status / tabline
-      "StatusLine",
-      "StatusLineNC",
-      "TabLine",
-      "TabLineFill",
-      "TabLineSel",
+        -- Status / tabline
+        "StatusLine",
+        "StatusLineNC",
+        "TabLine",
+        "TabLineFill",
+        "TabLineSel",
 
-      -- Popup / completion
-      "Pmenu",
-      "PmenuSbar",
-      "PmenuThumb",
-      "PmenuBorder",
-      "TelescopePromptBorder",
-      "TelescopeResultsBorder",
-      "TelescopePreviewBorder",
+        -- Popup / completion
+        "Pmenu",
+        "PmenuSbar",
+        "PmenuThumb",
+        "PmenuBorder",
+        "TelescopePromptBorder",
+        "TelescopeResultsBorder",
+        "TelescopePreviewBorder",
 
 
-      -- Completion item kinds (nvim-cmp)
-      "CmpItemKindVariable",
-      "CmpItemKindFunction",
-      "CmpItemKindMethod",
-      "CmpItemKindConstructor",
-      "CmpItemKindClass",
-      "CmpItemKindInterface",
-      "CmpItemKindStruct",
-      "CmpItemKindEnum",
-      "CmpItemKindEnumMember",
-      "CmpItemKindModule",
-      "CmpItemKindProperty",
-      "CmpItemKindField",
-      "CmpItemKindTypeParameter",
-      "CmpItemKindConstant",
-      "CmpItemKindKeyword",
-      "CmpItemKindSnippet",
-      "CmpItemKindText",
-      "CmpItemKindFile",
-      "CmpItemKindFolder",
-      "CmpItemKindColor",
-      "CmpItemKindReference",
-      "CmpItemKindOperator",
-      "CmpItemKindUnit",
-      "CmpItemKindValue",
+        -- Completion item kinds (nvim-cmp)
+        "CmpItemKindVariable",
+        "CmpItemKindFunction",
+        "CmpItemKindMethod",
+        "CmpItemKindConstructor",
+        "CmpItemKindClass",
+        "CmpItemKindInterface",
+        "CmpItemKindStruct",
+        "CmpItemKindEnum",
+        "CmpItemKindEnumMember",
+        "CmpItemKindModule",
+        "CmpItemKindProperty",
+        "CmpItemKindField",
+        "CmpItemKindTypeParameter",
+        "CmpItemKindConstant",
+        "CmpItemKindKeyword",
+        "CmpItemKindSnippet",
+        "CmpItemKindText",
+        "CmpItemKindFile",
+        "CmpItemKindFolder",
+        "CmpItemKindColor",
+        "CmpItemKindReference",
+        "CmpItemKindOperator",
+        "CmpItemKindUnit",
+        "CmpItemKindValue",
 
-      -- Completion text
-      "CmpItemAbbr",
-      "CmpItemAbbrDeprecated",
-      "CmpItemAbbrMatch",
-      "CmpItemAbbrMatchFuzzy",
-      "CmpItemMenu",
+        -- Completion text
+        "CmpItemAbbr",
+        "CmpItemAbbrDeprecated",
+        "CmpItemAbbrMatch",
+        "CmpItemAbbrMatchFuzzy",
+        "CmpItemMenu",
 
-      -- Which-key
-      "WhichKey",
-      "WhichKeyFloat",
-      "WhichKeyTile",
+        -- Which-key
+        "WhichKey",
+        "WhichKeyFloat",
+        "WhichKeyTile",
 
-      -- Neo-tree
-      "NeoTreeTabActive",
-      "NeoTreeTabInactive",
-      "NeoTreeTabSeparatorActive",
-      "NeoTreeTabSeparatorInactive",
+        -- Neo-tree
+        "NeoTreeTabActive",
+        "NeoTreeTabInactive",
+        "NeoTreeTabSeparatorActive",
+        "NeoTreeTabSeparatorInactive",
 
-      -- Render / markdown
-      "RenderMarkdownCode",
+        -- Render / markdown
+        "RenderMarkdownCode",
 
-      -- Bufferline / Barbar
-      "BufferLineFill",
-      "BufferLineBackground",
-      "BufferLineBuffer",
-      "BufferLineBufferVisible",
-      "BufferLineBufferSelected",
-      "BufferLineTab",
-      "BufferLineTabSelected",
-      "BufferLineSeparator",
-      "BufferLineSeparatorVisible",
-      "BufferLineSeparatorSelected",
+        -- Bufferline / Barbar
+        "BufferLineFill",
+        "BufferLineBackground",
+        "BufferLineBuffer",
+        "BufferLineBufferVisible",
+        "BufferLineBufferSelected",
+        "BufferLineTab",
+        "BufferLineTabSelected",
+        "BufferLineSeparator",
+        "BufferLineSeparatorVisible",
+        "BufferLineSeparatorSelected",
 
-      "BufferCurrent",
-      "BufferCurrentIndex",
-      "BufferCurrentMod",
-      "BufferCurrentSign",
-      "BufferCurrentTarget",
+        "BufferCurrent",
+        "BufferCurrentIndex",
+        "BufferCurrentMod",
+        "BufferCurrentSign",
+        "BufferCurrentTarget",
 
-      "BufferVisible",
-      "BufferVisibleIndex",
-      "BufferVisibleMod",
-      "BufferVisibleSign",
-      "BufferVisibleTarget",
+        "BufferVisible",
+        "BufferVisibleIndex",
+        "BufferVisibleMod",
+        "BufferVisibleSign",
+        "BufferVisibleTarget",
 
-      "BufferInactive",
-      "BufferInactiveIndex",
-      "BufferInactiveMod",
-      "BufferInactiveSign",
-      "BufferInactiveTarget",
+        "BufferInactive",
+        "BufferInactiveIndex",
+        "BufferInactiveMod",
+        "BufferInactiveSign",
+        "BufferInactiveTarget",
 
-      "BufferTabpages",
-      "BufferTabpageFill",
+        "BufferTabpages",
+        "BufferTabpageFill",
 
-      -- Devicons
-      "BufferLineDevIconLua",
-      "BufferLineDevIconDefault",
+        -- Devicons
+        "BufferLineDevIconLua",
+        "BufferLineDevIconDefault",
 
-      -- Overseer
-      "OverseerTask",
-      "OverseerTaskBorder",
-      "OverseerRunning",
-      "OverseerSuccess",
-      "OverseerCanceled",
-      "OverseerFailure",
-      "OverseerBorder",
-        }
+        -- Overseer
+        "OverseerTask",
+        "OverseerTaskBorder",
+        "OverseerRunning",
+        "OverseerSuccess",
+        "OverseerCanceled",
+        "OverseerFailure",
+        "OverseerBorder",
+    }
 
     for _, group in ipairs(transparent_groups) do
         local ok, hl = pcall(vim.api.nvim_get_hl, 0, { name = group })

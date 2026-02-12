@@ -1,46 +1,59 @@
+-- ============================================================================
+-- Add this to your treesitter plugin configuration
+-- Usually in lua/plugins/treesitter.lua
+-- ============================================================================
+
 return {
-  'nvim-treesitter/nvim-treesitter',
-  event = { "BufReadPost", "BufNewFile" }, -- Lazy load for better startup
-  build = ':TSUpdate',
+  "nvim-treesitter/nvim-treesitter",
+  branch = "master",
+  build = ":TSUpdate",
+  event = { "BufReadPost", "BufNewFile" },
   dependencies = {
-    'nvim-treesitter/nvim-treesitter-textobjects',
-    'nvim-treesitter/nvim-treesitter-context',
+    "nvim-treesitter/nvim-treesitter-textobjects",
   },
   config = function()
-    require('nvim-treesitter.config').setup({
-      -- Only install what you actually use
+    require("nvim-treesitter.configs").setup({
       ensure_installed = {
-        "lua", "vim", "vimdoc", "query",
-        "javascript", "typescript", "tsx", "html", "css", "json",
-        "python", "bash", "markdown", "markdown_inline",
-        "java", "go", "rust", "c", "cpp",
+        "java",
+        "lua",
+        "vim",
+        "vimdoc",
+        "python",
+        "javascript",
+        "typescript",
+        "rust",
+        "go",
+        "c",
+        "cpp",
+        "json",
+        "yaml",
+        "html",
+        "css",
+        "markdown",
+        "bash",
       },
 
-      -- Performance optimizations
+      auto_install = true,
+
       highlight = {
         enable = true,
-        additional_vim_regex_highlighting = false, -- CRITICAL for performance
-        disable = function(lang, buf)
-          local max_filesize = 1024 * 1024         -- 100 KB
-          local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
-          if ok and stats and stats.size > max_filesize then
-            return true
-          end
-        end,
+        additional_vim_regex_highlighting = false, -- Disable vim regex highlighting
       },
 
-      -- Disable features you don't need
-      indent = { enable = false }, -- Often buggy, LSP handles formatting
+      indent = {
+        enable = true,
+      },
+
       incremental_selection = {
         enable = true,
         keymaps = {
           init_selection = "<C-space>",
           node_incremental = "<C-space>",
-          node_decremental = "<BS>",
+          scope_incremental = false,
+          node_decremental = "<bs>",
         },
       },
 
-      -- Keep only essential text objects
       textobjects = {
         select = {
           enable = true,
@@ -50,21 +63,31 @@ return {
             ["if"] = "@function.inner",
             ["ac"] = "@class.outer",
             ["ic"] = "@class.inner",
+            ["aa"] = "@parameter.outer",
+            ["ia"] = "@parameter.inner",
+          },
+        },
+        move = {
+          enable = true,
+          set_jumps = true,
+          goto_next_start = {
+            ["]m"] = "@function.outer",
+            ["]]"] = "@class.outer",
+          },
+          goto_next_end = {
+            ["]M"] = "@function.outer",
+            ["]["] = "@class.outer",
+          },
+          goto_previous_start = {
+            ["[m"] = "@function.outer",
+            ["[["] = "@class.outer",
+          },
+          goto_previous_end = {
+            ["[M"] = "@function.outer",
+            ["[]"] = "@class.outer",
           },
         },
       },
     })
-
-    -- Context with minimal overhead
-    local context_ok, context = pcall(require, 'treesitter-context')
-    if context_ok then
-      context.setup({
-        enable = true,
-        max_lines = 3,
-        min_window_height = 20,
-        trim_scope = 'outer',
-        mode = 'cursor',
-      })
-    end
   end,
 }

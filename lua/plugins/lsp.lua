@@ -23,6 +23,333 @@ return {
     },
   },
 
+
+  {
+    "mfussenegger/nvim-jdtls",
+    ft = "java",
+  },
+
+  -- IMPORTANT: Configure jdtls separately through lspconfig
+  -- This must come AFTER nvim-java in the plugin list
+  {
+    "neovim/nvim-lspconfig",
+    event = { "BufReadPre", "BufNewFile" },
+    dependencies = {
+      "williamboman/mason.nvim",
+      "williamboman/mason-lspconfig.nvim",
+      "hrsh7th/cmp-nvim-lsp",
+      "nvim-java/nvim-java", -- Ensure nvim-java is loaded first
+    },
+    config = function()
+      local cmp_nvim_lsp = require("cmp_nvim_lsp")
+
+      -- LSP keymaps (applied on attach)
+      local on_attach = function(client, bufnr)
+        local opts = { buffer = bufnr, silent = true }
+
+        -- Enable semantic tokens if available
+        if client.server_capabilities.semanticTokensProvider then
+          vim.lsp.semantic_tokens.start(bufnr, client.id)
+        end
+
+        -- Highlight symbol under cursor
+        if client.server_capabilities.documentHighlightProvider then
+          local highlight_group = vim.api.nvim_create_augroup("lsp_document_highlight", { clear = false })
+          vim.api.nvim_clear_autocmds({ buffer = bufnr, group = highlight_group })
+          vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
+            buffer = bufnr,
+            group = highlight_group,
+            callback = vim.lsp.buf.document_highlight,
+          })
+          vim.api.nvim_create_autocmd("CursorMoved", {
+            buffer = bufnr,
+            group = highlight_group,
+            callback = vim.lsp.buf.clear_references,
+          })
+        end
+
+        -- Navigation keymaps
+        vim.keymap.set("n", "gd", "<cmd>Lspsaga goto_definition<CR>", opts)
+        vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
+        vim.keymap.set("n", "gr", "<cmd>Telescope lsp_references<CR>", opts)
+        vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts)
+        vim.keymap.set("n", "gt", vim.lsp.buf.type_definition, opts)
+
+        -- Documentation
+        vim.keymap.set("n", "K", "<cmd>Lspsaga hover_doc<CR>", opts)
+
+        -- Diagnostics
+        vim.keymap.set("n", "<leader>d", "<cmd>Lspsaga show_line_diagnostics<CR>", opts)
+        vim.keymap.set("n", "[d", "<cmd>Lspsaga diagnostic_jump_prev<CR>", opts)
+        vim.keymap.set("n", "]d", "<cmd>Lspsaga diagnostic_jump_next<CR>", opts)
+
+        -- Jump to errors specifically
+        vim.keymap.set("n", "[e", function()
+          require("lspsaga.diagnostic"):goto_prev({ severity = vim.diagnostic.severity.ERROR })
+        end, opts)
+        vim.keymap.set("n", "]e", function()
+          require("lspsaga.diagnostic"):goto_next({ severity = vim.diagnostic.severity.ERROR })
+        end, opts)
+
+        -- Workspace folders
+        vim.keymap.set("n", "<leader>wa", vim.lsp.buf.add_workspace_folder, opts)
+        vim.keymap.set("n", "<leader>wr", vim.lsp.buf.remove_workspace_folder, opts)
+        vim.keymap.set("n", "<leader>wl", function()
+          print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
+        end, opts)
+
+        -- Toggle inlay hints
+        if client.supports_method("textDocument/inlayHint") then
+          vim.keymap.set("n", "<leader>th", function()
+            vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
+          end, { buffer = bufnr, desc = "Toggle Inlay Hints" })
+        end
+
+        -- Java-specific keymaps
+        if client.name == "jdtls" then
+          vim.keymap.set("n", "<leader>jo", function()
+            require('java').runner.built_in.run_app()
+          end, vim.tbl_extend("force", opts, { desc = "Java: Run App" }))
+
+          vim.keymap.set("n", "<leader>jt", function()
+            require('java').test.run_current_class()
+          end, vim.tbl_extend("force", opts, { desc = "Java: Test Class" }))
+        end
+      end
+
+      -- Enhanced capabilities with nvim-cmp
+      local capabilities = cmp_nvim_lsp.default_capabilities()
+
+      -- Diagnostic configuration
+      vim.diagnostic.config({
+        virtual_text = {
+          prefix = "●",
+          source = "if_many",
+        },
+        signs = true,
+        underline = true,
+        update_in_insert = false,
+        severity_sort = true,
+        float = {
+          border = "rounded",
+          source = "always",
+          header = "",
+          prefix = "",
+        },
+      })
+
+      -- Diagnostic signs
+      local signs = {
+        Error = " ",
+        Warn = " ",
+        Hint = "󰌵 ",
+        Info = " "
+      }
+      for type, icon in pairs(signs) do
+        local hl = "DiagnosticSign" .. type
+        vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = "" })
+      end
+
+      -- Force borders on all LSP handlers
+      local orig_util_open_floating_preview = vim.lsp.util.open_floating_preview
+      function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
+        opts = opts or {}
+        opts.border = opts.border or "rounded"
+        return orig_util_open_floating_preview(contents, syntax, opts, ...)
+      end
+
+      vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(
+        vim.lsp.handlers.hover,
+        { border = "rounded" }
+      )
+
+      vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(
+        vim.lsp.handlers.signature_help,
+        { border = "rounded" }
+      )
+
+      -- Store config globally for mason-lspconfig to use
+      _G.lsp_on_attach = on_attach
+      _G.lsp_capabilities = capabilities
+
+      -- Setup jdtls separately using nvim-java's configuration
+      local ok, jdtls = pcall(require, 'java')
+      if ok then
+        -- Use vim.schedule to ensure nvim-java is fully loaded
+        vim.schedule(function()
+          require('lspconfig').jdtls.setup({
+            on_attach = on_attach,
+            capabilities = capabilities,
+            handlers = {
+              ["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
+                border = "rounded",
+              }),
+              ["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
+                border = "rounded",
+              }),
+            },
+            settings = {
+              java = {
+                eclipse = {
+                  downloadSources = true,
+                },
+                maven = {
+                  downloadSources = true,
+                  updateSnapshots = true,
+                },
+                implementationCodeLens = {
+                  enabled = true,
+                },
+                referencesCodeLens = {
+                  enabled = true,
+                },
+                format = {
+                  enabled = true,
+                  settings = {
+                    url = vim.fn.stdpath("config") .. "/lang-servers/intellij-java-google-style.xml",
+                    profile = "GoogleStyle",
+                  },
+                },
+                signatureHelp = {
+                  enabled = true,
+                  description = {
+                    enabled = true,
+                  },
+                },
+                contentProvider = { preferred = 'fernflower' },
+                sources = {
+                  organizeImports = {
+                    starThreshold = 1,
+                    staticStarThreshold = 1,
+                  },
+                },
+                completion = {
+                  favoriteStaticMembers = {
+                    "org.junit.jupiter.api.Assertions.*",
+                    "org.junit.Assert.*",
+                    "org.mockito.Mockito.*",
+                    "org.mockito.ArgumentMatchers.*",
+                    "java.util.Objects.requireNonNull",
+                    "java.util.Objects.requireNonNullElse",
+                    "org.lwjgl.glfw.GLFW.*",
+                    "org.lwjgl.opengl.GL11.*",
+                    "org.lwjgl.opengl.GL20.*",
+                    "org.lwjgl.opengl.GL30.*",
+                    "org.lwjgl.opengl.GL33.*",
+                    "org.lwjgl.opengl.GL45.*",
+                    "org.lwjgl.vulkan.VK10.*",
+                    "org.lwjgl.system.MemoryUtil.*",
+                    "org.lwjgl.system.MemoryStack.*",
+                    "imgui.ImGui.*",
+                    "imgui.flag.ImGuiWindowFlags.*",
+                    "imgui.flag.ImGuiCol.*",
+                    "imgui.type.ImBoolean.*",
+                    "imgui.type.ImInt.*",
+                    "imgui.type.ImFloat.*",
+                  },
+                  filteredTypes = {
+                    "com.sun.*",
+                    "io.micrometer.shaded.*",
+                    "java.awt.*",
+                    "sun.*",
+                    "jdk.*",
+                  },
+                  importOrder = {
+                    "java",
+                    "javax",
+                    "org.lwjgl",
+                    "imgui",
+                    "org",
+                    "com",
+                  },
+                },
+                configuration = {
+                  detectJdksAtStart = true,
+                  runtimes = {
+                    {
+                      name = "JavaSE-1.8",
+                      path = vim.fn.expand("~/.sdkman/candidates/java/8.0.432-tem"),
+                      default = false,
+                    },
+                    {
+                      name = "JavaSE-11",
+                      path = vim.fn.expand("~/.sdkman/candidates/java/11.0.25-tem"),
+                      default = false,
+                    },
+                    {
+                      name = "JavaSE-17",
+                      path = vim.fn.expand("~/.sdkman/candidates/java/17.0.13-tem"),
+                      default = false,
+                    },
+                    {
+                      name = "JavaSE-21",
+                      path = vim.fn.expand("~/.sdkman/candidates/java/21.0.5-tem"),
+                      default = true,
+                    },
+                  },
+                  updateBuildConfiguration = "automatic",
+                },
+                inlayHints = {
+                  parameterNames = {
+                    enabled = "all",
+                  },
+                },
+                saveActions = {
+                  organizeImports = true,
+                },
+                autobuild = {
+                  enabled = true,
+                },
+                project = {
+                  referencedLibraries = {
+                    "lib/**/*.jar",
+                    "${env:HOME}/.m2/repository/org/lwjgl/**/*.jar",
+                    "${env:HOME}/.m2/repository/io/github/spair/**/*.jar",
+                    "libs/joml/**/*.jar",
+                  },
+                },
+                import = {
+                  gradle = {
+                    enabled = true,
+                    wrapper = {
+                      enabled = true,
+                    },
+                  },
+                  maven = {
+                    enabled = true,
+                    downloadSources = true,
+                    updateSnapshots = true,
+                  },
+                  exclusions = {
+                    "**/node_modules/**",
+                    "**/.metadata/**",
+                    "**/archetype-resources/**",
+                    "**/META-INF/maven/**",
+                  },
+                },
+              },
+            },
+            init_options = {
+              extendedClientCapabilities = {
+                progressReportProvider = true,
+                classFileContentsSupport = true,
+                generateToStringPromptSupport = true,
+                hashCodeEqualsPromptSupport = true,
+                advancedExtractRefactoringSupport = true,
+                advancedOrganizeImportsSupport = true,
+                generateConstructorsPromptSupport = true,
+                generateDelegateMethodsPromptSupport = true,
+                resolveAdditionalTextEditsSupport = true,
+                moveRefactoringSupport = true,
+                overrideMethodsPromptSupport = true,
+                inferSelectionSupport = { "extractMethod", "extractVariable", "extractConstant" },
+              },
+            },
+          })
+        end)
+      end
+    end,
+  },
   -- LSP Configuration
   {
     "neovim/nvim-lspconfig",
@@ -333,13 +660,6 @@ return {
     lazy = true,
     ft = { "json", "jsonc", "yaml" },
   },
-
-  -- Java LSP
-  {
-    "mfussenegger/nvim-jdtls",
-    ft = "java",
-  },
-
   -- Autocompletion
   {
     "hrsh7th/nvim-cmp",

@@ -1,100 +1,67 @@
--- ftplugin/java.lua
--- Only load this for Java files
-if vim.bo.filetype ~= 'java' then
-  return
-end
+-- ============================================================================
+-- RECOMMENDED: Use nvim-jdtls instead of nvim-java (more stable)
+-- Place this in: ~/.config/nvim/ftplugin/java.lua
+-- ============================================================================
 
--- Check if jdtls is installed
-local jdtls_ok, jdtls = pcall(require, 'jdtls')
-if not jdtls_ok then
-  vim.notify('nvim-jdtls not installed. Run :Lazy sync', vim.log.levels.ERROR)
-  return
-end
+-- Disable built-in Java syntax highlighting (use Treesitter instead)
+vim.cmd([[syntax clear]])
 
--- Find project root
-local root_markers = { '.git', 'mvnw', 'gradlew', 'pom.xml', 'build.gradle', 'settings.gradle', 'settings.gradle.kts', 'build.gradle.kts' }
+local jdtls = require('jdtls')
+
+-- Find root directory
+local root_markers = {
+  'gradlew', 'mvnw', '.git', 'pom.xml',
+  'build.gradle', 'build.gradle.kts',
+  'settings.gradle', 'settings.gradle.kts'
+}
 local root_dir = require('jdtls.setup').find_root(root_markers)
 if not root_dir then
-  vim.notify('No Java project root found', vim.log.levels.WARN)
+  vim.notify('Could not find Java project root', vim.log.levels.WARN)
   return
 end
 
--- Setup paths
-local home = os.getenv('HOME')
+-- Workspace directory
 local project_name = vim.fn.fnamemodify(root_dir, ':p:h:t')
-local workspace_dir = home .. '/.local/share/nvim/jdtls-workspace/' .. project_name
+local workspace_dir = vim.fn.stdpath('data') .. '/jdtls-workspace/' .. project_name
 
--- Mason installation path
-local mason_path = vim.fn.stdpath('data') .. '/mason/packages/jdtls'
-
--- Check if jdtls is installed via Mason
-if vim.fn.isdirectory(mason_path) == 0 then
-  vim.notify('JDTLS not installed. Run :MasonInstall jdtls', vim.log.levels.ERROR)
-  return
-end
-
--- Platform-specific configuration
-local config_dir = mason_path .. '/config_linux'
-if vim.fn.has('mac') == 1 then
-  config_dir = mason_path .. '/config_mac'
-elseif vim.fn.has('win32') == 1 then
-  config_dir = mason_path .. '/config_win'
-end
-
--- Find the launcher JAR
-local launcher_jar = vim.fn.glob(mason_path .. '/plugins/org.eclipse.equinox.launcher_*.jar')
-if launcher_jar == '' then
-  vim.notify('JDTLS launcher jar not found', vim.log.levels.ERROR)
-  return
-end
-
--- Get capabilities for autocompletion
-local cmp_ok, cmp_nvim_lsp = pcall(require, 'cmp_nvim_lsp')
+-- Get capabilities
 local capabilities = vim.lsp.protocol.make_client_capabilities()
-if cmp_ok then
+local ok, cmp_nvim_lsp = pcall(require, 'cmp_nvim_lsp')
+if ok then
   capabilities = cmp_nvim_lsp.default_capabilities(capabilities)
 end
 
--- Explicitly enable semantic tokens
-capabilities.textDocument.semanticTokens = {
-  dynamicRegistration = false,
-  requests = {
-    range = true,
-    full = {
-      delta = true,
-    },
-  },
-  tokenTypes = {
-    "namespace", "type", "class", "enum", "interface", "struct", "typeParameter",
-    "parameter", "variable", "property", "enumMember", "event", "function",
-    "method", "macro", "keyword", "modifier", "comment", "string", "number",
-    "regexp", "operator", "decorator",
-  },
-  tokenModifiers = {
-    "declaration", "definition", "readonly", "static", "deprecated", "abstract",
-    "async", "modification", "documentation", "defaultLibrary",
-  },
-  formats = { "relative" },
-  overlappingTokenSupport = false,
-  multilineTokenSupport = false,
-}
+-- Attach function
+local on_attach = function(client, bufnr)
+  -- Enable semantic tokens
+  if client.server_capabilities.semanticTokensProvider then
+    vim.lsp.semantic_tokens.start(bufnr, client.id)
+  end
 
--- Extended capabilities for JDTLS
-local extendedClientCapabilities = jdtls.extendedClientCapabilities
-extendedClientCapabilities.resolveAdditionalTextEditsSupport = true
-extendedClientCapabilities.progressReportProvider = true
-extendedClientCapabilities.classFileContentsSupport = true
-extendedClientCapabilities.generateToStringPromptSupport = true
-extendedClientCapabilities.hashCodeEqualsPromptSupport = true
-extendedClientCapabilities.advancedExtractRefactoringSupport = true
-extendedClientCapabilities.advancedOrganizeImportsSupport = true
-extendedClientCapabilities.generateConstructorsPromptSupport = true
-extendedClientCapabilities.generateDelegateMethodsPromptSupport = true
-extendedClientCapabilities.moveRefactoringSupport = true
-extendedClientCapabilities.overrideMethodsPromptSupport = true
-extendedClientCapabilities.inferSelectionSupport = { "extractMethod", "extractVariable", "extractConstant" }
+  -- Call global on_attach if exists
+  if _G.lsp_on_attach then
+    _G.lsp_on_attach(client, bufnr)
+  end
 
--- JDTLS configuration
+  -- Java-specific keymaps
+  local opts = { buffer = bufnr, silent = true }
+  vim.keymap.set('n', '<leader>jo', jdtls.organize_imports,
+    vim.tbl_extend("force", opts, { desc = "Java: Organize Imports" }))
+  vim.keymap.set('n', '<leader>jt', jdtls.test_class,
+    vim.tbl_extend("force", opts, { desc = "Java: Test Class" }))
+  vim.keymap.set('n', '<leader>jn', jdtls.test_nearest_method,
+    vim.tbl_extend("force", opts, { desc = "Java: Test Method" }))
+  vim.keymap.set('n', '<leader>jx', jdtls.extract_variable,
+    vim.tbl_extend("force", opts, { desc = "Java: Extract Variable" }))
+  vim.keymap.set('v', '<leader>jx', [[<ESC><CMD>lua require('jdtls').extract_variable(true)<CR>]],
+    vim.tbl_extend("force", opts, { desc = "Java: Extract Variable" }))
+  vim.keymap.set('n', '<leader>jc', jdtls.extract_constant,
+    vim.tbl_extend("force", opts, { desc = "Java: Extract Constant" }))
+  vim.keymap.set('v', '<leader>jm', [[<ESC><CMD>lua require('jdtls').extract_method(true)<CR>]],
+    vim.tbl_extend("force", opts, { desc = "Java: Extract Method" }))
+end
+
+-- JDTLS config
 local config = {
   cmd = {
     'java',
@@ -103,16 +70,20 @@ local config = {
     '-Declipse.product=org.eclipse.jdt.ls.core.product',
     '-Dlog.protocol=true',
     '-Dlog.level=ALL',
-    '-Xmx2g',
+    '-Xmx1g',
     '--add-modules=ALL-SYSTEM',
     '--add-opens', 'java.base/java.util=ALL-UNNAMED',
     '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
-    '-jar', launcher_jar,
-    '-configuration', config_dir,
+    '-jar', vim.fn.glob(vim.fn.stdpath('data') .. '/mason/packages/jdtls/plugins/org.eclipse.equinox.launcher_*.jar'),
+    '-configuration', vim.fn.stdpath('data') .. '/mason/packages/jdtls/config_linux',
     '-data', workspace_dir,
   },
 
   root_dir = root_dir,
+
+  capabilities = capabilities,
+
+  on_attach = on_attach,
 
   settings = {
     java = {
@@ -123,17 +94,11 @@ local config = {
         downloadSources = true,
         updateSnapshots = true,
       },
-      implementationsCodeLens = {
+      implementationCodeLens = {
         enabled = true,
       },
       referencesCodeLens = {
         enabled = true,
-      },
-      semanticHighlighting = {
-        enabled = true,
-      },
-      references = {
-        includeDecompiledSources = true,
       },
       format = {
         enabled = true,
@@ -159,7 +124,6 @@ local config = {
         favoriteStaticMembers = {
           "org.junit.jupiter.api.Assertions.*",
           "org.junit.Assert.*",
-          "org.junit.Assume.*",
           "org.mockito.Mockito.*",
           "org.mockito.ArgumentMatchers.*",
           "java.util.Objects.requireNonNull",
@@ -227,14 +191,8 @@ local config = {
           enabled = "all",
         },
       },
-      referenceCodeLens = {
-        enabled = true,
-      },
       saveActions = {
         organizeImports = true,
-      },
-      server = {
-        launchMode = "Standard",
       },
       autobuild = {
         enabled = true,
@@ -247,38 +205,11 @@ local config = {
           "libs/joml/**/*.jar",
         },
       },
-      templates = {
-        fileHeader = {
-          "/**",
-          " * ${file_name}",
-          " *",
-          " * @author ${user}",
-          " * @date ${date}",
-          " */",
-        },
-        typeComment = {},
-      },
-      trace = {
-        server = "off",
-      },
       import = {
         gradle = {
           enabled = true,
           wrapper = {
             enabled = true,
-          },
-          version = nil,
-          home = nil,
-          java = {
-            home = nil,
-          },
-          offline = {
-            enabled = false,
-          },
-          arguments = nil,
-          jvmArguments = nil,
-          user = {
-            home = nil,
           },
         },
         maven = {
@@ -293,59 +224,35 @@ local config = {
           "**/META-INF/maven/**",
         },
       },
-      codeGeneration = {
-        toString = {
-          template = "${object.className}{${member.name()}=${member.value}, ${otherMembers}}",
-        },
-        useBlocks = true,
-      },
-      lombok = {
-        enabled = false,
-      },
     },
   },
 
-  capabilities = capabilities,
-
-  on_attach = function(client, bufnr)
-    -- Debug: Check if semantic tokens are supported
-    print("JDTLS capabilities:")
-    print("semanticTokensProvider:", vim.inspect(client.server_capabilities.semanticTokensProvider))
-
-    if client.server_capabilities.semanticTokensProvider then
-      vim.lsp.semantic_tokens.start(bufnr, client.id)
-      print("Semantic tokens started for buffer", bufnr)
-
-      -- Force a refresh after a short delay
-      vim.defer_fn(function()
-        vim.lsp.semantic_tokens.force_refresh(bufnr)
-      end, 100)
-    else
-      print("WARNING: JDTLS does not support semantic tokens!")
-    end
-  end,
-
   init_options = {
-    bundles = {},
-    extendedClientCapabilities = vim.tbl_deep_extend("force", extendedClientCapabilities, {
-      semanticTokensRefreshSupport = true,
-    }),
+    extendedClientCapabilities = {
+      progressReportProvider = true,
+      classFileContentsSupport = true,
+      generateToStringPromptSupport = true,
+      hashCodeEqualsPromptSupport = true,
+      advancedExtractRefactoringSupport = true,
+      advancedOrganizeImportsSupport = true,
+      generateConstructorsPromptSupport = true,
+      generateDelegateMethodsPromptSupport = true,
+      resolveAdditionalTextEditsSupport = true,
+      moveRefactoringSupport = true,
+      overrideMethodsPromptSupport = true,
+      inferSelectionSupport = { "extractMethod", "extractVariable", "extractConstant" },
+    },
   },
 
   handlers = {
     ["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
-      border = "single",
+      border = "rounded",
     }),
     ["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
-      border = "single",
+      border = "rounded",
     }),
-  },
-
-  flags = {
-    debounce_text_changes = 150,
-    allow_incremental_sync = true,
   },
 }
 
--- Start JDTLS
+-- Start jdtls
 jdtls.start_or_attach(config)
