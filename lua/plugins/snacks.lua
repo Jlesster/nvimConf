@@ -8,7 +8,7 @@ return {
       picker       = {
         enabled = true,
         win = {
-          border = "rounded",
+          border = "single",
         },
       },
       terminal     = {

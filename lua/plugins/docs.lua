@@ -18,51 +18,79 @@ return {
     },
     keys = {
       -- Primary documentation lookup - overrides default K when no LSP
-      { 'K', function()
-        -- Check if LSP is attached
-        local clients = vim.lsp.get_active_clients({ bufnr = 0 })
-        if #clients > 0 then
-          vim.lsp.buf.hover()
-        else
-          -- Fallback to DevDocs
-          vim.cmd('DevdocsOpenFloat')
-        end
-      end, desc = 'Smart Documentation (LSP/DevDocs)' },
+      {
+        'K',
+        function()
+          -- Check if LSP is attached
+          local clients = vim.lsp.get_active_clients({ bufnr = 0 })
+          if #clients > 0 then
+            vim.lsp.buf.hover()
+          else
+            -- Fallback to DevDocs
+            vim.cmd('DevdocsOpenFloat')
+          end
+        end,
+        desc = 'Smart Documentation (LSP/DevDocs)'
+      },
 
       -- DevDocs keybinds
-      { '<leader>dd', '<cmd>DevdocsOpen<cr>', desc = 'DevDocs: Search' },
-      { '<leader>df', '<cmd>DevdocsOpenFloat<cr>', desc = 'DevDocs: Float' },
+      { '<leader>dd', '<cmd>DevdocsOpen<cr>',        desc = 'DevDocs: Search' },
+      { '<leader>df', '<cmd>DevdocsOpenFloat<cr>',   desc = 'DevDocs: Float' },
       { '<leader>dF', '<cmd>DevdocsOpenCurrent<cr>', desc = 'DevDocs: Current' },
 
       -- Quick language shortcuts
-      { '<leader>dp', function()
-        require('nvim-devdocs').open('python', vim.fn.expand('<cword>'))
-      end, desc = 'Python Docs' },
+      {
+        '<leader>dp',
+        function()
+          require('nvim-devdocs').open('python', vim.fn.expand('<cword>'))
+        end,
+        desc = 'Python Docs'
+      },
 
-      { '<leader>dj', function()
-        require('nvim-devdocs').open('javascript', vim.fn.expand('<cword>'))
-      end, desc = 'JavaScript Docs' },
+      {
+        '<leader>dj',
+        function()
+          require('nvim-devdocs').open('javascript', vim.fn.expand('<cword>'))
+        end,
+        desc = 'JavaScript Docs'
+      },
 
-      { '<leader>dr', function()
-        require('nvim-devdocs').open('rust', vim.fn.expand('<cword>'))
-      end, desc = 'Rust Docs' },
+      {
+        '<leader>dr',
+        function()
+          require('nvim-devdocs').open('rust', vim.fn.expand('<cword>'))
+        end,
+        desc = 'Rust Docs'
+      },
 
-      { '<leader>dl', function()
-        require('nvim-devdocs').open('lua', vim.fn.expand('<cword>'))
-      end, desc = 'Lua Docs' },
+      {
+        '<leader>dl',
+        function()
+          require('nvim-devdocs').open('lua', vim.fn.expand('<cword>'))
+        end,
+        desc = 'Lua Docs'
+      },
 
-      { '<leader>dg', function()
-        require('nvim-devdocs').open('go', vim.fn.expand('<cword>'))
-      end, desc = 'Go Docs' },
+      {
+        '<leader>dg',
+        function()
+          require('nvim-devdocs').open('go', vim.fn.expand('<cword>'))
+        end,
+        desc = 'Go Docs'
+      },
 
-      { '<leader>dc', function()
-        require('nvim-devdocs').open('cpp', vim.fn.expand('<cword>'))
-      end, desc = 'C++ Docs' },
+      {
+        '<leader>dc',
+        function()
+          require('nvim-devdocs').open('cpp', vim.fn.expand('<cword>'))
+        end,
+        desc = 'C++ Docs'
+      },
 
       -- Management
-      { '<leader>dI', '<cmd>DevdocsInstall<cr>', desc = 'Install DevDocs' },
+      { '<leader>dI', '<cmd>DevdocsInstall<cr>',   desc = 'Install DevDocs' },
       { '<leader>dU', '<cmd>DevdocsUninstall<cr>', desc = 'Uninstall DevDocs' },
-      { '<leader>dR', '<cmd>DevdocsFetch<cr>', desc = 'Update DevDocs' },
+      { '<leader>dR', '<cmd>DevdocsFetch<cr>',     desc = 'Update DevDocs' },
     },
     opts = {
       dir_path = vim.fn.stdpath('data') .. '/devdocs',
@@ -92,7 +120,7 @@ return {
         relative = 'editor',
         height = 0.8,
         width = 0.8,
-        border = 'rounded',
+        border = 'single',
       },
       wrap = true,
       ensure_installed = {
@@ -161,10 +189,14 @@ return {
     cmd = { 'Man', 'Vman' },
     keys = {
       { '<leader>dm', '<cmd>Telescope man_pages<cr>', desc = 'Man Pages' },
-      { '<leader>dM', function()
-        local word = vim.fn.expand('<cword>')
-        vim.cmd('Man ' .. word)
-      end, desc = 'Man Page (word)' },
+      {
+        '<leader>dM',
+        function()
+          local word = vim.fn.expand('<cword>')
+          vim.cmd('Man ' .. word)
+        end,
+        desc = 'Man Page (word)'
+      },
     },
     init = function()
       vim.g.no_man_maps = 1
@@ -196,17 +228,25 @@ return {
     'sunaku/vim-dasht',
     cmd = 'Dasht',
     keys = {
-      { '<leader>dk', function()
-        local word = vim.fn.expand('<cword>')
-        local ft = vim.bo.filetype
-        vim.fn['dasht#query'](word, ft)
-      end, desc = 'Dasht: Search Word' },
+      {
+        '<leader>dk',
+        function()
+          local word = vim.fn.expand('<cword>')
+          local ft = vim.bo.filetype
+          vim.fn['dasht#query'](word, ft)
+        end,
+        desc = 'Dasht: Search Word'
+      },
 
-      { '<leader>dK', function()
-        local word = vim.fn.expand('<cWORD>')
-        local ft = vim.bo.filetype
-        vim.fn['dasht#query'](word, ft)
-      end, desc = 'Dasht: Search WORD' },
+      {
+        '<leader>dK',
+        function()
+          local word = vim.fn.expand('<cWORD>')
+          local ft = vim.bo.filetype
+          vim.fn['dasht#query'](word, ft)
+        end,
+        desc = 'Dasht: Search WORD'
+      },
 
       { '<leader>dD', '<cmd>Dasht!<cr>', desc = 'Dasht: Prompt' },
     },
@@ -237,7 +277,7 @@ return {
     'nvim-telescope/telescope.nvim',
     keys = {
       { '<leader>sh', '<cmd>Telescope help_tags<cr>', desc = 'Help Tags' },
-      { '<leader>sk', '<cmd>Telescope keymaps<cr>', desc = 'Keymaps' },
+      { '<leader>sk', '<cmd>Telescope keymaps<cr>',   desc = 'Keymaps' },
     },
   },
 
@@ -250,7 +290,7 @@ return {
     ft = 'markdown',
     cmd = { 'MarkdownPreview', 'MarkdownPreviewStop' },
     keys = {
-      { '<leader>mp', '<cmd>MarkdownPreview<cr>', desc = 'Markdown Preview' },
+      { '<leader>mp', '<cmd>MarkdownPreview<cr>',     desc = 'Markdown Preview' },
       { '<leader>ms', '<cmd>MarkdownPreviewStop<cr>', desc = 'Stop Preview' },
     },
   },

@@ -17,6 +17,41 @@ return {
         },
       })
 
+      -- Disable on specific filetypes
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = {
+          "help",
+          "alpha",
+          "dashboard",
+          "snacks_dashboard",
+          "neo-tree",
+          "Trouble",
+          "trouble",
+          "lazy",
+          "mason",
+          "notify",
+          "toggleterm",
+          "lazyterm",
+        },
+        callback = function()
+          vim.b.miniindentscope_disable = true
+        end,
+      })
+
+      -- Additional check for Snacks dashboard by buffer name
+      vim.api.nvim_create_autocmd("BufEnter", {
+        callback = function()
+          local bufname = vim.api.nvim_buf_get_name(0)
+          -- Disable if it's the Snacks dashboard buffer
+          if bufname == "" and vim.bo.filetype == "" then
+            vim.b.miniindentscope_disable = true
+          end
+          -- Or check if it's a scratch buffer used by dashboard
+          if bufname:match("^$") or bufname:match("dashboard") then
+            vim.b.miniindentscope_disable = true
+          end
+        end,
+      })
       -- Scan a line for any rainbow delimiter color
       local function scan_line_for_rainbow(bufnr, line)
         if line < 1 then return nil end

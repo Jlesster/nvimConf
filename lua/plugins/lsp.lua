@@ -11,7 +11,7 @@ return {
     build = ":MasonUpdate",
     opts = {
       ui = {
-        border = "rounded",
+        border = "single",
         width = 0.8,
         height = 0.8,
         icons = {
@@ -23,14 +23,16 @@ return {
     },
   },
 
-
+  -- Java support
+  -- NOTE: Java LSP configuration is handled in ftplugin/java.lua
   {
-    "mfussenegger/nvim-jdtls",
+    "nvim-java/nvim-java",
     ft = "java",
+    dependencies = {
+      "mfussenegger/nvim-jdtls",
+      "nvim-treesitter/nvim-treesitter", -- Ensure Treesitter loads first
+    },
   },
-
-  -- IMPORTANT: Configure jdtls separately through lspconfig
-  -- This must come AFTER nvim-java in the plugin list
   {
     "neovim/nvim-lspconfig",
     event = { "BufReadPre", "BufNewFile" },
@@ -38,7 +40,7 @@ return {
       "williamboman/mason.nvim",
       "williamboman/mason-lspconfig.nvim",
       "hrsh7th/cmp-nvim-lsp",
-      "nvim-java/nvim-java", -- Ensure nvim-java is loaded first
+      "nvim-java/nvim-java",
     },
     config = function()
       local cmp_nvim_lsp = require("cmp_nvim_lsp")
@@ -47,9 +49,11 @@ return {
       local on_attach = function(client, bufnr)
         local opts = { buffer = bufnr, silent = true }
 
-        -- Enable semantic tokens if available
+        -- Enable semantic tokens for Java only
         if client.server_capabilities.semanticTokensProvider then
-          vim.lsp.semantic_tokens.start(bufnr, client.id)
+          if client.name == "jdtls" then
+            vim.lsp.semantic_tokens.start(bufnr, client.id)
+          end
         end
 
         -- Highlight symbol under cursor
@@ -131,7 +135,7 @@ return {
         update_in_insert = false,
         severity_sort = true,
         float = {
-          border = "rounded",
+          border = "single",
           source = "always",
           header = "",
           prefix = "",
@@ -154,335 +158,27 @@ return {
       local orig_util_open_floating_preview = vim.lsp.util.open_floating_preview
       function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
         opts = opts or {}
-        opts.border = opts.border or "rounded"
+        opts.border = opts.border or "single"
         return orig_util_open_floating_preview(contents, syntax, opts, ...)
       end
 
       vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(
         vim.lsp.handlers.hover,
-        { border = "rounded" }
+        { border = "single" }
       )
 
       vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(
         vim.lsp.handlers.signature_help,
-        { border = "rounded" }
+        { border = "single" }
       )
 
       -- Store config globally for mason-lspconfig to use
       _G.lsp_on_attach = on_attach
       _G.lsp_capabilities = capabilities
-
-      -- Setup jdtls separately using nvim-java's configuration
-      local ok, jdtls = pcall(require, 'java')
-      if ok then
-        -- Use vim.schedule to ensure nvim-java is fully loaded
-        vim.schedule(function()
-          require('lspconfig').jdtls.setup({
-            on_attach = on_attach,
-            capabilities = capabilities,
-            handlers = {
-              ["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
-                border = "rounded",
-              }),
-              ["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
-                border = "rounded",
-              }),
-            },
-            settings = {
-              java = {
-                eclipse = {
-                  downloadSources = true,
-                },
-                maven = {
-                  downloadSources = true,
-                  updateSnapshots = true,
-                },
-                implementationCodeLens = {
-                  enabled = true,
-                },
-                referencesCodeLens = {
-                  enabled = true,
-                },
-                format = {
-                  enabled = true,
-                  settings = {
-                    url = vim.fn.stdpath("config") .. "/lang-servers/intellij-java-google-style.xml",
-                    profile = "GoogleStyle",
-                  },
-                },
-                signatureHelp = {
-                  enabled = true,
-                  description = {
-                    enabled = true,
-                  },
-                },
-                contentProvider = { preferred = 'fernflower' },
-                sources = {
-                  organizeImports = {
-                    starThreshold = 1,
-                    staticStarThreshold = 1,
-                  },
-                },
-                completion = {
-                  favoriteStaticMembers = {
-                    "org.junit.jupiter.api.Assertions.*",
-                    "org.junit.Assert.*",
-                    "org.mockito.Mockito.*",
-                    "org.mockito.ArgumentMatchers.*",
-                    "java.util.Objects.requireNonNull",
-                    "java.util.Objects.requireNonNullElse",
-                    "org.lwjgl.glfw.GLFW.*",
-                    "org.lwjgl.opengl.GL11.*",
-                    "org.lwjgl.opengl.GL20.*",
-                    "org.lwjgl.opengl.GL30.*",
-                    "org.lwjgl.opengl.GL33.*",
-                    "org.lwjgl.opengl.GL45.*",
-                    "org.lwjgl.vulkan.VK10.*",
-                    "org.lwjgl.system.MemoryUtil.*",
-                    "org.lwjgl.system.MemoryStack.*",
-                    "imgui.ImGui.*",
-                    "imgui.flag.ImGuiWindowFlags.*",
-                    "imgui.flag.ImGuiCol.*",
-                    "imgui.type.ImBoolean.*",
-                    "imgui.type.ImInt.*",
-                    "imgui.type.ImFloat.*",
-                  },
-                  filteredTypes = {
-                    "com.sun.*",
-                    "io.micrometer.shaded.*",
-                    "java.awt.*",
-                    "sun.*",
-                    "jdk.*",
-                  },
-                  importOrder = {
-                    "java",
-                    "javax",
-                    "org.lwjgl",
-                    "imgui",
-                    "org",
-                    "com",
-                  },
-                },
-                configuration = {
-                  detectJdksAtStart = true,
-                  runtimes = {
-                    {
-                      name = "JavaSE-1.8",
-                      path = vim.fn.expand("~/.sdkman/candidates/java/8.0.432-tem"),
-                      default = false,
-                    },
-                    {
-                      name = "JavaSE-11",
-                      path = vim.fn.expand("~/.sdkman/candidates/java/11.0.25-tem"),
-                      default = false,
-                    },
-                    {
-                      name = "JavaSE-17",
-                      path = vim.fn.expand("~/.sdkman/candidates/java/17.0.13-tem"),
-                      default = false,
-                    },
-                    {
-                      name = "JavaSE-21",
-                      path = vim.fn.expand("~/.sdkman/candidates/java/21.0.5-tem"),
-                      default = true,
-                    },
-                  },
-                  updateBuildConfiguration = "automatic",
-                },
-                inlayHints = {
-                  parameterNames = {
-                    enabled = "all",
-                  },
-                },
-                saveActions = {
-                  organizeImports = true,
-                },
-                autobuild = {
-                  enabled = true,
-                },
-                project = {
-                  referencedLibraries = {
-                    "lib/**/*.jar",
-                    "${env:HOME}/.m2/repository/org/lwjgl/**/*.jar",
-                    "${env:HOME}/.m2/repository/io/github/spair/**/*.jar",
-                    "libs/joml/**/*.jar",
-                  },
-                },
-                import = {
-                  gradle = {
-                    enabled = true,
-                    wrapper = {
-                      enabled = true,
-                    },
-                  },
-                  maven = {
-                    enabled = true,
-                    downloadSources = true,
-                    updateSnapshots = true,
-                  },
-                  exclusions = {
-                    "**/node_modules/**",
-                    "**/.metadata/**",
-                    "**/archetype-resources/**",
-                    "**/META-INF/maven/**",
-                  },
-                },
-              },
-            },
-            init_options = {
-              extendedClientCapabilities = {
-                progressReportProvider = true,
-                classFileContentsSupport = true,
-                generateToStringPromptSupport = true,
-                hashCodeEqualsPromptSupport = true,
-                advancedExtractRefactoringSupport = true,
-                advancedOrganizeImportsSupport = true,
-                generateConstructorsPromptSupport = true,
-                generateDelegateMethodsPromptSupport = true,
-                resolveAdditionalTextEditsSupport = true,
-                moveRefactoringSupport = true,
-                overrideMethodsPromptSupport = true,
-                inferSelectionSupport = { "extractMethod", "extractVariable", "extractConstant" },
-              },
-            },
-          })
-        end)
-      end
     end,
   },
+
   -- LSP Configuration
-  {
-    "neovim/nvim-lspconfig",
-    event = { "BufReadPre", "BufNewFile" },
-    dependencies = {
-      "williamboman/mason.nvim",
-      "williamboman/mason-lspconfig.nvim",
-      "hrsh7th/cmp-nvim-lsp",
-    },
-    config = function()
-      local cmp_nvim_lsp = require("cmp_nvim_lsp")
-
-      -- LSP keymaps (applied on attach)
-      local on_attach = function(client, bufnr)
-        local opts = { buffer = bufnr, silent = true }
-
-        -- Enable semantic tokens if available
-        if client.server_capabilities.semanticTokensProvider then
-          vim.lsp.semantic_tokens.start(bufnr, client.id)
-        end
-
-        -- Highlight symbol under cursor
-        if client.server_capabilities.documentHighlightProvider then
-          local highlight_group = vim.api.nvim_create_augroup("lsp_document_highlight", { clear = false })
-          vim.api.nvim_clear_autocmds({ buffer = bufnr, group = highlight_group })
-          vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
-            buffer = bufnr,
-            group = highlight_group,
-            callback = vim.lsp.buf.document_highlight,
-          })
-          vim.api.nvim_create_autocmd("CursorMoved", {
-            buffer = bufnr,
-            group = highlight_group,
-            callback = vim.lsp.buf.clear_references,
-          })
-        end
-
-        -- Navigation keymaps
-        vim.keymap.set("n", "gd", "<cmd>Lspsaga goto_definition<CR>", opts)
-        vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
-        vim.keymap.set("n", "gr", "<cmd>Telescope lsp_references<CR>", opts)
-        vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts)
-        vim.keymap.set("n", "gt", vim.lsp.buf.type_definition, opts)
-
-        -- Documentation
-        vim.keymap.set("n", "K", "<cmd>Lspsaga hover_doc<CR>", opts)
-
-        -- Diagnostics (lspsaga handles these)
-        vim.keymap.set("n", "<leader>d", "<cmd>Lspsaga show_line_diagnostics<CR>", opts)
-        vim.keymap.set("n", "[d", "<cmd>Lspsaga diagnostic_jump_prev<CR>", opts)
-        vim.keymap.set("n", "]d", "<cmd>Lspsaga diagnostic_jump_next<CR>", opts)
-
-        -- Jump to errors specifically
-        vim.keymap.set("n", "[e", function()
-          require("lspsaga.diagnostic"):goto_prev({ severity = vim.diagnostic.severity.ERROR })
-        end, opts)
-        vim.keymap.set("n", "]e", function()
-          require("lspsaga.diagnostic"):goto_next({ severity = vim.diagnostic.severity.ERROR })
-        end, opts)
-
-        -- Workspace folders
-        vim.keymap.set("n", "<leader>wa", vim.lsp.buf.add_workspace_folder, opts)
-        vim.keymap.set("n", "<leader>wr", vim.lsp.buf.remove_workspace_folder, opts)
-        vim.keymap.set("n", "<leader>wl", function()
-          print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
-        end, opts)
-
-        -- Toggle inlay hints (if you added lsp-inlayhints plugin)
-        if client.supports_method("textDocument/inlayHint") then
-          vim.keymap.set("n", "<leader>th", function()
-            require("lsp-inlayhints").toggle()
-          end, { buffer = bufnr, desc = "Toggle Inlay Hints" })
-        end
-      end
-
-      -- Enhanced capabilities with nvim-cmp
-      local capabilities = cmp_nvim_lsp.default_capabilities()
-
-      -- Diagnostic configuration
-      vim.diagnostic.config({
-        virtual_text = {
-          prefix = "●",
-          source = "if_many",
-        },
-        signs = true,
-        underline = true,
-        update_in_insert = false,
-        severity_sort = true,
-        float = {
-          border = "rounded",
-          source = "always",
-          header = "",
-          prefix = "",
-        },
-      })
-
-      -- Diagnostic signs
-      local signs = {
-        Error = " ",
-        Warn = " ",
-        Hint = "󰌵 ",
-        Info = " "
-      }
-      for type, icon in pairs(signs) do
-        local hl = "DiagnosticSign" .. type
-        vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = "" })
-      end
-
-      -- Force borders on all LSP handlers
-      local orig_util_open_floating_preview = vim.lsp.util.open_floating_preview
-      function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
-        opts = opts or {}
-        opts.border = opts.border or "rounded"
-        return orig_util_open_floating_preview(contents, syntax, opts, ...)
-      end
-
-      vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(
-        vim.lsp.handlers.hover,
-        { border = "rounded" }
-      )
-
-      vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(
-        vim.lsp.handlers.signature_help,
-        { border = "rounded" }
-      )
-
-      -- Store config globally for mason-lspconfig to use
-      _G.lsp_on_attach = on_attach
-      _G.lsp_capabilities = capabilities
-    end,
-  },
-
-  -- Mason LSP Config bridge
   {
     "williamboman/mason-lspconfig.nvim",
     dependencies = {
@@ -490,8 +186,6 @@ return {
       "neovim/nvim-lspconfig",
     },
     config = function()
-      local lspconfig = require("lspconfig")
-
       -- Server-specific configurations
       local server_configs = {
         lua_ls = {
@@ -577,14 +271,6 @@ return {
               semanticTokens = true,
             },
           },
-          on_attach = function(client, bufnr)
-            if _G.lsp_on_attach then
-              _G.lsp_on_attach(client, bufnr)
-            end
-            if client.server_capabilities.semanticTokensProvider then
-              vim.lsp.semantic_tokens.start(bufnr, client.id)
-            end
-          end,
         },
 
         clangd = {
@@ -635,6 +321,13 @@ return {
         handlers = {
           -- Default handler
           function(server_name)
+            -- Use pcall to safely require lspconfig
+            local ok, lspconfig = pcall(require, "lspconfig")
+            if not ok then
+              vim.notify("lspconfig not available", vim.log.levels.ERROR)
+              return
+            end
+
             local config = {
               on_attach = _G.lsp_on_attach,
               capabilities = _G.lsp_capabilities,
@@ -647,7 +340,7 @@ return {
             lspconfig[server_name].setup(config)
           end,
 
-          -- Skip jdtls (handled by ftplugin)
+          -- Skip jdtls (handled by ftplugin/java.lua)
           ["jdtls"] = function() end,
         },
       })
@@ -660,6 +353,7 @@ return {
     lazy = true,
     ft = { "json", "jsonc", "yaml" },
   },
+
   -- Autocompletion
   {
     "hrsh7th/nvim-cmp",
@@ -738,10 +432,10 @@ return {
 
         window = {
           completion = cmp.config.window.bordered({
-            border = "rounded",
+            border = "single",
           }),
           documentation = cmp.config.window.bordered({
-            border = "rounded",
+            border = "single",
           }),
         },
 
@@ -783,7 +477,7 @@ return {
     config = function()
       require("lspsaga").setup({
         ui = {
-          border = "rounded",
+          border = "single",
           title = true,
           winblend = 0,
           expand = "",
@@ -848,7 +542,7 @@ return {
           },
         },
         symbol_in_winbar = {
-          enable = false, -- Disabled since we're using navic in lualine
+          enable = false,
           separator = " › ",
           hide_keyword = true,
           show_file = true,
@@ -889,7 +583,7 @@ return {
       notification = {
         window = {
           winblend = 0,
-          border = "rounded",
+          border = "single",
         },
       },
       progress = {
@@ -899,6 +593,7 @@ return {
       },
     },
   },
+
   -- Function signatures
   {
     "ray-x/lsp_signature.nvim",
@@ -906,7 +601,7 @@ return {
     opts = {
       bind = true,
       handler_opts = {
-        border = "rounded",
+        border = "single",
       },
       hint_enable = false,
       floating_window_above_cur_line = true,
@@ -943,7 +638,7 @@ return {
     ft = "qf",
     opts = {
       preview = {
-        border = "rounded",
+        border = "single",
         show_title = true,
         win_height = 15,
       },
@@ -1016,9 +711,18 @@ return {
     dependencies = { "williamboman/mason.nvim" },
     opts = {
       ensure_installed = {
-        "stylua", "prettier", "prettierd", "black", "isort",
-        "gofmt", "goimports", "rustfmt",
-        "eslint_d", "pylint", "golangcilint", "markdownlint",
+        "stylua",
+        "prettier",
+        "prettierd",
+        "black",
+        "isort",
+        "gofmt",
+        "goimports",
+        "rustfmt",
+        "eslint_d",
+        "pylint",
+        "golangcilint",
+        "markdownlint",
       },
       auto_update = true,
       run_on_start = true,

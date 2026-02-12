@@ -1,12 +1,14 @@
 -- ============================================================================
--- Add this to your treesitter plugin configuration
--- Usually in lua/plugins/treesitter.lua
+-- FILE: lua/plugins/treesitter.lua
+-- Treesitter configuration with proper early loading
 -- ============================================================================
 
 return {
   "nvim-treesitter/nvim-treesitter",
+  lazy = false,
   branch = "master",
   build = ":TSUpdate",
+  -- Load very early
   event = { "BufReadPost", "BufNewFile" },
   dependencies = {
     "nvim-treesitter/nvim-treesitter-textobjects",
@@ -37,7 +39,7 @@ return {
 
       highlight = {
         enable = true,
-        additional_vim_regex_highlighting = false, -- Disable vim regex highlighting
+        additional_vim_regex_highlighting = false,
       },
 
       indent = {

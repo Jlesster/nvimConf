@@ -1,4 +1,3 @@
-
 return {
   -- Better quickfix window
   {
@@ -15,13 +14,13 @@ return {
       input = {
         enabled = true,
         default_prompt = "Input:",
-        border = "rounded",
+        border = "single",
       },
       select = {
         enabled = true,
         backend = { "telescope", "builtin" },
         builtin = {
-          border = "rounded",
+          border = "single",
         },
       },
     },

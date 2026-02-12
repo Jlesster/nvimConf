@@ -22,9 +22,9 @@ return {
         min_height = 5,
         max_height = 5,
         default_detail = 1,
-        border = "rounded",
+        border = "single",
         bindings = {
-          ["<CR>"] = false,  -- Disable default open behavior
+          ["<CR>"] = false, -- Disable default open behavior
         },
         win_opts = {
           winblend = 0,
@@ -90,14 +90,14 @@ return {
 
       -- Prevent opening files in Overseer window
       vim.api.nvim_create_autocmd("FileType", {
-        pattern = {"OverseerList", "OverseerForm"},
+        pattern = { "OverseerList", "OverseerForm" },
         callback = function(ev)
           vim.api.nvim_create_autocmd("BufEnter", {
             buffer = ev.buf,
             callback = function()
               -- Make the window non-modifiable and prevent buffer changes
               vim.bo[ev.buf].modifiable = false
-              vim.wo.winfixbuf = true  -- Prevent changing buffer in this window (nvim 0.10+)
+              vim.wo.winfixbuf = true -- Prevent changing buffer in this window (nvim 0.10+)
             end,
           })
         end,
@@ -112,7 +112,7 @@ return {
       })
 
       -- Add colored separator line at top of Overseer window
-      vim.api.nvim_create_autocmd({"FileType", "BufEnter", "TermOpen"}, {
+      vim.api.nvim_create_autocmd({ "FileType", "BufEnter", "TermOpen" }, {
         callback = function()
           local wininfo = vim.fn.getwininfo(vim.fn.win_getid())[1]
           if wininfo and wininfo.height <= 10 and wininfo.botline then

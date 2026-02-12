@@ -34,7 +34,115 @@ return {
   {
     "NMAC427/guess-indent.nvim",
     lazy = false,
-    opts = {}
+    opts = {
+      auto_cmd = true,               -- Set to false to disable automatic execution
+      override_editorconfig = false, -- Don't override editorconfig settings
+      filetype_exclude = {           -- Exclude certain filetypes
+        "netrw",
+        "tutor",
+        "snacks_dashboard",
+        "neo-tree",
+        "lazy",
+        "mason",
+      },
+      buftype_exclude = { -- Exclude certain buffer types
+        "help",
+        "nofile",
+        "terminal",
+        "prompt",
+      },
+    },
+    config = function(_, opts)
+      require('guess-indent').setup(opts)
+
+      -- Set default indentation preferences for specific languages
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = "go",
+        callback = function()
+          -- Go: 2 spaces (custom preference)
+          vim.bo.expandtab = true
+          vim.bo.tabstop = 2
+          vim.bo.shiftwidth = 2
+          vim.bo.softtabstop = 2
+        end,
+      })
+
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = { "cpp", "c", "h", "hpp" },
+        callback = function()
+          -- C/C++ common convention: 2 spaces
+          vim.bo.expandtab = true
+          vim.bo.tabstop = 2
+          vim.bo.shiftwidth = 2
+          vim.bo.softtabstop = 2
+        end,
+      })
+
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = "java",
+        callback = function()
+          -- Java: 2 spaces (custom preference)
+          vim.bo.expandtab = true
+          vim.bo.tabstop = 2
+          vim.bo.shiftwidth = 2
+          vim.bo.softtabstop = 2
+        end,
+      })
+
+      -- Additional language preferences
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = { "javascript", "typescript", "javascriptreact", "typescriptreact", "json", "yaml" },
+        callback = function()
+          -- Web/config files: 2 spaces
+          vim.bo.expandtab = true
+          vim.bo.tabstop = 2
+          vim.bo.shiftwidth = 2
+          vim.bo.softtabstop = 2
+        end,
+      })
+
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = { "python" },
+        callback = function()
+          -- Python PEP 8: 4 spaces
+          vim.bo.expandtab = true
+          vim.bo.tabstop = 4
+          vim.bo.shiftwidth = 4
+          vim.bo.softtabstop = 4
+        end,
+      })
+
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = { "rust" },
+        callback = function()
+          -- Rust convention: 4 spaces
+          vim.bo.expandtab = true
+          vim.bo.tabstop = 4
+          vim.bo.shiftwidth = 4
+          vim.bo.softtabstop = 4
+        end,
+      })
+
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = { "lua" },
+        callback = function()
+          -- Lua: 2 spaces
+          vim.bo.expandtab = true
+          vim.bo.tabstop = 2
+          vim.bo.shiftwidth = 2
+          vim.bo.softtabstop = 2
+        end,
+      })
+
+      -- Optional: Show a notification when indentation is detected
+      -- vim.api.nvim_create_autocmd("User", {
+      --   pattern = "GuessIndent",
+      --   callback = function()
+      --     local indent = vim.bo.expandtab and (vim.bo.shiftwidth .. " spaces") or "tabs"
+      --     vim.notify("Detected indent: " .. indent, vim.log.levels.INFO, { title = "Guess Indent" })
+      --   end,
+      -- })
+    end,
   },
   {
     "brenoprata10/nvim-highlight-colors",
