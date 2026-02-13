@@ -645,7 +645,10 @@ return {
     },
   },
 
-  -- Formatting
+  -- ============================================================================
+  -- Conform.nvim Configuration with clang-format
+  -- ============================================================================
+
   {
     "stevearc/conform.nvim",
     event = { "BufWritePre" },
@@ -662,21 +665,52 @@ return {
     },
     opts = {
       formatters_by_ft = {
+        -- Use clang-format for C-family and Java
+        c = { "clang-format" },
+        cpp = { "clang-format" },
+        java = { "clang-format" },
+
+        -- clang-format also supports these (optional)
+        javascript = { "clang-format" },
+        typescript = { "clang-format" },
+
+        -- Keep other formatters as-is
         lua = { "stylua" },
         python = { "isort", "black" },
-        javascript = { { "prettierd", "prettier" } },
-        typescript = { { "prettierd", "prettier" } },
-        javascriptreact = { { "prettierd", "prettier" } },
-        typescriptreact = { { "prettierd", "prettier" } },
-        json = { { "prettierd", "prettier" } },
+        json = { "prettierd", "prettier", stop_after_first = true },
         yaml = { "prettier" },
-        markdown = { { "prettierd", "prettier" } },
+        markdown = { "prettierd", "prettier", stop_after_first = true },
         go = { "goimports", "gofmt" },
         rust = { "rustfmt" },
+
+        -- If you want the old {{ }} behavior for JavaScript/TypeScript:
+        javascriptreact = { "prettierd", "prettier", stop_after_first = true },
+        typescriptreact = { "prettierd", "prettier", stop_after_first = true },
       },
+
       format_on_save = {
         timeout_ms = 500,
         lsp_fallback = true,
+      },
+
+      -- Custom formatter configurations
+      formatters = {
+        -- Configure clang-format to use your .clang-format file
+        ["clang-format"] = {
+          command = "clang-format",
+          args = {
+            -- Will automatically find .clang-format in current dir or parent dirs
+            -- Or specify explicitly: "--style=file:/path/to/.clang-format"
+            "--style=file",
+            "--assume-filename", "$FILENAME",
+          },
+          stdin = true,
+        },
+
+        -- Keep your other formatter configs
+        black = {
+          prepend_args = { "--fast", "--line-length", "100" },
+        },
       },
     },
   },
@@ -715,6 +749,7 @@ return {
         "prettier",
         "prettierd",
         "black",
+        "clang-format",
         "isort",
         "gofmt",
         "goimports",

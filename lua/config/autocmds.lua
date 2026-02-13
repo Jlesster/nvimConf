@@ -113,3 +113,42 @@ autocmd("FileType", {
     vim.opt_local.conceallevel = 0
   end,
 })
+
+-- Go indentation
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "go" },
+  callback = function()
+    vim.bo.indentexpr = ""
+    vim.bo.cindent = true
+    vim.bo.smartindent = false
+    vim.bo.autoindent = true
+    vim.bo.cinoptions = "(4,u4,U1,w1"
+  end,
+})
+
+-- C/C++ indentation
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "c", "cpp", "h", "hpp" },
+  callback = function()
+    vim.bo.cindent = true
+    vim.bo.cinoptions = "(4,u4,U1,w1"
+  end,
+})
+
+-- Python indentation (simple, Python is straightforward)
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "python" },
+  callback = function()
+    vim.bo.smartindent = true
+    vim.bo.autoindent = true
+  end,
+})
+
+-- Lua, JS, TS indentation
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "lua", "javascript", "typescript", "javascriptreact", "typescriptreact" },
+  callback = function()
+    vim.bo.smartindent = true
+    vim.bo.autoindent = true
+  end,
+})

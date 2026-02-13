@@ -48,7 +48,7 @@ return {
           easing = "linear",
         },
       },
-      statuscolumn = { enabled = true },
+      statuscolumn = { enabled = false },
       words        = { enabled = true },
       zen          = {
         enabled = true,

@@ -269,7 +269,7 @@ keymap("n", "<leader>r", ":Yazi <CR>", { desc = "Yazi" })
 -- ============================================================================
 
 keymap("n", "<leader>te", ":Neotree toggle<CR>", { desc = "Toggle file explorer" })
-keymap("n", "<leader>ta", ":AerialToggle<CR>", { desc = "Toggle Aerial" })
+keymap("n", "<leader>i", ":AerialToggle<CR>", { desc = "Toggle Aerial" })
 keymap("n", "<leader>tc", function()
   vim.opt.conceallevel = vim.opt.conceallevel:get() == 0 and 2 or 0
 end, { desc = "Toggle conceal" })

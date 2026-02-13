@@ -7,7 +7,7 @@ vim.g.maplocalleader = ","
 -- UI Settings
 opt.number = true
 opt.relativenumber = true
-opt.signcolumn = "yes:2"
+-- opt.signcolumn = "yes:2"
 opt.cursorline = true
 opt.termguicolors = true
 opt.scrolloff = 8
@@ -19,13 +19,14 @@ opt.pumheight = 10
 opt.winminwidth = 5
 opt.splitkeep = "screen"
 opt.fillchars = { eob = " " } -- Remove ~ from empty lines
-opt.conceallevel = 2 -- Hide concealed text unless cursor on line
+opt.conceallevel = 0 -- Hide concealed text unless cursor on line
 opt.concealcursor = "" -- Show concealed text in all modes on cursor line
 opt.list = true -- Show some invisible characters
-opt.listchars = { tab = "→ ", trail = "·", nbsp = "␣" } -- Characters for whitespace
+opt.listchars = { tab = "  ", trail = " ", nbsp = " " } -- Characters for whitespace
 opt.showbreak = "↪ " -- Character to show for wrapped lines
-opt.numberwidth = 4 -- Width of number column
+opt.numberwidth = 1 -- Width of number column
 opt.showtabline = 2 -- Always show tabline
+opt.statuscolumn = '%s%{v:relnum?printf("%4d",v:relnum):printf("%d",v:lnum)} '
 
 -- Editing
 opt.expandtab = true
@@ -33,19 +34,22 @@ opt.shiftwidth = 2
 opt.tabstop = 2
 opt.softtabstop = 2
 opt.smartindent = true
+opt.autoindent = true
 opt.wrap = true
 opt.linebreak = true
 opt.breakindent = true
-opt.formatoptions = "jcroqlnt"                                                    -- Better formatting options
-opt.grepformat = "%f:%l:%c:%m"                                                    -- Format for :grep
-opt.grepprg = "rg --vimgrep"                                                      -- Use ripgrep for :grep
-opt.inccommand = "split"                                                          -- Preview substitutions in split
-opt.jumpoptions = "view"                                                          -- Preserve view when jumping
-opt.autowrite = true                                                              -- Auto write before running commands
-opt.confirm = true                                                                -- Confirm to save changes before exiting
-opt.sessionoptions = "buffers,curdir,tabpages,winsize,help,globals,skiprtp,folds" -- Session options
-opt.formatexpr = "v:lua.vim.lsp.formatexpr()"                                     -- Use LSP for gq formatting
-opt.tagfunc = "v:lua.vim.lsp.tagfunc"                                             -- Use LSP for tag jumping
+opt.formatoptions = "jcroqlnt" -- Better formatting options
+opt.grepformat = "%f:%l:%c:%m" -- Format for :grep
+opt.grepprg = "rg --vimgrep"   -- Use ripgrep for :grep
+opt.inccommand = "split"       -- Preview substitutions in split
+opt.jumpoptions = "view"       -- Preserve view when jumping
+opt.autowrite = true           -- Auto write before running commands
+opt.confirm = true             -- Confirm to save changes before exiting
+
+-- Session options
+opt.sessionoptions = "buffers,curdir,tabpages,winsize,help,globals,skiprtp,folds"
+opt.formatexpr = "v:lua.vim.lsp.formatexpr()" -- Use LSP for gq formatting
+opt.tagfunc = "v:lua.vim.lsp.tagfunc"         -- Use LSP for tag jumping
 
 -- Fold
 opt.foldmethod = "expr" -- Use treesitter for folding
@@ -54,13 +58,9 @@ opt.foldmethod = "expr" -- Use treesitter for folding
 opt.diffopt:append("algorithm:patience") -- Better diff algorithm
 opt.diffopt:append("indent-heuristic")   -- Better diff heuristic
 
--- opt.foldexpr = "nvim_treesitter#foldexpr()" -- Treesitter fold expression
+opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
 opt.foldenable = false  -- Don't fold by default
 opt.foldlevelstart = 99 -- Start with all folds open
-
--- Copy/Indent
-opt.copyindent = true     -- Copy previous indentation on autoindent
-opt.preserveindent = true -- Preserve indent structure when editing
 
 -- Search
 opt.ignorecase = true
