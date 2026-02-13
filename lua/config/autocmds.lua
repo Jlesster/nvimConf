@@ -9,6 +9,12 @@ autocmd("TextYankPost", {
   end,
 })
 
+-- Auto-save on focus lost
+vim.api.nvim_create_autocmd("FocusLost", {
+  pattern = "*",
+  command = "silent! wa",
+})
+
 -- Close some filetypes with <q>
 autocmd("FileType", {
   group = augroup("close_with_q", { clear = true }),
@@ -123,6 +129,18 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.bo.smartindent = false
     vim.bo.autoindent = true
     vim.bo.cinoptions = "(4,u4,U1,w1"
+    vim.opt_local.tabstop = 4
+    vim.opt_local.shiftwidth = 4
+    vim.opt_local.expandtab = false -- Use hard tabs for Go
+  end,
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "python", "rust", "go" },
+  callback = function()
+    vim.opt_local.tabstop = 4
+    vim.opt_local.shiftwidth = 4
+    vim.opt_local.expandtab = true
   end,
 })
 

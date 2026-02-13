@@ -6,11 +6,11 @@ local transition = require("utils.material-transition")
 local subscribers = {}
 
 function M.subscribe(fn)
-  table.insert(subscribers,fn)
+  table.insert(subscribers, fn)
 end
 
 local theme_file = vim.fn.stdpath("config")
-  .. "/colors/material_purple_mocha.lua"
+    .. "/colors/material_purple_mocha.lua"
 
 local is_transitioning = false
 local fs_event = nil
@@ -108,11 +108,11 @@ local function reload_heirline_colors(colors)
   local hl_colors = heirline_components.hl.get_colors()
 
   -- Override buffer colors with your theme colors
-  hl_colors.buffer_fg = colors.overlay0 or "#706F86"  -- Inactive tab text
-  hl_colors.buffer_bg = "NONE"                         -- Inactive tab background
-  hl_colors.buffer_visible_fg = colors.text or "#D1D5F4"  -- Visible but not active
-  hl_colors.buffer_active_fg = colors.mauve or "#F493B5"  -- Active tab text
-  hl_colors.tabline_bg = "NONE"                        -- Background of entire tabline
+  hl_colors.buffer_fg = colors.overlay0 or "#706F86"     -- Inactive tab text
+  hl_colors.buffer_bg = "NONE"                           -- Inactive tab background
+  hl_colors.buffer_visible_fg = colors.text or "#D1D5F4" -- Visible but not active
+  hl_colors.buffer_active_fg = colors.mauve or "#F493B5" -- Active tab text
+  hl_colors.tabline_bg = "NONE"                          -- Background of entire tabline
 
   -- Reload heirline with new colors
   heirline.load_colors(hl_colors)
@@ -296,7 +296,7 @@ function M.setup()
   debounce_timer = uv.new_timer()
 
   local ok, err = pcall(function()
-    -- FIX: Watch the theme file (Lua) instead of SCSS
+    --  FIX: Watch the theme file (Lua) instead of SCSS
     uv.fs_event_start(fs_event, watch_file, {}, function(err, filename, events)
       if err then
         vim.schedule(function()
