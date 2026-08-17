@@ -23,8 +23,8 @@ return {
         rust = { 'rustfmt' },
         go = { 'gofumpt' },
         nix = { 'nixfmt' },
-        qml = { 'qmlformat' },
         meson = { 'meson' },
+        kotlin = { 'ktlint' },
         javascript = { 'prettierd', 'prettier', stop_after_first = true },
         javascriptreact = { 'prettierd', 'prettier', stop_after_first = true },
         typescript = { 'prettierd', 'prettier', stop_after_first = true },
@@ -42,6 +42,12 @@ return {
       format_on_save = function(bufnr)
         if vim.bo[bufnr].buftype ~= '' then
           return
+        end
+        if vim.bo[bufnr].filetype == 'qml' then
+          return { timeout_ms = 500, lsp_format = 'first' }
+        end
+        if vim.bo[bufnr].filetype == 'kotlin' then
+          return { timeout_ms = 2000, lsp_format = 'prefer' }
         end
         return { timeout_ms = 500, lsp_format = 'never' }
       end,

@@ -5,33 +5,61 @@ local M = {}
 
 -- ─── Palette ────────────────────────────────────────────────────────────────
 M.colors = {
-  crust = '#0f0f1f',
-  mantle = '#191926',
-  base = '#14141c',
-  surface0 = '#22222f',
-  surface1 = '#2d2d3d',
-  surface2 = '#3a3a4d',
-  overlay0 = '#5a5c78',
-  overlay1 = '#73758f',
-  overlay2 = '#8c8ea6',
-  subtext0 = '#9698b3',
-  subtext1 = '#aaacc4',
-  text = '#d4d6f0',
-  lavender = '#9d8cff',
-  blue = '#6e9bff',
-  sapphire = '#5ce8d8',
-  sky = '#5ce0f5',
-  teal = '#4dd8b0',
-  green = '#7dff9e',
-  yellow = '#ffe06e',
-  peach = '#ffb15c',
-  maroon = '#e8546a',
-  red = '#ff6e7a',
-  mauve = '#c478ff',
-  pink = '#ff8fc9',
-  flamingo = '#ff9f8a',
-  rosewater = '#ffc4a3',
+  crust = '#11111b',
+  mantle = '#181825',
+  base = '#1e1e2e',
+  surface0 = '#313244',
+  surface1 = '#45475a',
+  surface2 = '#585b70',
+  overlay0 = '#6c7086',
+  overlay1 = '#7f849c',
+  overlay2 = '#9399b2',
+  subtext0 = '#a6adc8',
+  subtext1 = '#bac2de',
+  text = '#cdd6f4',
+  lavender = '#b4befe',
+  blue = '#89b4fa',
+  sapphire = '#74c7ec',
+  sky = '#89dceb',
+  teal = '#94e2d5',
+  green = '#a6e3a1',
+  yellow = '#f9e2af',
+  peach = '#fab387',
+  maroon = '#eba0ac',
+  red = '#f38ba8',
+  mauve = '#cba6f7',
+  pink = '#f5c2e7',
+  flamingo = '#f2cdcd',
+  rosewater = '#f5e0dc',
 }
+-- M.colors = {
+--   crust = '#0c1219',
+--   mantle = '#10171f',
+--   base = '#141b25',
+--   surface0 = '#1c2531',
+--   surface1 = '#25303e',
+--   surface2 = '#313d4e',
+--   overlay0 = '#4a5666',
+--   overlay1 = '#5f6d80',
+--   overlay2 = '#788599',
+--   subtext0 = '#8e9bab',
+--   subtext1 = '#a3aebc',
+--   text = '#d2dae4',
+--   lavender = '#9b8bd6',
+--   blue = '#4d82c4',
+--   sapphire = '#3f9ac9',
+--   sky = '#4facd6',
+--   teal = '#3ec9a7',
+--   green = '#6bc48f',
+--   yellow = '#d1b45f',
+--   peach = '#cf9760',
+--   maroon = '#b85585',
+--   red = '#d1668d',
+--   mauve = '#877ac4',
+--   pink = '#a97bb8',
+--   flamingo = '#c98583',
+--   rosewater = '#d9b8a8',
+-- }
 
 -- ─── Semantic aliases ────────────────────────────────────────────────────────
 local p = M.colors
@@ -41,6 +69,7 @@ local c = {
   bg_sel = p.surface0,
   bg_subtle = p.surface1,
   fg_dim = p.surface2,
+  comment = p.subtext0,
   fg = p.text,
   fg_bright = p.rosewater,
   fg_alt = p.lavender,
@@ -89,54 +118,74 @@ end
 M.transparent = state_read()
 
 local transparent_bgs = {
-  Normal = { fg = c.fg, bg = c.bg_dark },
-  NormalNC = { fg = c.fg_alt, bg = c.bg_dark },
-  NormalFloat = { fg = c.fg, bg = c.bg_dark },
+  Normal = { fg = c.fg, bg = c.bg },
+  NormalNC = { fg = c.fg_alt, bg = c.bg },
+  NormalFloat = { fg = c.fg, bg = c.bg },
   SignColumn = { fg = c.bg_sel, bg = c.bg },
   FoldColumn = { fg = c.fg_dim, bg = c.bg },
-  StatusLine = { fg = c.fg_alt, bg = c.bg_dark },
+  StatusLine = { fg = c.fg_alt, bg = c.bg },
   StatusLineNC = { fg = c.fg_dim, bg = c.bg },
   WinBar = { fg = c.fg_alt, bg = c.bg },
   WinBarNC = { fg = c.fg_dim, bg = c.bg },
   WinSeparator = { fg = c.bg_sel, bg = c.bg },
-  TabLine = { fg = c.fg_dim, bg = c.bg_dark },
+  TabLine = { fg = c.fg_dim, bg = c.bg },
   TabLineFill = { bg = c.bg },
   TabLineSel = { fg = c.mauve, bg = c.bg, bold = true },
-  Pmenu = { fg = c.fg_alt, bg = c.bg_dark },
+  Pmenu = { fg = c.fg_alt, bg = c.bg },
   PmenuSbar = { bg = c.bg_sel },
-  FloatBorder = { fg = c.bg_sel, bg = c.bg_dark },
-  FloatTitle = { fg = c.mauve, bg = c.bg_dark, bold = true },
+  FloatBorder = { fg = c.bg_sel, bg = c.bg },
+  FloatTitle = { fg = c.mauve, bg = c.bg, bold = true },
   FidgetTitle = { fg = p.overlay1, bg = p.mantle },
   FidgetTask = { fg = p.overlay0, bg = p.mantle },
-  CursorLine = { bg = c.bg_dark },
-  CursorColumn = { bg = c.bg_dark },
+  CursorLine = { bg = c.bg },
+  CursorColumn = { bg = c.bg },
   DiagnosticVirtualTextError = { fg = c.red, bg = c.bg, italic = true },
   DiagnosticVirtualTextWarn = { fg = c.yellow, bg = c.bg, italic = true },
   DiagnosticVirtualTextInfo = { fg = c.teal, bg = c.bg, italic = true },
   DiagnosticVirtualTextHint = { fg = c.sky, bg = c.bg, italic = true },
   LspInlayHint = {
     fg = c.fg_dim,
-    bg = c.bg_dark,
+    bg = c.bg,
     italic = true,
     nocombine = true,
   },
-  TelescopeNormal = { fg = c.fg, bg = c.bg_dark },
-  TelescopeBorder = { fg = c.bg_sel, bg = c.bg_dark },
+  TelescopeNormal = { fg = c.fg, bg = c.bg },
+  TelescopeBorder = { fg = c.bg_sel, bg = c.bg },
   TelescopePromptNormal = { bg = c.bg },
   TelescopePromptBorder = { fg = c.bg_sel, bg = c.bg },
-  TelescopePromptTitle = { fg = c.yellow, bg = c.bg_dark },
-  TelescopeResultsNormal = { bg = c.bg_dark },
-  TelescopeResultsBorder = { fg = c.bg_sel, bg = c.bg_dark },
-  TelescopeResultsTitle = { fg = c.bg_dark, bg = c.bg_dark },
+  TelescopePromptTitle = { fg = c.yellow, bg = c.bg },
+  TelescopeResultsNormal = { bg = c.bg },
+  TelescopeResultsBorder = { fg = c.bg_sel, bg = c.bg },
+  TelescopeResultsTitle = { fg = c.bg_dark, bg = c.bg },
   TelescopePreviewNormal = { bg = c.bg },
   TelescopePreviewBorder = { fg = c.bg_sel, bg = c.bg },
-  TroubleNormal = { fg = c.fg, bg = c.bg_dark },
-  TroubleNormalNC = { fg = c.fg_alt, bg = c.bg_dark },
-  WhichKeyNormal = { bg = c.bg_dark },
-  MiniFilesNormal = { fg = c.fg, bg = c.bg_dark },
-  MiniFilesBorder = { fg = c.bg_sel, bg = c.bg_dark },
-  MiniFilesBorderModified = { fg = c.yellow, bg = c.bg_dark },
-  MasonNormal = { bg = c.bg_dark },
+  TroubleNormal = { fg = c.fg, bg = c.bg },
+  TroubleNormalNC = { fg = c.fg_alt, bg = c.bg },
+  WhichKeyNormal = { bg = c.bg },
+  MiniFilesNormal = { fg = c.fg, bg = c.bg },
+  MiniFilesBorder = { fg = c.bg_sel, bg = c.bg },
+  MiniFilesBorderModified = { fg = c.yellow, bg = c.bg },
+  NeoTreeNormal = { fg = c.fg, bg = c.bg },
+  NeoTreeNormalNC = { fg = c.fg_alt, bg = c.bg },
+  NeoTreeWinSeparator = { fg = c.bg_sel, bg = c.bg },
+  NeoTreeIndentMarker = { fg = c.bg_sel },
+  NeoTreeRootName = { fg = c.mauve, bold = true },
+  NeoTreeDirectoryIcon = { fg = c.blue },
+  NeoTreeDirectoryName = { fg = c.blue },
+  NeoTreeFileName = { fg = c.fg },
+  NeoTreeFileNameOpened = { fg = c.lavender, italic = true },
+  NeoTreeModified = { fg = c.yellow },
+  NeoTreeGitAdded = { fg = c.green },
+  NeoTreeGitModified = { fg = c.yellow },
+  NeoTreeGitDeleted = { fg = c.red },
+  NeoTreeGitUntracked = { fg = c.teal },
+  NeoTreeGitIgnored = { fg = c.fg_dim },
+  NeoTreeGitConflict = { fg = c.maroon, bold = true },
+  NeoTreeTabActive = { fg = c.bg, bg = c.mauve, bold = true },
+  NeoTreeTabInactive = { fg = c.fg_dim, bg = c.bg },
+  NeoTreeTabSeparatorActive = { fg = c.mauve, bg = c.bg },
+  NeoTreeTabSeparatorInactive = { fg = c.bg_sel, bg = c.bg },
+  MasonNormal = { bg = c.bg },
   ToggleTermNormal = { bg = c.bg },
 }
 
@@ -157,7 +206,15 @@ local function apply_transparent(enable)
     end
   end
 
-  local lualine_modes = { 'normal', 'insert', 'visual', 'replace', 'command', 'terminal', 'inactive' }
+  local lualine_modes = {
+    'normal',
+    'insert',
+    'visual',
+    'replace',
+    'command',
+    'terminal',
+    'inactive',
+  }
   local lualine_sections = { 'a', 'b', 'c', 'x', 'y', 'z' }
   if enable then
     lualine_bg_cache = {}
@@ -211,20 +268,20 @@ function M.load()
   vim.g.colors_name = 'wallpaper'
 
   -- ─── Editor chrome ────────────────────────────────────────────────────────
-  hi('Normal', { fg = c.fg, bg = c.bg_dark })
-  hi('NormalFloat', { fg = c.fg, bg = c.bg_dark })
-  hi('NormalNC', { fg = c.fg_alt, bg = c.bg_dark })
-  hi('FloatBorder', { fg = c.bg_sel, bg = c.bg_dark })
-  hi('FloatTitle', { fg = c.mauve, bg = c.bg_dark, bold = true })
+  hi('Normal', { fg = c.fg, bg = c.bg })
+  hi('NormalFloat', { fg = c.fg, bg = c.bg })
+  hi('NormalNC', { fg = c.fg_alt, bg = c.bg })
+  hi('FloatBorder', { fg = c.bg_sel, bg = c.bg })
+  hi('FloatTitle', { fg = c.mauve, bg = c.bg, bold = true })
 
   hi('@neovim.logo.N', { fg = c.mauve })
   hi('@neovim.logo', { fg = c.mauve })
   hi('@neovim.version', { fg = c.green })
 
   hi('Cursor', { fg = c.bg, bg = c.mauve })
-  hi('CursorLine', { bg = c.bg_dark })
+  hi('CursorLine', { bg = c.bg })
   hi('CursorLineNr', { fg = c.mauve, bold = true })
-  hi('CursorColumn', { bg = c.bg_dark })
+  hi('CursorColumn', { bg = c.bg })
 
   hi('LineNr', { fg = c.bg_sel })
   hi('SignColumn', { fg = c.bg_sel, bg = c.bg })
@@ -232,21 +289,21 @@ function M.load()
   hi('FoldColumn', { fg = c.fg_dim, bg = c.bg })
   hi('Folded', { fg = c.overlay0, bg = c.none })
 
-  hi('StatusLine', { fg = c.fg_alt, bg = c.bg_dark })
+  hi('StatusLine', { fg = c.fg_alt, bg = c.bg })
   hi('StatusLineNC', { fg = c.fg_dim, bg = c.bg })
   hi('WinBar', { fg = c.fg_alt, bg = c.bg })
   hi('WinBarNC', { fg = c.fg_dim, bg = c.bg })
   hi('WinSeparator', { fg = c.bg_sel, bg = c.bg })
 
-  hi('TabLine', { fg = c.fg_dim, bg = c.bg_dark })
+  hi('TabLine', { fg = c.fg_dim, bg = c.bg })
   hi('TabLineFill', { bg = c.bg })
   hi('TabLineSel', { fg = c.mauve, bg = c.bg, bold = true })
 
-  hi('Pmenu', { fg = c.fg_alt, bg = c.bg_dark })
+  hi('Pmenu', { fg = c.fg_alt, bg = c.bg })
   hi('PmenuSel', { fg = c.bg, bg = c.mauve, bold = true })
   hi('PmenuSbar', { bg = c.bg_sel })
   hi('PmenuThumb', { bg = c.fg_dim })
-  hi('PmenuBorder', { fg = c.bg_sel, bg = c.bg_dark })
+  hi('PmenuBorder', { fg = c.bg_sel, bg = c.bg })
 
   hi('Search', { fg = c.bg, bg = c.yellow })
   hi('IncSearch', { fg = c.bg, bg = c.peach, bold = true })
@@ -294,27 +351,86 @@ function M.load()
   hi('NotifyINFOTitle', { fg = c.teal, bold = true })
   hi('NotifyDEBUGTitle', { fg = c.fg_dim, bold = true })
   hi('NotifyTRACETitle', { fg = c.mauve, bold = true })
-  hi('NotifyERRORBody', { fg = c.fg, bg = c.bg_dark })
-  hi('NotifyWARNBody', { fg = c.fg, bg = c.bg_dark })
-  hi('NotifyINFOBody', { fg = c.fg, bg = c.bg_dark })
-  hi('NotifyDEBUGBody', { fg = c.fg, bg = c.bg_dark })
-  hi('NotifyTRACEBody', { fg = c.fg, bg = c.bg_dark })
+  hi('NotifyERRORBody', { fg = c.fg, bg = c.bg })
+  hi('NotifyWARNBody', { fg = c.fg, bg = c.bg })
+  hi('NotifyINFOBody', { fg = c.fg, bg = c.bg })
+  hi('NotifyDEBUGBody', { fg = c.fg, bg = c.bg })
+  hi('NotifyTRACEBody', { fg = c.fg, bg = c.bg })
+
+  -- ─── Marvin / Jason (marvin.nvim) ───────────────────────────────────────
+  -- "core": mirrors whatever standard group marvin.nvim links these to by
+  -- default, so they stay consistent with NormalFloat/Special/Comment/etc.
+  -- above rather than introducing a second visual language.
+  hi('MarvinWin', { fg = c.fg, bg = c.bg })
+  hi('MarvinAccentBorder', { fg = c.bg_sel, bg = c.bg })
+  hi('MarvinItem', { fg = c.fg, bg = c.bg })
+  hi('MarvinItemIcon', { fg = c.peach, italic = true })
+  hi('MarvinDesc', { fg = c.comment, italic = true })
+  hi('MarvinSepLine', { fg = c.bg_sel })
+  hi('MarvinSepLabel', { fg = c.bg_sel })
+  hi('MarvinSearch', { fg = c.bg, bg = c.yellow })
+  hi('MarvinSearchBox', { fg = c.bg_sel })
+  hi('MarvinFooter', { fg = c.comment, italic = true })
+  hi('MarvinFooterKey', { fg = c.teal })
+  hi('MarvinBadge', { fg = c.yellow })
+  hi('MarvinInputText', { fg = c.fg })
+  hi('MarvinInputHint', { fg = c.comment, italic = true })
+
+  -- "toolwin": JetBrains-style chrome — header/gutter sit on p.mantle (same
+  -- level as FidgetTitle/FidgetTask above), the one accent fill is the
+  -- selection row.
+  hi('MarvinToolWinHeader', { fg = c.fg_alt, bg = p.mantle, bold = true })
+  hi('MarvinToolWinCrumb', { fg = p.overlay1, bg = p.mantle, italic = true })
+  hi('MarvinSelRail', { fg = c.blue })
+  hi('MarvinSelText', { fg = c.fg, bg = c.bg_sel })
+  hi('MarvinGutter', { fg = p.overlay0, bg = p.mantle })
+
+  -- "status": statusline/winbar segments. Not applied to any Marvin-owned
+  hi('MarvinStatusBar', { fg = c.fg_alt, bg = c.bg })
+  hi('MarvinStatusProject', { fg = c.blue, bg = c.bg })
+  hi('MarvinStatusOk', { fg = c.green, bg = c.bg })
+  hi('MarvinStatusRun', { fg = c.yellow, bg = c.bg })
+  hi('MarvinStatusFail', { fg = c.red, bg = c.bg })
+  hi('MarvinStatusIdle', { fg = p.overlay1, bg = c.bg })
+  hi('MarvinStatusDevice', { fg = c.teal, bg = c.bg })
+  hi('MarvinStatusSep', { fg = c.fg_dim, bg = c.bg })
+
+  -- "console": Jason task console (bottom-docked run/output panel) — same
+  -- crust/mantle split as the toolwin group above.
+  hi('JasonConWin', { fg = c.fg, bg = c.bg })
+  hi('JasonConBorder', { fg = c.bg_sel, bg = p.bg })
+  hi('JasonConTitle', { fg = c.fg_alt, bg = p.mantle, bold = true })
+  hi('JasonConOutWin', { fg = c.fg, bg = c.bg })
+  hi('JasonConOutBorder', { fg = c.bg_sel, bg = p.bg })
+  hi('JasonConOutTitle', { fg = p.overlay1, bg = p.bg, bold = true })
+  hi('JasonConSep', { fg = c.bg_sel, bg = c.bg })
+  hi('JasonConSepLbl', { fg = c.bg_sel, bg = c.bg })
+  hi('JasonConSel', { fg = c.fg, bg = c.bg_sel })
+  hi('JasonConSelRail', { fg = c.blue })
+  hi('JasonConOk', { fg = c.green })
+  hi('JasonConFail', { fg = c.red })
+  hi('JasonConRunning', { fg = c.yellow })
+  hi('JasonConDim', { fg = c.bg_sel })
+  hi('JasonConCmd', { fg = c.fg })
+  hi('JasonConTime', { fg = c.peach })
+  hi('JasonConFooter', { fg = c.comment, italic = true })
+  hi('JasonConFooterKey', { fg = c.teal })
 
   -- blink
-  hi('BlinkCmpMenu', { fg = c.fg_alt, bg = c.bg_dark })
-  hi('BlinkCmpMenuBorder', { fg = c.bg_sel, bg = c.bg_dark })
+  hi('BlinkCmpMenu', { fg = c.fg_alt, bg = c.bg })
+  hi('BlinkCmpMenuBorder', { fg = c.bg_sel, bg = c.bg })
   hi('BlinkCmpMenuSelection', { fg = c.fg, bg = c.bg_sel })
   hi('BlinkCmpScrollBarThumb', { bg = c.fg_dim })
-  hi('BlinkCmpScrollBarGutter', { bg = c.bg_dark })
+  hi('BlinkCmpScrollBarGutter', { bg = c.bg })
   hi('BlinkCmpLabel', { fg = c.fg_alt })
   hi('BlinkCmpLabelMatch', { fg = c.yellow, bold = true })
   hi('BlinkCmpLabelDeprecated', { fg = c.fg_dim, strikethrough = true })
   hi('BlinkCmpKind', { fg = c.mauve })
-  hi('BlinkCmpDoc', { fg = c.fg, bg = c.bg_dark })
-  hi('BlinkCmpDocBorder', { fg = c.bg_sel, bg = c.bg_dark })
-  hi('BlinkCmpDocSeparator', { fg = c.bg_sel, bg = c.bg_dark })
-  hi('BlinkCmpSignatureHelp', { fg = c.fg, bg = c.bg_dark })
-  hi('BlinkCmpSignatureHelpBorder', { fg = c.bg_sel, bg = c.bg_dark })
+  hi('BlinkCmpDoc', { fg = c.fg, bg = c.bg })
+  hi('BlinkCmpDocBorder', { fg = c.bg_sel, bg = c.bg })
+  hi('BlinkCmpDocSeparator', { fg = c.bg_sel, bg = c.bg })
+  hi('BlinkCmpSignatureHelp', { fg = c.fg, bg = c.bg })
+  hi('BlinkCmpSignatureHelpBorder', { fg = c.bg_sel, bg = c.bg })
   hi('BlinkCmpGhostText', { fg = c.fg_dim, italic = true })
 
   -- grug
@@ -343,7 +459,7 @@ function M.load()
   hi('Removed', { fg = c.red })
 
   -- ─── Syntax ───────────────────────────────────────────────────────────────
-  hi('Comment', { fg = c.fg_dim, italic = true })
+  hi('Comment', { fg = c.comment, italic = true })
   hi('SpecialComment', { fg = c.bg_subtle, italic = true })
   hi('Constant', { fg = c.peach })
   hi('String', { fg = c.teal })
@@ -352,27 +468,27 @@ function M.load()
   hi('Boolean', { fg = c.peach })
   hi('Float', { fg = c.peach })
   hi('Identifier', { fg = c.fg })
-  hi('Function', { fg = c.blue })
+  hi('Function', { fg = c.blue, italic = true })
   hi('Statement', { fg = c.mauve })
   hi('Conditional', { fg = c.mauve })
   hi('Repeat', { fg = c.mauve })
-  hi('Label', { fg = c.mauve })
+  hi('Label', { fg = c.mauve, italic = true })
   hi('Operator', { fg = c.sky })
   hi('Keyword', { fg = c.mauve })
   hi('Exception', { fg = c.red })
-  hi('PreProc', { fg = c.pink })
-  hi('Include', { fg = c.mauve })
-  hi('Define', { fg = c.mauve })
-  hi('Macro', { fg = c.pink })
-  hi('PreCondit', { fg = c.mauve })
-  hi('Type', { fg = c.yellow })
-  hi('StorageClass', { fg = c.mauve })
-  hi('Structure', { fg = c.yellow })
-  hi('Typedef', { fg = c.yellow })
-  hi('javaTypedef', { fg = c.red })
-  hi('Special', { fg = c.peach })
+  hi('PreProc', { fg = c.pink, italic = true })
+  hi('Include', { fg = c.mauve, italic = true })
+  hi('Define', { fg = c.mauve, italic = true })
+  hi('Macro', { fg = c.pink, italic = true })
+  hi('PreCondit', { fg = c.mauve, italic = true })
+  hi('Type', { fg = c.yellow, italic = true })
+  hi('StorageClass', { fg = c.mauve, italic = true })
+  hi('Structure', { fg = c.yellow, italic = true })
+  hi('Typedef', { fg = c.yellow, italic = true })
+  hi('javaTypedef', { fg = c.red, italic = true })
+  hi('Special', { fg = c.peach, italic = true })
   hi('SpecialChar', { fg = c.peach })
-  hi('Tag', { fg = c.mauve })
+  hi('Tag', { fg = c.mauve, italic = true })
   hi('Delimiter', { fg = c.fg_dim })
   hi('Debug', { fg = c.red })
   hi('Underlined', { underline = true })
@@ -392,11 +508,11 @@ function M.load()
   -- ─── Treesitter ───────────────────────────────────────────────────────────
   hi('@variable', { fg = c.fg })
   hi('@variable.builtin', { fg = c.red })
-  hi('@variable.parameter', { fg = c.maroon })
+  hi('@variable.parameter', { fg = c.maroon, italic = true })
   hi('@variable.member', { fg = c.fg })
   hi('@constant', { fg = c.peach })
   hi('@constant.builtin', { fg = c.peach })
-  hi('@constant.macro', { fg = c.pink })
+  hi('@constant.macro', { fg = c.pink, italic = true })
   hi('@string', { fg = c.teal })
   hi('@string.escape', { fg = c.peach })
   hi('@string.special', { fg = c.peach })
@@ -405,30 +521,31 @@ function M.load()
   hi('@number', { fg = c.peach })
   hi('@number.float', { fg = c.peach })
   hi('@boolean', { fg = c.peach })
-  hi('@function', { fg = c.blue })
+  hi('@function', { fg = c.blue, italic = true })
   hi('@function.builtin', { fg = c.sky })
   hi('@function.call', { fg = c.blue })
-  hi('@function.macro', { fg = c.pink })
-  hi('@function.method', { fg = c.blue })
+  hi('@function.macro', { fg = c.pink, italic = true })
+  hi('@function.method', { fg = c.blue, italic = true })
   hi('@function.method.call', { fg = c.blue })
-  hi('@constructor', { fg = c.yellow })
+  hi('@constructor', { fg = c.yellow, italic = true })
   hi('@operator', { fg = c.sky })
   hi('@keyword', { fg = c.mauve })
-  hi('@keyword.function', { fg = c.mauve })
+  hi('@keyword.function', { fg = c.mauve, italic = true })
   hi('@keyword.operator', { fg = c.sky })
-  hi('@keyword.import', { fg = c.mauve })
-  hi('@keyword.return', { fg = c.pink })
+  hi('@keyword.import', { fg = c.mauve, italic = true })
+  hi('@keyword.return', { fg = c.pink, italic = true })
   hi('@keyword.exception', { fg = c.red })
   hi('@keyword.conditional', { fg = c.mauve })
   hi('@keyword.repeat', { fg = c.mauve })
-  hi('@keyword.modifier', { fg = c.mauve })
+  hi('@keyword.modifier', { fg = c.mauve, italic = true })
   hi('@type', { fg = c.yellow })
   hi('@type.builtin', { fg = c.yellow })
-  hi('@type.definition', { fg = c.yellow })
-  hi('@type.qualifier', { fg = c.mauve })
-  hi('@attribute', { fg = c.peach })
-  hi('@property', { fg = c.fg_alt })
-  hi('@comment', { fg = c.fg_dim, italic = true })
+  hi('@type.definition', { fg = c.yellow, italic = true })
+  hi('@type.qualifier', { fg = c.mauve, italic = true })
+  hi('@attribute', { fg = c.peach, italic = true })
+  hi('@property', { fg = c.fg_alt, italic = true })
+  hi('@field', { fg = c.fg_alt, italic = true })
+  hi('@comment', { fg = c.comment, italic = true })
   hi('@comment.documentation', { fg = c.bg_subtle, italic = true })
   hi('@comment.error', { fg = c.red, italic = true })
   hi('@comment.warning', { fg = c.yellow, italic = true })
@@ -450,28 +567,27 @@ function M.load()
   hi('@diff.plus', { fg = c.green })
   hi('@diff.minus', { fg = c.red })
   hi('@diff.delta', { fg = c.yellow })
-  hi('@module', { fg = c.fg_alt })
-  hi('@namespace', { fg = c.fg_alt })
-  hi('@label', { fg = c.mauve })
+  hi('@module', { fg = c.fg_alt, italic = true })
+  hi('@namespace', { fg = c.fg_alt, italic = true })
+  hi('@label', { fg = c.mauve, italic = true })
 
   -- ─── LSP semantic tokens (language-agnostic) ──────────────────────────────
-  hi('@lsp.type.class', { fg = c.yellow })
-  hi('@lsp.type.decorator', { fg = c.peach })
-  hi('@lsp.type.enum', { fg = c.yellow })
-  hi('@lsp.type.enumMember', { fg = c.peach })
-  hi('@lsp.type.function', { fg = c.blue })
-  hi('@lsp.type.interface', { fg = c.yellow })
-  hi('@lsp.type.macro', { fg = c.pink })
-  hi('@lsp.type.method', { fg = c.blue })
-  hi('@lsp.type.namespace', { fg = c.fg_alt })
-  hi('@lsp.type.parameter', { fg = c.red })
-  hi('@lsp.type.property', { fg = c.fg_alt })
-  hi('@lsp.type.struct', { fg = c.yellow })
-  hi('@lsp.type.type', { fg = c.yellow })
-  hi('@lsp.type.typeParameter', { fg = c.yellow })
-  hi('@lsp.type.lifetime', { fg = c.peach })
+  hi('@lsp.type.class', { fg = c.yellow, italic = true })
+  hi('@lsp.type.decorator', { fg = c.peach, italic = true })
+  hi('@lsp.type.enum', { fg = c.yellow, italic = true })
+  hi('@lsp.type.enumMember', { fg = c.peach, italic = true })
+  hi('@lsp.type.function', { fg = c.blue, italic = true })
+  hi('@lsp.type.interface', { fg = c.yellow, italic = true })
+  hi('@lsp.type.macro', { fg = c.pink, italic = true })
+  hi('@lsp.type.method', { fg = c.blue, italic = true })
+  hi('@lsp.type.namespace', { fg = c.fg_alt, italic = true })
+  hi('@lsp.type.parameter', { fg = c.red, italic = true })
+  hi('@lsp.type.property', { fg = c.fg_alt, italic = true })
+  hi('@lsp.type.struct', { fg = c.yellow, italic = true })
+  hi('@lsp.type.type', { fg = c.yellow, italic = true })
+  hi('@lsp.type.typeParameter', { fg = c.yellow, italic = true })
+  hi('@lsp.type.lifetime', { fg = c.peach, italic = true })
   hi('@lsp.type.builtinType', { fg = c.yellow })
-  -- cleared: TS handles these with finer granularity
   hi('@lsp.type.variable', {})
   hi('@lsp.type.selfKeyword', {})
   hi('@lsp.type.keyword', {})
@@ -480,105 +596,126 @@ function M.load()
   hi('@lsp.type.number', {})
   hi('@lsp.type.boolean', {})
   hi('@lsp.type.comment', {})
-  hi('@lsp.mod.static', { fg = c.red })
+  hi('@lsp.mod.static', { fg = c.red, italic = true })
   hi('@lsp.mod.deprecated', { fg = c.fg_dim, strikethrough = true })
   hi('@lsp.mod.documentation', { fg = c.bg_subtle, italic = true })
-  hi('@lsp.mod.defaultLibrary', { fg = c.yellow })
-  hi('@lsp.typemod.function.declaration', { fg = c.blue })
-  hi('@lsp.typemod.method.defaultLibrary', { fg = c.yellow })
+  hi('@lsp.mod.defaultLibrary', { fg = c.yellow, italic = true })
+  hi('@lsp.typemod.function.declaration', { fg = c.blue, italic = true })
+  hi('@lsp.typemod.method.defaultLibrary', { fg = c.yellow, italic = true })
 
   -- ── Rust ──────────────────────────────────────────────────────────────────
-  hi('@lsp.type.namespace.rust', { fg = c.fg_alt })
-  hi('@lsp.type.enum.rust', { fg = c.yellow })
-  hi('@lsp.type.enumMember.rust', { fg = c.peach })
-  hi('@lsp.type.struct.rust', { fg = c.yellow })
+  hi('@lsp.type.namespace.rust', { fg = c.fg_alt, italic = true })
+  hi('@lsp.type.enum.rust', { fg = c.yellow, italic = true })
+  hi('@lsp.type.enumMember.rust', { fg = c.peach, italic = true })
+  hi('@lsp.type.struct.rust', { fg = c.yellow, italic = true })
   hi('@lsp.type.interface.rust', { fg = c.yellow, italic = true })
   hi('@lsp.type.typeParameter.rust', { fg = c.yellow, italic = true })
   hi('@lsp.type.formatSpecifier.rust', { fg = c.red, italic = true })
-  hi('@lsp.type.macro.rust', { fg = c.pink })
-  hi('@lsp.type.function.rust', { fg = c.blue })
-  hi('@lsp.type.method.rust', { fg = c.blue })
+  hi('@lsp.type.macro.rust', { fg = c.pink, italic = true })
+  hi('@lsp.type.function.rust', { fg = c.blue, italic = true })
+  hi('@lsp.type.method.rust', { fg = c.blue, italic = true })
   hi('@lsp.type.lifetime.rust', { fg = c.peach, italic = true })
   hi('@lsp.type.selfKeyword.rust', { fg = c.red })
-  hi('@lsp.type.parameter.rust', { fg = c.red })
-  hi('@lsp.type.property.rust', { fg = c.fg_alt })
-  hi('@lsp.mod.static.rust', { fg = c.red })
+  hi('@lsp.type.parameter.rust', { fg = c.red, italic = true })
+  hi('@lsp.type.property.rust', { fg = c.fg_alt, italic = true })
+  hi('@lsp.mod.static.rust', { fg = c.red, italic = true })
   hi('@lsp.mod.unsafe.rust', { fg = c.red, italic = true })
   hi('@lsp.mod.deprecated.rust', { fg = c.fg_dim, strikethrough = true })
-  hi('@lsp.typemod.function.static.rust', { fg = c.blue })
-  hi('@lsp.typemod.function.associated.rust', { fg = c.blue })
-  hi('@lsp.typemod.method.static.rust', { fg = c.blue })
-  hi('@lsp.typemod.variable.static.rust', { fg = c.red })
-  hi('@lsp.typemod.variable.readonly.rust', { fg = c.peach })
-  hi('@lsp.typemod.variable.mutable.rust', { fg = c.fg, underline = true })
-  hi('@lsp.typemod.struct.readonly.rust', { fg = c.yellow })
+  hi('@lsp.typemod.function.static.rust', { fg = c.blue, italic = true })
+  hi('@lsp.typemod.function.associated.rust', { fg = c.blue, italic = true })
+  hi('@lsp.typemod.method.static.rust', { fg = c.blue, italic = true })
+  hi('@lsp.typemod.variable.static.rust', { fg = c.red, italic = true })
+  hi('@lsp.typemod.variable.readonly.rust', { fg = c.peach, italic = true })
+  hi(
+    '@lsp.typemod.variable.mutable.rust',
+    { fg = c.fg, italic = true, underline = true }
+  )
+  hi('@lsp.typemod.struct.readonly.rust', { fg = c.yellow, italic = true })
   hi('@lsp.typemod.macro.unsafe.rust', { fg = c.pink, italic = true })
 
   -- ── Go ─────────────────────────────────────────────────────────────────────
-  hi('@lsp.type.namespace.go', { fg = c.fg_alt })
-  hi('@lsp.type.function.go', { fg = c.blue })
-  hi('@lsp.type.method.go', { fg = c.blue })
-  hi('@lsp.type.struct.go', { fg = c.yellow })
+  hi('@lsp.type.namespace.go', { fg = c.fg_alt, italic = true })
+  hi('@lsp.type.function.go', { fg = c.blue, italic = true })
+  hi('@lsp.type.method.go', { fg = c.blue, italic = true })
+  hi('@lsp.type.struct.go', { fg = c.yellow, italic = true })
   hi('@lsp.type.interface.go', { fg = c.yellow, italic = true })
   hi('@lsp.type.typeParameter.go', { fg = c.yellow, italic = true })
   hi('@lsp.type.variable.go', { fg = c.fg })
-  hi('@lsp.type.parameter.go', { fg = c.red })
-  hi('@lsp.type.property.go', { fg = c.fg_alt })
-  hi('@lsp.type.macro.go', { fg = c.pink })
-  hi('@lsp.mod.static.go', { fg = c.red })
+  hi('@lsp.type.parameter.go', { fg = c.red, italic = true })
+  hi('@lsp.type.property.go', { fg = c.fg_alt, italic = true })
+  hi('@lsp.type.macro.go', { fg = c.pink, italic = true })
+  hi('@lsp.mod.static.go', { fg = c.red, italic = true })
   hi('@lsp.mod.deprecated.go', { fg = c.fg_dim, strikethrough = true })
-  hi('@lsp.typemod.function.exported.go', { fg = c.blue, bold = true })
-  hi('@lsp.typemod.method.exported.go', { fg = c.blue, bold = true })
-  hi('@lsp.typemod.type.exported.go', { fg = c.yellow, bold = true })
-  hi('@lsp.typemod.variable.exported.go', { fg = c.fg, bold = true })
+  hi(
+    '@lsp.typemod.function.exported.go',
+    { fg = c.blue, bold = true, italic = true }
+  )
+  hi(
+    '@lsp.typemod.method.exported.go',
+    { fg = c.blue, bold = true, italic = true }
+  )
+  hi(
+    '@lsp.typemod.type.exported.go',
+    { fg = c.yellow, bold = true, italic = true }
+  )
+  hi(
+    '@lsp.typemod.variable.exported.go',
+    { fg = c.fg, bold = true, italic = true }
+  )
 
   -- ── C ───────────────────────────────────────────────────────────────────────
-  hi('@lsp.type.function.c', { fg = c.blue })
-  hi('@lsp.type.method.c', { fg = c.blue })
-  hi('@lsp.type.struct.c', { fg = c.yellow })
-  hi('@lsp.type.enum.c', { fg = c.yellow })
-  hi('@lsp.type.enumMember.c', { fg = c.peach })
-  hi('@lsp.type.macro.c', { fg = c.pink })
-  hi('@lsp.type.type.c', { fg = c.yellow })
-  hi('@lsp.type.parameter.c', { fg = c.red })
+  hi('@lsp.type.function.c', { fg = c.blue, italic = true })
+  hi('@lsp.type.method.c', { fg = c.blue, italic = true })
+  hi('@lsp.type.struct.c', { fg = c.yellow, italic = true })
+  hi('@lsp.type.enum.c', { fg = c.yellow, italic = true })
+  hi('@lsp.type.enumMember.c', { fg = c.peach, italic = true })
+  hi('@lsp.type.macro.c', { fg = c.pink, italic = true })
+  hi('@lsp.type.type.c', { fg = c.yellow, italic = true })
+  hi('@lsp.type.parameter.c', { fg = c.red, italic = true })
   hi('@lsp.type.variable.c', { fg = c.fg })
-  hi('@lsp.type.property.c', { fg = c.fg_alt })
-  hi('@lsp.mod.static.c', { fg = c.red })
+  hi('@lsp.type.property.c', { fg = c.fg_alt, italic = true })
+  hi('@lsp.mod.static.c', { fg = c.red, italic = true })
   hi('@lsp.mod.deprecated.c', { fg = c.fg_dim, strikethrough = true })
-  hi('@lsp.typemod.function.static.c', { fg = c.blue })
-  hi('@lsp.typemod.variable.static.c', { fg = c.red })
-  hi('@lsp.typemod.variable.readonly.c', { fg = c.peach })
-  hi('@lsp.typemod.macro.globalScope.c', { fg = c.pink, bold = true })
+  hi('@lsp.typemod.function.static.c', { fg = c.blue, italic = true })
+  hi('@lsp.typemod.variable.static.c', { fg = c.red, italic = true })
+  hi('@lsp.typemod.variable.readonly.c', { fg = c.peach, italic = true })
+  hi(
+    '@lsp.typemod.macro.globalScope.c',
+    { fg = c.pink, bold = true, italic = true }
+  )
 
   -- ── C++ ─────────────────────────────────────────────────────────────────────
-  hi('@lsp.type.namespace.cpp', { fg = c.fg_alt })
-  hi('@lsp.type.class.cpp', { fg = c.yellow })
-  hi('@lsp.type.struct.cpp', { fg = c.yellow })
-  hi('@lsp.type.enum.cpp', { fg = c.yellow })
-  hi('@lsp.type.enumMember.cpp', { fg = c.peach })
-  hi('@lsp.type.function.cpp', { fg = c.blue })
-  hi('@lsp.type.method.cpp', { fg = c.blue })
-  hi('@lsp.type.macro.cpp', { fg = c.pink })
-  hi('@lsp.type.property.cpp', { fg = c.fg_alt })
-  hi('@lsp.type.parameter.cpp', { fg = c.red })
-  hi('@lsp.type.type.cpp', { fg = c.yellow })
+  hi('@lsp.type.namespace.cpp', { fg = c.fg_alt, italic = true })
+  hi('@lsp.type.class.cpp', { fg = c.yellow, italic = true })
+  hi('@lsp.type.struct.cpp', { fg = c.yellow, italic = true })
+  hi('@lsp.type.enum.cpp', { fg = c.yellow, italic = true })
+  hi('@lsp.type.enumMember.cpp', { fg = c.peach, italic = true })
+  hi('@lsp.type.function.cpp', { fg = c.blue, italic = true })
+  hi('@lsp.type.method.cpp', { fg = c.blue, italic = true })
+  hi('@lsp.type.macro.cpp', { fg = c.pink, italic = true })
+  hi('@lsp.type.property.cpp', { fg = c.fg_alt, italic = true })
+  hi('@lsp.type.parameter.cpp', { fg = c.red, italic = true })
+  hi('@lsp.type.type.cpp', { fg = c.yellow, italic = true })
   hi('@lsp.type.interface.cpp', { fg = c.yellow, italic = true })
   hi('@lsp.type.typeParameter.cpp', { fg = c.yellow, italic = true })
-  hi('@lsp.mod.static.cpp', { fg = c.red })
+  hi('@lsp.mod.static.cpp', { fg = c.red, italic = true })
   hi('@lsp.mod.virtual.cpp', { fg = c.blue, italic = true })
   hi('@lsp.mod.abstract.cpp', { fg = c.yellow, italic = true })
   hi('@lsp.mod.deprecated.cpp', { fg = c.fg_dim, strikethrough = true })
-  hi('@lsp.typemod.method.static.cpp', { fg = c.blue })
+  hi('@lsp.typemod.method.static.cpp', { fg = c.blue, italic = true })
   hi('@lsp.typemod.method.virtual.cpp', { fg = c.blue, italic = true })
-  hi('@lsp.typemod.function.static.cpp', { fg = c.blue })
+  hi('@lsp.typemod.function.static.cpp', { fg = c.blue, italic = true })
   hi('@lsp.typemod.function.virtual.cpp', { fg = c.blue, italic = true })
-  hi('@lsp.typemod.variable.static.cpp', { fg = c.red })
-  hi('@lsp.typemod.variable.readonly.cpp', { fg = c.peach })
+  hi('@lsp.typemod.variable.static.cpp', { fg = c.red, italic = true })
+  hi('@lsp.typemod.variable.readonly.cpp', { fg = c.peach, italic = true })
   hi('@lsp.typemod.type.abstract.cpp', { fg = c.yellow, italic = true })
-  hi('@lsp.typemod.macro.globalScope.cpp', { fg = c.pink, bold = true })
+  hi(
+    '@lsp.typemod.macro.globalScope.cpp',
+    { fg = c.pink, bold = true, italic = true }
+  )
   hi(
     '@lsp.typemod.enumMember.defaultLibrary.cpp',
-    { fg = c.red, italic = true }
+    { fg = c.red, bold = true, italic = true }
   )
   -- Re-applied for cpp (LSP is primary highlighter at priority 999)
   hi('@lsp.type.variable.cpp', { fg = c.fg })
@@ -590,46 +727,46 @@ function M.load()
   hi('@lsp.type.comment.cpp', { fg = c.fg_dim, italic = true })
 
   -- ── Java ─────────────────────────────────────────────────────────────────────
-  hi('@lsp.type.namespace.java', { fg = c.fg_alt })
-  hi('@lsp.type.class.java', { fg = c.yellow })
+  hi('@lsp.type.namespace.java', { fg = c.fg_alt, italic = true })
+  hi('@lsp.type.class.java', { fg = c.yellow, italic = true })
   hi('@lsp.type.interface.java', { fg = c.yellow, italic = true })
-  hi('@lsp.type.enum.java', { fg = c.yellow })
-  hi('@lsp.type.enumMember.java', { fg = c.peach })
+  hi('@lsp.type.enum.java', { fg = c.yellow, italic = true })
+  hi('@lsp.type.enumMember.java', { fg = c.peach, italic = true })
   hi('@lsp.type.annotation.java', { fg = c.peach, italic = true })
   hi('@lsp.type.typeParameter.java', { fg = c.yellow, italic = true })
-  hi('@lsp.type.function.java', { fg = c.blue })
-  hi('@lsp.type.method.java', { fg = c.blue })
-  hi('@lsp.type.property.java', { fg = c.fg_alt })
-  hi('@lsp.type.parameter.java', { fg = c.red })
+  hi('@lsp.type.function.java', { fg = c.blue, italic = true })
+  hi('@lsp.type.method.java', { fg = c.blue, italic = true })
+  hi('@lsp.type.property.java', { fg = c.fg_alt, italic = true })
+  hi('@lsp.type.parameter.java', { fg = c.red, italic = true })
   hi('@lsp.type.variable.java', { fg = c.fg })
-  hi('@lsp.type.macro.java', { fg = c.pink })
-  hi('@lsp.mod.static.java', { fg = c.red })
+  hi('@lsp.type.macro.java', { fg = c.pink, italic = true })
+  hi('@lsp.mod.static.java', { fg = c.red, italic = true })
   hi('@lsp.mod.abstract.java', { fg = c.yellow, italic = true })
   hi('@lsp.mod.deprecated.java', { fg = c.fg_dim, strikethrough = true })
-  hi('@lsp.typemod.method.static.java', { fg = c.blue })
+  hi('@lsp.typemod.method.static.java', { fg = c.blue, italic = true })
   hi('@lsp.typemod.method.abstract.java', { fg = c.blue, italic = true })
   hi('@lsp.typemod.class.abstract.java', { fg = c.yellow, italic = true })
   hi('@lsp.typemod.property.static.java', { fg = c.red, italic = true })
-  hi('@lsp.typemod.variable.static.java', { fg = c.red })
-  hi('@lsp.typemod.variable.readonly.java', { fg = c.peach })
+  hi('@lsp.typemod.variable.static.java', { fg = c.red, italic = true })
+  hi('@lsp.typemod.variable.readonly.java', { fg = c.peach, italic = true })
   hi(
     '@lsp.typemod.variable.static.readonly.java',
-    { fg = c.peach, bold = true }
+    { fg = c.peach, bold = true, italic = true }
   )
 
   -- ── Zig ──────────────────────────────────────────────────────────────────────
-  hi('@lsp.type.namespace.zig', { fg = c.fg_alt })
-  hi('@lsp.type.type.zig', { fg = c.yellow })
-  hi('@lsp.type.struct.zig', { fg = c.yellow })
-  hi('@lsp.type.enum.zig', { fg = c.yellow })
-  hi('@lsp.type.enumMember.zig', { fg = c.peach })
-  hi('@lsp.type.union.zig', { fg = c.yellow })
-  hi('@lsp.type.tagField.zig', { fg = c.peach })
-  hi('@lsp.type.field.zig', { fg = c.fg_alt })
-  hi('@lsp.type.errorTag.zig', { fg = c.red })
-  hi('@lsp.type.function.zig', { fg = c.blue })
-  hi('@lsp.type.method.zig', { fg = c.blue })
-  hi('@lsp.type.parameter.zig', { fg = c.red })
+  hi('@lsp.type.namespace.zig', { fg = c.fg_alt, italic = true })
+  hi('@lsp.type.type.zig', { fg = c.yellow, italic = true })
+  hi('@lsp.type.struct.zig', { fg = c.yellow, italic = true })
+  hi('@lsp.type.enum.zig', { fg = c.yellow, italic = true })
+  hi('@lsp.type.enumMember.zig', { fg = c.peach, italic = true })
+  hi('@lsp.type.union.zig', { fg = c.yellow, italic = true })
+  hi('@lsp.type.tagField.zig', { fg = c.peach, italic = true })
+  hi('@lsp.type.field.zig', { fg = c.fg_alt, italic = true })
+  hi('@lsp.type.errorTag.zig', { fg = c.red, italic = true })
+  hi('@lsp.type.function.zig', { fg = c.blue, italic = true })
+  hi('@lsp.type.method.zig', { fg = c.blue, italic = true })
+  hi('@lsp.type.parameter.zig', { fg = c.red, italic = true })
   hi('@lsp.type.variable.zig', { fg = c.fg })
   hi('@lsp.type.typeParameter.zig', { fg = c.yellow, italic = true })
   hi('@lsp.type.builtin.zig', { fg = c.sky })
@@ -638,34 +775,34 @@ function M.load()
   hi('@lsp.type.number.zig', { fg = c.peach })
   hi('@lsp.type.string.zig', { fg = c.teal })
   hi('@lsp.type.comment.zig', { fg = c.fg_dim, italic = true })
-  hi('@lsp.type.decorator.zig', { fg = c.peach })
+  hi('@lsp.type.decorator.zig', { fg = c.peach, italic = true })
   hi('@lsp.mod.generic.zig', { fg = c.yellow, italic = true })
   hi('@lsp.mod.comptime.zig', { fg = c.mauve, italic = true })
-  hi('@type.zig', { fg = c.yellow })
+  hi('@type.zig', { fg = c.yellow, italic = true })
   hi('@type.builtin.zig', { fg = c.yellow })
-  hi('@variable.parameter.zig', { fg = c.maroon })
-  hi('@keyword.import.zig', { fg = c.mauve })
+  hi('@variable.parameter.zig', { fg = c.maroon, italic = true })
+  hi('@keyword.import.zig', { fg = c.mauve, italic = true })
   hi('@function.builtin.zig', { fg = c.sky })
   hi('@string.special.zig', { fg = c.peach })
 
   -- Meson
-  hi('@variable.meson', { fg = c.yellow })
-  hi('@lsp.type.function.meson', { fg = c.blue })
-  hi('@lsp.type.method.meson', { fg = c.blue })
+  hi('@variable.meson', { fg = c.yellow, italic = true })
+  hi('@lsp.type.function.meson', { fg = c.blue, italic = true })
+  hi('@lsp.type.method.meson', { fg = c.blue, italic = true })
   hi('@lsp.type.variable.meson', { fg = c.fg })
-  hi('@lsp.typemod.variable.readonly.meson', { fg = c.sky })
+  hi('@lsp.typemod.variable.readonly.meson', { fg = c.sky, italic = true })
   hi('@lsp.type.substitute_bounds.meson', { fg = c.fg_dim })
   hi('@lsp.type.keyword.meson', { fg = c.mauve })
   hi('@lsp.type.string.meson', { fg = c.teal })
   hi('@lsp.type.number.meson', { fg = c.peach })
 
   -- ─── LSP cross-language ──────────────────────────────────────────────────
-  hi('LspReferenceText', { bg = c.bg_sel, nocombine = true })
+  hi('LspReferenceText', { bg = c.bg_sel })
   hi('LspReferenceRead', { bg = c.bg_sel })
   hi('LspReferenceWrite', { bg = c.bg_sel, underline = true })
   hi(
     'LspInlayHint',
-    { fg = c.fg_dim, bg = c.bg_dark, italic = true, nocombine = true }
+    { fg = c.fg_dim, bg = c.bg, italic = true, nocombine = true }
   )
   hi('LspCodeLens', { fg = c.fg_dim, italic = true })
   hi('LspSignatureActiveParameter', { fg = c.peach, bold = true })
@@ -723,17 +860,17 @@ function M.load()
   hi('NeoTreeGitUntracked', { fg = c.flamingo })
 
   -- ─── Telescope ────────────────────────────────────────────────────────────
-  hi('TelescopeNormal', { fg = c.fg, bg = c.bg_dark })
-  hi('TelescopeBorder', { fg = c.bg_sel, bg = c.bg_dark })
+  hi('TelescopeNormal', { fg = c.fg, bg = c.bg })
+  hi('TelescopeBorder', { fg = c.bg_sel, bg = c.bg })
   hi('TelescopeTitle', { fg = c.mauve, bold = true })
   hi('TelescopePromptNormal', { bg = c.bg })
   hi('TelescopePromptBorder', { fg = c.bg_sel, bg = c.bg })
-  hi('TelescopePromptTitle', { fg = c.yellow, bg = c.bg_dark })
+  hi('TelescopePromptTitle', { fg = c.yellow, bg = c.bg })
   hi('TelescopePromptPrefix', { fg = c.mauve, bg = c.bg })
   hi('TelescopePromptCounter', { fg = c.fg_dim, bg = c.bg_sel })
-  hi('TelescopeResultsNormal', { bg = c.bg_dark })
-  hi('TelescopeResultsBorder', { fg = c.bg_sel, bg = c.bg_dark })
-  hi('TelescopeResultsTitle', { fg = c.bg_dark, bg = c.bg_dark })
+  hi('TelescopeResultsNormal', { bg = c.bg })
+  hi('TelescopeResultsBorder', { fg = c.bg_sel, bg = c.bg })
+  hi('TelescopeResultsTitle', { fg = c.bg, bg = c.bg })
   hi('TelescopePreviewNormal', { bg = c.bg })
   hi('TelescopePreviewBorder', { fg = c.bg_sel, bg = c.bg })
   hi('TelescopePreviewTitle', { fg = c.bg, bg = c.green })
@@ -742,8 +879,8 @@ function M.load()
   hi('TelescopeMatching', { fg = c.yellow, bold = true })
 
   -- ─── Trouble ──────────────────────────────────────────────────────────────
-  hi('TroubleNormal', { fg = c.fg, bg = c.bg_dark })
-  hi('TroubleNormalNC', { fg = c.fg_alt, bg = c.bg_dark })
+  hi('TroubleNormal', { fg = c.fg, bg = c.bg })
+  hi('TroubleNormalNC', { fg = c.fg_alt, bg = c.bg })
   hi('TroubleCount', { fg = c.mauve, bg = c.bg_sel, bold = true })
   hi('TroubleFilename', { fg = c.blue })
   hi('TroubleDirectory', { fg = c.blue })
@@ -763,23 +900,45 @@ function M.load()
   hi('WhichKeySeparator', { fg = c.fg_dim })
   hi('WhichKeyValue', { fg = c.fg_dim })
   hi('WhichKeyBorder', { fg = c.bg_sel })
-  hi('WhichKeyNormal', { bg = c.bg_dark })
+  hi('WhichKeyNormal', { bg = c.bg })
 
   -- ─── Mini ─────────────────────────────────────────────────────────────────
-  hi('MiniFilesNormal', { fg = c.fg, bg = c.bg_dark })
+  hi('MiniFilesNormal', { fg = c.fg, bg = c.bg })
   hi('MiniFilesTitle', { fg = c.mauve, bold = true })
   hi('MiniFilesTitleFocused', { fg = c.bg, bg = c.mauve, bold = true })
-  hi('MiniFilesBorder', { fg = c.bg_sel, bg = c.bg_dark })
-  hi('MiniFilesBorderModified', { fg = c.yellow, bg = c.bg_dark })
+  hi('MiniFilesBorder', { fg = c.bg_sel, bg = c.bg })
+  hi('MiniFilesBorderModified', { fg = c.yellow, bg = c.bg })
   hi('MiniFilesCursorLine', { bg = c.bg_sel })
   hi('MiniFilesDirectory', { fg = c.blue })
   hi('MiniIndentscopeSymbol', { fg = c.bg_sel })
   hi('MiniIndentscopePrefix', { fg = c.bg_sel })
   hi('MiniTablineCurrent', { fg = c.lavender, bg = c.bg, bold = true })
-  hi('MiniTablineVisible', { fg = c.fg_alt, bg = c.bg_dark })
+  hi('MiniTablineVisible', { fg = c.fg_alt, bg = c.bg })
   hi('MiniTablineHidden', { fg = c.fg_dim, bg = c.bg })
+
+  -- ─── Neo-tree ─────────────────────────────────────────────────────────────
+  hi('NeoTreeNormal', { fg = c.fg, bg = c.bg })
+  hi('NeoTreeNormalNC', { fg = c.fg_alt, bg = c.bg })
+  hi('NeoTreeWinSeparator', { fg = c.bg_sel, bg = c.bg })
+  hi('NeoTreeIndentMarker', { fg = c.bg_sel })
+  hi('NeoTreeRootName', { fg = c.mauve, bold = true })
+  hi('NeoTreeDirectoryIcon', { fg = c.blue })
+  hi('NeoTreeDirectoryName', { fg = c.blue })
+  hi('NeoTreeFileName', { fg = c.fg })
+  hi('NeoTreeFileNameOpened', { fg = c.lavender, italic = true })
+  hi('NeoTreeModified', { fg = c.yellow })
+  hi('NeoTreeGitAdded', { fg = c.green })
+  hi('NeoTreeGitModified', { fg = c.yellow })
+  hi('NeoTreeGitDeleted', { fg = c.red })
+  hi('NeoTreeGitUntracked', { fg = c.teal })
+  hi('NeoTreeGitIgnored', { fg = c.fg_dim })
+  hi('NeoTreeGitConflict', { fg = c.maroon, bold = true })
+  hi('NeoTreeTabActive', { fg = c.bg, bg = c.mauve, bold = true })
+  hi('NeoTreeTabInactive', { fg = c.fg_dim, bg = c.bg })
+  hi('NeoTreeTabSeparatorActive', { fg = c.mauve, bg = c.bg })
+  hi('NeoTreeTabSeparatorInactive', { fg = c.bg_sel, bg = c.bg })
   hi('MiniTablineModifiedCurrent', { fg = c.yellow, bg = c.bg, bold = true })
-  hi('MiniTablineModifiedVisible', { fg = c.yellow, bg = c.bg_dark })
+  hi('MiniTablineModifiedVisible', { fg = c.yellow, bg = c.bg })
   hi('MiniTablineModifiedHidden', { fg = c.fg_dim, bg = c.bg })
   hi('MiniTablineFill', { bg = c.bg })
   hi('MiniSurround', { fg = c.bg, bg = c.peach, bold = true })
@@ -818,12 +977,12 @@ function M.load()
   hi('TodoFgTEST', { fg = c.sky })
 
   -- dropbar
-  hi('DropBarCurrentContext', { bg = c.bg_dark })
-  hi('DropBarMenuCurrentContext', { bg = c.bg_dark })
-  hi('DropBarMenuNormalFloat', { fg = c.fg, bg = c.bg_dark })
-  hi('DropBarMenuFloatBorder', { fg = c.bg_sel, bg = c.bg_dark })
-  hi('DropBarHover', { fg = c.bg_sel, bg = c.bg_dark })
-  hi('DropBarPreview', { bg = c.bg_dark })
+  hi('DropBarCurrentContext', { bg = c.bg })
+  hi('DropBarMenuCurrentContext', { bg = c.bg })
+  hi('DropBarMenuNormalFloat', { fg = c.fg, bg = c.bg })
+  hi('DropBarMenuFloatBorder', { fg = c.bg_sel, bg = c.bg })
+  hi('DropBarHover', { fg = c.bg_sel, bg = c.bg })
+  hi('DropBarPreview', { bg = c.bg })
   hi('DropBarIconKindDefault', { fg = c.mauve })
   hi('DropBarKindDefault', { fg = c.fg_alt })
 
@@ -832,34 +991,31 @@ function M.load()
   hi('SmartSplitsResize', { fg = c.yellow, bold = true })
 
   -- bufferline
-  hi('BufferLineFill', { bg = c.bg_dark })
-  hi('BufferLineBackground', { fg = p.overlay0, bg = c.bg_dark })
-  hi('BufferLineBufferVisible', { fg = p.surface0, bg = c.bg_dark })
+  hi('BufferLineFill', { bg = c.bg })
+  hi('BufferLineBackground', { fg = p.overlay0, bg = c.bg })
+  hi('BufferLineBufferVisible', { fg = p.surface0, bg = c.bg })
   hi(
     'BufferLineBufferSelected',
-    { fg = c.fg, bg = c.bg_dark, bold = true, italic = true }
+    { fg = c.fg, bg = c.bg, bold = true, italic = true }
   )
-  hi('BufferLineNumbers', { fg = c.overlay0, bg = c.bg_dark })
-  hi('BufferLineNumbersSelected', { fg = c.fg, bg = c.bg_dark, bold = true })
-  hi('BufferLineModified', { fg = p.overlay0, bg = c.bg_dark })
-  hi(
-    'BufferLineModifiedSelected',
-    { fg = c.yellow, bg = c.bg_dark, bold = true }
-  )
-  hi('BufferLineIndicatorSelected', { fg = c.mauve, bg = c.bg_dark })
-  hi('BufferLineDuplicate', { fg = p.overlay2, bg = c.bg_dark, italic = true })
+  hi('BufferLineNumbers', { fg = c.overlay0, bg = c.bg })
+  hi('BufferLineNumbersSelected', { fg = c.fg, bg = c.bg, bold = true })
+  hi('BufferLineModified', { fg = p.overlay0, bg = c.bg })
+  hi('BufferLineModifiedSelected', { fg = c.yellow, bg = c.bg, bold = true })
+  hi('BufferLineIndicatorSelected', { fg = c.mauve, bg = c.bg })
+  hi('BufferLineDuplicate', { fg = p.overlay2, bg = c.bg, italic = true })
   hi(
     'BufferLineDuplicateSelected',
-    { fg = p.overlay2, bg = c.bg_dark, italic = true }
+    { fg = p.overlay2, bg = c.bg, italic = true }
   )
   hi(
     'BufferLineDuplicateVisible',
-    { fg = p.overlay2, bg = c.bg_dark, italic = true }
+    { fg = p.overlay2, bg = c.bg, italic = true }
   )
-  hi('BufferLineSeparator', { fg = c.bg_sel, bg = c.bg_dark })
-  hi('BufferLineSeparatorSelected', { fg = c.bg_sel, bg = c.bg_dark })
-  hi('BufferLineSeparatorVisible', { fg = c.bg_sel, bg = c.bg_dark })
-  hi('BufferLineOffsetSeparator', { fg = c.bg_dark, bg = c.bg_dark })
+  hi('BufferLineSeparator', { fg = c.bg_sel, bg = c.bg })
+  hi('BufferLineSeparatorSelected', { fg = c.bg_sel, bg = c.bg })
+  hi('BufferLineSeparatorVisible', { fg = c.bg_sel, bg = c.bg })
+  hi('BufferLineOffsetSeparator', { fg = c.bg, bg = c.bg_dark })
 
   -- render-markdown
   hi('RenderMarkdownH1', { fg = c.mauve, bold = true })
@@ -874,7 +1030,7 @@ function M.load()
   hi('RenderMarkdownH4Bg', { bg = c.bg_sel })
   hi('RenderMarkdownH5Bg', { bg = c.bg_sel })
   hi('RenderMarkdownH6Bg', { bg = c.bg_sel })
-  hi('RenderMarkdownCode', { bg = c.bg_dark })
+  hi('RenderMarkdownCode', { bg = c.bg })
   hi('RenderMarkdownCodeInline', { fg = c.teal, bg = c.bg_sel })
   hi('RenderMarkdownBullet', { fg = c.mauve })
   hi('RenderMarkdownChecked', { fg = c.green })
@@ -893,7 +1049,7 @@ function M.load()
   hi('ToggleTermNormal', { bg = c.bg })
 
   -- ─── Mason ────────────────────────────────────────────────────────────────
-  hi('MasonNormal', { bg = c.bg_dark })
+  hi('MasonNormal', { bg = c.bg })
   hi('MasonHeader', { fg = c.bg, bg = c.mauve, bold = true })
   hi('MasonHeaderSecondary', { fg = c.bg, bg = c.teal, bold = true })
   hi('MasonHighlight', { fg = c.teal })
@@ -1022,5 +1178,7 @@ vim.keymap.set('n', '<leader>tm', function()
   M.toggle_transparent()
 end, { desc = 'wallpaper: toggle transparency', silent = true })
 
-package.preload['dankula'] = function() return M end
+package.preload['dankula'] = function()
+  return M
+end
 return M

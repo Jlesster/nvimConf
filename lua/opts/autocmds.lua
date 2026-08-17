@@ -7,10 +7,8 @@ vim.api.nvim_create_autocmd('FileType', {
     'lua',
     'json',
     'jsonc',
-    'xml',
     'html',
     'css',
-    'qml',
     'scss',
     'yaml',
     'toml',
@@ -75,6 +73,59 @@ vim.api.nvim_create_autocmd('FileType', {
   pattern = { 'c', 'cpp' },
   callback = function()
     vim.opt_local.cindent = true
-    vim.opt_local.cinoptions = 'g0,l1,j1,J1'
+    vim.opt_local.cinoptions = 'g0,l1,j1,J1,N-s'
+  end,
+})
+
+vim.api.nvim_create_autocmd('VimEnter', {
+  callback = function()
+    io.write('\x1b[>1u')
+  end,
+})
+vim.api.nvim_create_autocmd('VimLeave', {
+  callback = function()
+    io.write('\x1b[<u')
+  end,
+})
+
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = 'kotlin',
+  callback = function()
+    vim.treesitter.start()
+  end,
+})
+
+vim.api.nvim_create_autocmd({ 'WinClosed', 'WinResized' }, {
+  callback = function(ev)
+    local f = io.open('/tmp/marvin_panel_trace.log', 'a')
+    if not f then
+      return
+    end
+    f:write(
+      string.format(
+        '[%s] %s match=%s\n',
+        os.date('%H:%M:%S'),
+        ev.event,
+        tostring(ev.match)
+      )
+    )
+    for _, w in ipairs(vim.api.nvim_list_wins()) do
+      local ok, b = pcall(vim.api.nvim_win_get_buf, w)
+      if ok then
+        local ok2, wd = pcall(vim.api.nvim_win_get_width, w)
+        local ok3, ht = pcall(vim.api.nvim_win_get_height, w)
+        f:write(
+          string.format(
+            '    win=%d buf=%d bt=[%s] w=%s h=%s\n',
+            w,
+            b,
+            vim.bo[b].buftype,
+            ok2 and wd or '?',
+            ok3 and ht or '?'
+          )
+        )
+      end
+    end
+    f:close()
   end,
 })

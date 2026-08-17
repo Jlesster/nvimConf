@@ -20,18 +20,17 @@ return {
     dependencies = { 'mason-org/mason.nvim' },
     opts = {
       ensure_installed = {
-        'lua_ls',
-        'gopls',
-        'clangd',
-        'gradle_ls',
-        'qmlls',
-        'jsonls',
-        'yamlls',
-        'taplo',
-        'bashls',
-        'mesonlsp',
-        'neocmake',
-        'rust_analyzer',
+        -- 'lua_ls',
+        -- 'gopls',
+        -- 'clangd',
+        -- 'gradle_ls',
+        -- 'jsonls',
+        -- 'yamlls',
+        -- 'taplo',
+        -- 'bashls',
+        -- 'mesonlsp',
+        -- 'neocmake',
+        -- 'rust_analyzer',
       },
       automatic_installation = false,
     },
@@ -158,10 +157,6 @@ return {
           local buf = ev.buf
           local client = vim.lsp.get_client_by_id(ev.data.client_id)
 
-          if client and client:supports_method('textDocument/inlayHint') then
-            vim.lsp.inlay_hint.enable(true, { bufnr = buf })
-          end
-
           if
             client and client:supports_method('textDocument/documentHighlight')
           then
@@ -177,6 +172,10 @@ return {
               group = hl,
               callback = vim.lsp.buf.clear_references,
             })
+          end
+
+          if client and client:supports_method('textDocument/inlayHint') then
+            vim.lsp.inlay_hint.enable(true, { bufnr = buf })
           end
 
           if client and client.name == 'rust-analyzer' then
@@ -242,6 +241,99 @@ return {
         },
       })
 
+      vim.lsp.config('qml-language-server', {
+        cmd = { 'qml-language-server' },
+        filetypes = { 'qml' },
+        root_markers = { '.git', { 'shell.qml', 'qmldir' } },
+      })
+
+      vim.lsp.config('nil_ls', {
+        cmd = { 'nil' },
+        filetypes = { 'nix' },
+        root_markers = { 'flake.nix', '.git' },
+        settings = {
+          ['nil'] = {
+            formatting = { command = { 'nixfmt' } },
+          },
+        },
+      })
+
+      local nixd_hint_timers = {}
+
+      local function debounce_nixd_inlay_hint(bufnr)
+        local timer = nixd_hint_timers[bufnr]
+        if timer then
+          timer:stop()
+        else
+          timer = vim.uv.new_timer()
+          nixd_hint_timers[bufnr] = timer
+        end
+
+        vim.lsp.inlay_hint.enable(false, { bufnr = bufnr })
+
+        timer:start(
+          300,
+          0,
+          vim.schedule_wrap(function()
+            if vim.api.nvim_buf_is_valid(bufnr) then
+              vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+            end
+          end)
+        )
+      end
+
+      vim.lsp.config('nixd', {
+        cmd = { 'nixd' },
+        filetypes = { 'nix' },
+        root_markers = { 'flake.nix', '.git' },
+        settings = {
+          nixd = {
+            nixpkgs = {
+              expr = 'import (builtins.getFlake "/home/jless/.flake").inputs.nixpkgs { }',
+            },
+            formatting = {
+              command = { 'nixfmt' },
+            },
+            options = {
+              nixos = {
+                expr = '(builtins.getFlake "/home/jless/.flake").nixosConfigurations.jless.options',
+              },
+              ['home-manager'] = {
+                expr = '(builtins.getFlake "/home/jless/.flake").nixosConfigurations.jless.options.home-manager.users.type.getSubOptions []',
+              },
+            },
+          },
+        },
+        on_attach = function(client, bufnr)
+          vim.lsp.inlay_hint.enable(false, { bufnr = bufnr })
+
+          vim.api.nvim_create_autocmd(
+            { 'TextChanged', 'TextChangedI', 'InsertLeave' },
+            {
+              buffer = bufnr,
+              callback = function()
+                debounce_nixd_inlay_hint(bufnr)
+              end,
+            }
+          )
+
+          vim.api.nvim_create_autocmd('BufDelete', {
+            buffer = bufnr,
+            once = true,
+            callback = function()
+              local timer = nixd_hint_timers[bufnr]
+              if timer then
+                timer:stop()
+                timer:close()
+                nixd_hint_timers[bufnr] = nil
+              end
+            end,
+          })
+
+          debounce_nixd_inlay_hint(bufnr)
+        end,
+      })
+
       vim.lsp.config('gopls', {
         capabilities = capabilities,
         settings = {
@@ -283,7 +375,7 @@ return {
           '--header-insertion-decorators',
           '--completion-style=detailed',
           '--fallback-style=llvm',
-          '--compile-commands-dir=builddir',
+          '--compile-commands-dir=builddir-linux',
           '--pch-storage=memory',
           '--offset-encoding=utf-16',
           '--rename-file-limit=0',
@@ -296,6 +388,19 @@ return {
           usePlaceholders = true,
           completeUnimported = true,
           clangdFileStatus = true,
+        },
+      })
+
+      vim.lsp.config('kmp_lsp', {
+        capabilities = capabilities,
+        cmd = { 'kmp-lsp' },
+        filetypes = { 'kotlin' },
+        root_markers = {
+          'build.gradle',
+          'build.gradle.kts',
+          'settings.gradle',
+          'settings.gradle.kts',
+          '.git',
         },
       })
 
@@ -468,7 +573,10 @@ return {
       })
 
       vim.lsp.enable({
+        'nixd',
+        'nil_ls',
         'lua_ls',
+        'kmp_lsp',
         'gdscript',
         'gopls',
         'clangd',
@@ -480,7 +588,7 @@ return {
         'mesonlsp',
         'dcm',
         'neocmake',
-        'qmlls',
+        'qml-language-server',
         'rust_analyzer',
       })
     end,
@@ -521,7 +629,7 @@ return {
   },
 
   {
-    dir = '~/Code/lua/Plugins/Linus.nvim',
+    dir = '~/Code/lua/Linus.nvim',
     dependencies = { 'lewis6991/hover.nvim' },
     ft = { 'java', 'go', 'c', 'cpp' },
     config = function()

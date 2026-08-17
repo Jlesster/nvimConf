@@ -242,8 +242,8 @@ return {
           end,
           offsets = {
             {
-              filetype = 'neo-tree',
-              text = '  files',
+              filetype = 'MarvinExplorer',
+              text = '  explorer',
               text_align = 'left',
               separator = false,
             },
@@ -354,6 +354,8 @@ return {
         return #names > 0 and ('LSP:' .. table.concat(names, ',')) or ''
       end
 
+      local marvin = require('marvin.statusbar').lualine_component
+
       local function macro_recording()
         local reg = vim.fn.reg_recording()
         return reg ~= '' and ('REC @' .. reg) or ''
@@ -386,6 +388,7 @@ return {
             },
           },
           lualine_c = {
+            { marvin },
             { macro_recording, color = { fg = '#f38ba8' } },
             { lsp_clients },
           },

@@ -1,7 +1,9 @@
 vim.filetype.add({
   extension = {
     gsc = 'gsc',
-    csc = 'gsc', -- BO3 client scripts use .csc
-    gsh = 'gsc', -- shared header files
+    csc = 'gsc',
   },
 })
+
+-- Piggyback on the C treesitter parser/highlight queries
+vim.treesitter.language.register('c', 'gsc')
